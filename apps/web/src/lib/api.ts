@@ -8,6 +8,7 @@ import type {
   DividendHistory,
   ForwardMonth,
   Holding,
+  LedgerRow,
   Movers,
   Projection,
   ScheduleRow,
@@ -74,7 +75,25 @@ export interface HoldingsScreenPayload {
   holdings: Holding[];
 }
 
+export interface TransactionsScreenPayload {
+  constants: Constants;
+  totals: Totals;
+  rows: LedgerRow[];
+  ledgerTotals: { buy: number; sell: number; income: number; fee: number; tax: number; count: number };
+  reconciliation: Array<{
+    ticker: string;
+    sharesDelta: number;
+    costDelta: number;
+    incomeDelta: number;
+    splitAdjusted: boolean;
+    basisAdjust: number;
+  }>;
+  instrumentCount: number;
+  prices: Record<string, { price: number; soldCost: number | null; status: string }>;
+}
+
 export const api = {
+  transactionsScreen: (f: Fetch) => get<TransactionsScreenPayload>(f, '/api/screens/transactions'),
   holdingsScreen: (f: Fetch) => get<HoldingsScreenPayload>(f, '/api/screens/holdings'),
   categoryEditor: (f: Fetch) => get<CategoryEditorPayload>(f, '/api/categories/editor'),
   editCategories: (f: Fetch, edit: CategoryEdit) => post<CategoryModel>(f, '/api/categories/edit', edit),

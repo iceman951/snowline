@@ -1,6 +1,6 @@
 import { Elysia, t } from 'elysia';
 import { cors } from '@elysiajs/cors';
-import { Engine, MONTHS } from '@snowline/core';
+import { editCategories, Engine, MONTHS } from '@snowline/core';
 import {
   clearGoalConfig,
   loadDataset,
@@ -18,6 +18,16 @@ export const app = new Elysia()
     if (code === 'NOT_FOUND') {
       set.status = 404;
       return { error: 'Not found' };
+    }
+    // Request mistakes must retain their client status so forms can ask for
+    // corrections instead of reporting a server outage.
+    if (code === 'VALIDATION') {
+      set.status = 422;
+      return { error: 'Invalid request data' };
+    }
+    if (code === 'PARSE') {
+      set.status = 400;
+      return { error: 'Malformed request body' };
     }
     set.status = 500;
     console.error(error);
@@ -52,6 +62,33 @@ export const app = new Elysia()
 
   .get('/api/categories', ({ query }) => engine().categories(query.ordered === 'true'), {
     query: t.Object({ ordered: t.Optional(t.String()) })
+  })
+
+  .get('/api/categories/editor', () => {
+    const e = engine();
+    return {
+      constants: e.constants, totals: e.totals(), categories: e.categories(true),
+      holdings: e.holdings(), targetTotal: e.targetTotal(), model: e.categoryModel()
+    };
+  })
+
+  // Read and edit the current model in one synchronous request so a stale
+  // browser page cannot overwrite unrelated edits with an older full model.
+  .post('/api/categories/edit', ({ body }) => {
+    const model = editCategories(engine(), body);
+    saveCategoryModel(model);
+    return model;
+  }, {
+    body: t.Union([
+      t.Object({ kind: t.Literal('create'), name: t.String(), target: t.Number() }),
+      t.Object({ kind: t.Literal('rename'), name: t.String(), to: t.String() }),
+      t.Object({ kind: t.Literal('target'), name: t.String(), target: t.Number() }),
+      t.Object({ kind: t.Literal('assign'), ticker: t.String(), name: t.String() }),
+      t.Object({ kind: t.Literal('delete'), name: t.String(), moveTo: t.String() }),
+      t.Object({ kind: t.Literal('move'), name: t.String(), delta: t.Union([t.Literal(-1), t.Literal(1)]) }),
+      t.Object({ kind: t.Literal('normalise') }),
+      t.Object({ kind: t.Literal('reset') })
+    ])
   })
 
   .put('/api/categories/model', ({ body }) => {
@@ -176,6 +213,29 @@ export const app = new Elysia()
       paymentCount: e.paymentCountNext12(),
       schedules,
       projection: e.projection(loadGoalConfig())
+    };
+  })
+
+  /* ---- composite: the Transactions screen -------------------------------- */
+
+  .get('/api/screens/transactions', () => {
+    const e = engine();
+    const rows = e.ledger.ledger();
+    return {
+      constants: e.constants,
+      totals: e.totals(),
+      rows,
+      ledgerTotals: e.ledger.ledgerTotals(rows),
+      reconciliation: e.ledger.ledgerReconciliation(),
+      instrumentCount: e.positions.length,
+      // Today's price per ticker, so a row can show the gain on what it bought
+      // without the client holding the whole position list.
+      prices: Object.fromEntries(
+        e.positions.map((p) => [
+          p.ticker,
+          { price: p.price, soldCost: p.soldCost, status: p.status }
+        ])
+      )
     };
   })
 
