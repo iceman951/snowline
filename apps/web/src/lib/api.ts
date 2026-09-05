@@ -92,7 +92,52 @@ export interface TransactionsScreenPayload {
   prices: Record<string, { price: number; soldCost: number | null; status: string }>;
 }
 
+export interface CorporateActionLogEntry {
+  id: string;
+  date: string;
+  type: string;
+  status: string;
+  ticker: string;
+  displayTicker: string;
+  name: string;
+  mono: string;
+  assetClass: string;
+  headline: string;
+  detail: string;
+  ratio: number;
+  ratioLabel: string | null;
+  sharesBefore: number;
+  sharesAfter: number;
+  sharesChanged: boolean;
+  basisBefore: number;
+  basisAfter: number;
+  basisChanged: boolean;
+  basisAdjust: number;
+  perShareBefore: number;
+  perShareAfter: number;
+  cash: number;
+  pending: boolean;
+}
+
+export interface CorporateActionsScreenPayload {
+  constants: Constants;
+  totals: Totals;
+  log: CorporateActionLogEntry[];
+  stats: {
+    count: number;
+    completed: number;
+    pending: number;
+    tickers: string[];
+    types: Array<{ type: string; count: number }>;
+    basisReduced: number;
+    cash: number;
+  };
+  reconciliation: TransactionsScreenPayload['reconciliation'];
+}
+
 export const api = {
+  corporateActionsScreen: (f: Fetch) =>
+    get<CorporateActionsScreenPayload>(f, '/api/screens/corporate-actions'),
   transactionsScreen: (f: Fetch) => get<TransactionsScreenPayload>(f, '/api/screens/transactions'),
   holdingsScreen: (f: Fetch) => get<HoldingsScreenPayload>(f, '/api/screens/holdings'),
   categoryEditor: (f: Fetch) => get<CategoryEditorPayload>(f, '/api/categories/editor'),

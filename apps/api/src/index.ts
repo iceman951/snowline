@@ -216,6 +216,21 @@ export const app = new Elysia()
     };
   })
 
+  /* ---- composite: the Corporate actions screen --------------------------- */
+
+  .get('/api/screens/corporate-actions', () => {
+    const e = engine();
+    return {
+      constants: e.constants,
+      totals: e.totals(),
+      log: e.ledger.corporateActionLog(),
+      stats: e.ledger.corporateActionStats(),
+      // The audit trail is only trustworthy alongside the proof that nothing
+      // it records has silently moved a stored number.
+      reconciliation: e.ledger.ledgerReconciliation()
+    };
+  })
+
   /* ---- composite: the Transactions screen -------------------------------- */
 
   .get('/api/screens/transactions', () => {
