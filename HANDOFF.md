@@ -2,7 +2,11 @@
 
 Read this first. It is the contract for anyone (human or agent) picking up the work.
 
-Last updated: 2026-09-06. Status: **Dashboard slice complete and verified.**
+Last updated: 2026-09-06. Status: **7 screens complete and verified.**
+
+Built: Dashboard, Holdings, Analytics — Common, Transactions, Corporate actions,
+Dividend calendar, My goal. Codex is building Categories in parallel (see
+`CODEX_HANDOFF.md`).
 
 ---
 
@@ -49,6 +53,17 @@ Ported and **parity-tested** (19 tests, 257 assertions, all passing):
 | `forwardPayments()` | forward 12 months with Paid/Declared/Estimated status |
 | `paymentCountNext12()` | payment count |
 | `goalConfig(patch?)` / `projection(patch?)` | the monthly-step goal projection engine |
+| `requiredContribution(cfg)` | smallest monthly contribution that reaches the goal (bisection) |
+| `calendarMonth(y, mi)` / `calendarYear(y, mi)` | day-level dividend events, with Paid/Declared/Estimated status |
+| `dividendsFor(ticker, n)` | a holding's recent payments |
+| `exchangesFor(ticker)` | cross-listings for the ticker combobox |
+| `ledger.ledger()` | every generated trade and income row |
+| `ledger.lotsFor(p)` / `incomeRowsFor(p)` | the lot solver and its income rows |
+| `ledger.ledgerTotals()` / `ledgerReconciliation()` | totals, and the proof rows still sum to the positions |
+| `ledger.transactionsFor(ticker)` | one holding's trades |
+| `ledger.corporateActionLog()` / `corporateActionStats()` | the audit trail with before/after figures |
+| `ledger.splitFactorAfter()` / `basisAdjustFor()` | split chain and return-of-capital adjustments |
+| `ledger.priceSeries(ticker, n)` | seeded deterministic price history |
 
 Also `fmt` (shared formatters — money, signed, pct, caret, k, compact) in `format.ts`.
 
@@ -132,20 +147,13 @@ That script loads `snowline-data.js` in a fake browser and dumps
 
 | Route | Bundle file | Notes |
 |---|---|---|
-| `/analytics` | `Analytics.dc.html` | TopNav + AnalyticsSubnav + KpiRow + HoldingsTable |
 | `/analytics/diversification` | `Diversification.dc.html` | needs `breakdown()`, `lookThrough()`, `fundComposition` |
 | `/analytics/dividends` | `AnalyticsDividends.dc.html` | needs `incomeBreakdown()`, `dividendRating()` |
 | `/analytics/growth` | `Growth.dc.html` | needs `history()`, `monthlyReturns()`, `holdingsPerformance()` |
 | `/analytics/metrics` | `Metrics.dc.html` | needs `riskStats()`, `riskVerdict()`, `betaOf()`, `seriesStats()` |
 | `/analytics/report` | `Report.dc.html` | |
-| `/portfolio/holdings` | `Holdings.dc.html` + `HoldingsTable.dc.html` | the big table; `HoldingsTable` is 54KB |
-| `/portfolio/transactions` | `Transactions.dc.html` | needs `ledger()`, `ledgerTotals()`, `ledgerReconciliation()`, `lotsFor()` |
-| `/portfolio/dividend-calendar` | `DividendCalendar.dc.html` | needs `calendarMonth()`, `calendarYear()` |
-| `/portfolio/goal` | `MyGoal.dc.html` | projection engine is already ported — this is UI only |
 | `/portfolio/cash` | `Cash.dc.html` | needs `cashFlow()`, `cashStats()`, `cashByCurrency()` |
-| `/portfolio/categories` | `Categories.dc.html` | mutations exist in the prototype; API has `PUT /api/categories/model` |
-| `/portfolio/corporate-actions` | `CorporateActions.dc.html` | needs `corporateActionLog()`, `splitFactorAfter()`, `basisAdjustFor()` |
-| `/tools/rebalancing` | `Rebalancing.dc.html` | |
+| `/tools/rebalancing` | `Rebalancing.dc.html` | reads the category model, already ported |
 | `/tools/screener` | `Screener.dc.html` | needs `marketUniverse()`, `universeStats()` |
 | `/tools/find-the-dip` | `FindTheDip.dc.html` | needs `technicals()`, `dipRows()` |
 | `/tools/payout-calendar` | `PayoutCalendar.dc.html` | needs `marketCalendarMonth()/Year()` |
@@ -154,19 +162,24 @@ That script loads `snowline-data.js` in a fake browser and dumps
 Nav links to these already exist in `src/lib/nav.ts` and currently 404.
 **A placeholder route has not been added** — decide whether to add one or build screens first.
 
+### Deliberately not built
+
+Three add/edit modals. In the prototype each only mutates local component state
+and never recalculates portfolio totals, so porting them would produce a form
+with nowhere to write. Each screen says so on the page:
+
+- Transactions: add / edit / import
+- Corporate actions: record a new event
+- Holdings drawer: the per-holding note
+
 ### Engine functions still to port from `snowline-data.js`
 
 Everything not in the table in §2. Grouped by the source file's own section comments:
 
-- **dividend calendar** — `calendarMonth`, `calendarYear`, `payAnchor`, `paysInMonth` (~line 478)
 - **cash** — `cashFlow`, `cashStats`, `cashByCurrency`, `cashPositions`, `cashFloat` (~line 656).
   Note: cash flow is *solved*, not stored — read the policy comment above `cashFlow()`.
 - **monthly history** — `history`, `historyRange`, `monthlyReturns`, `benchmarkValuePath`,
   `holdingsPerformance`, `monthSpan`, `returnPath` (~line 913). Pinned at both ends; read the comment.
-- **transaction ledger** — `ledger`, `ledgerTotals`, `ledgerReconciliation`, `lotsFor`,
-  `incomeRowsFor`, `transactionsFor`, `dividendsFor`, `exchangesFor`, `tradeFee` (~line 1106)
-- **corporate actions** — `corporateActionsFor`, `splitFactorAfter`, `basisAdjustFor`,
-  `corporateActionLog`, `corporateActionStats` (~line 1122)
 - **market universe** — `marketUniverse`, `universeSectors`, `universeStats`,
   `marketCalendarMonth`, `marketCalendarYear` (~line 1501)
 - **fund look-through** — `fundComposition`, `lookThrough`, `breakdown`, `incomeBreakdown`,
@@ -182,8 +195,9 @@ Everything not in the table in §2. Grouped by the source file's own section com
 Several of these use a **seeded PRNG** (`seeded(s)`) so the prototype's "random" detail data
 is deterministic. Port the PRNG exactly or the numbers will not match.
 
-Also not yet stored in SQLite: `corporateActions`, `fundComposition`, the market universe,
-and the watchlist. Extend `schema.sql` + `seed.ts` when the screens that need them are built.
+Also not yet stored in SQLite: `fundComposition`, the market universe, and the watchlist.
+Extend `schema.sql` + `seed.ts` when the screens that need them are built.
+(`corporateActions` is stored — see the `corporate_actions` table.)
 
 ---
 
@@ -265,6 +279,13 @@ scripts/extract-reference.ts    regenerates seed + parity reference from the bun
 
 ## 8. Suggested next step
 
-Build `/portfolio/holdings` next. It is the highest-value remaining screen, the engine
-functions it needs (`holdings()`, `categories()`) are **already ported and tested**, and
-`HoldingsTable.dc.html` is reused by `/analytics` — so one build unlocks two routes.
+`/portfolio/cash` or `/tools/rebalancing`.
+
+Rebalancing needs no new engine work — it reads the category model, which is ported and
+tested. Cash needs `cashFlow()`, which is the most interesting remaining port: there is no
+stored cash ledger, so deposits and withdrawals are *solved* under a stated top-up/sweep
+policy such that the walk never goes negative and ends exactly on today's balance. Read the
+comment above `cashFlow()` before porting it.
+
+After those, the Analytics tabs share one dependency — `history()` — so porting the monthly
+history unlocks Growth, Metrics and Report together.
