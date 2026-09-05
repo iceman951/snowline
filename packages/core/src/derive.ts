@@ -24,7 +24,8 @@ import type {
   TimelinePoint,
   Totals
 } from './types.js';
-import { EXCHANGES, LedgerEngine } from './ledger.js';
+import { EXCHANGES, LedgerEngine, parseDate } from './ledger.js';
+import type { CalendarEvent, CalendarMonth } from './types.js';
 
 export const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] as const;
 const QUARTER_MONTHS: Record<string, 1> = { Mar: 1, Jun: 1, Sep: 1, Dec: 1 };
@@ -361,6 +362,121 @@ export class Engine {
 
   paymentCountNext12(): number {
     return sum(this.payers().map((p) => (p.frequency === 'Monthly' ? 12 : 4)));
+  }
+
+  /* ---- dividend calendar ------------------------------------------------
+     Day-level events for any month, projected from each payer's own known
+     ex-date and pay-date and its frequency. Amounts come from the same
+     annualGross() the rest of the app uses, so a month's total here agrees
+     with the forward schedule. Status follows the same three states as the
+     forward chart: everything up to today is Paid, next month is Declared,
+     later months Estimated. --------------------------------------------- */
+
+  private daysInMonth(y: number, mi: number): number {
+    return new Date(y, mi + 1, 0).getDate();
+  }
+
+  private todayDay(): number {
+    return parseDate(this.constants.today.label).d;
+  }
+
+  private payAnchor(p: Position) {
+    return {
+      pay: p.nextPayDate ? parseDate(p.nextPayDate) : null,
+      ex: p.nextExDate ? parseDate(p.nextExDate) : null
+    };
+  }
+
+  /** A quarterly payer only pays in months three apart from its anchor. */
+  private paysInMonth(p: Position, mi: number): boolean {
+    if (!p.yieldPct || p.status !== 'open') return false;
+    if (p.frequency === 'Monthly') return true;
+    const a = this.payAnchor(p);
+    if (!a.pay) return false;
+    return ((((mi - a.pay.m) % 3) + 3) % 3) === 0;
+  }
+
+  private clampDay(day: number, y: number, mi: number): number {
+    return Math.min(day, this.daysInMonth(y, mi));
+  }
+
+  calendarMonth(year: number, mi: number): CalendarMonth {
+    const { today } = this.constants;
+    const rank = year * 12 + mi - (today.year * 12 + today.monthIndex);
+    const td = this.todayDay();
+
+    const events: CalendarEvent[] = [];
+    this.payers().forEach((p) => {
+      if (!this.paysInMonth(p, mi)) return;
+      const a = this.payAnchor(p);
+      const payDay = this.clampDay(a.pay ? a.pay.d : 15, year, mi);
+      const exDay = this.clampDay(a.ex ? a.ex.d : Math.max(1, payDay - 3), year, mi);
+      const gross = p.frequency === 'Monthly' ? this.annualGross(p) / 12 : this.annualGross(p) / 4;
+      const status: PaymentStatus =
+        rank < 0 ? 'Paid' : rank === 0 ? (payDay <= td ? 'Paid' : 'Declared') : rank === 1 ? 'Declared' : 'Estimated';
+
+      events.push({
+        ticker: p.ticker,
+        name: p.name,
+        mono: p.mono,
+        frequency: p.frequency,
+        shares: p.shares,
+        yieldPct: p.yieldPct,
+        status,
+        day: payDay,
+        exDay,
+        exDate: `${exDay} ${MONTHS[mi]} ${year}`,
+        payDate: `${payDay} ${MONTHS[mi]} ${year}`,
+        gross,
+        net: this.net(gross),
+        perShare: p.shares ? gross / p.shares : 0
+      });
+    });
+    events.sort((a, b) => a.day - b.day || b.gross - a.gross);
+
+    const n = this.daysInMonth(year, mi);
+    const days = [];
+    for (let d = 1; d <= n; d++) {
+      const onDay = events.filter((e) => e.day === d);
+      days.push({
+        day: d,
+        events: onDay,
+        gross: sum(onDay.map((e) => e.gross)),
+        net: sum(onDay.map((e) => e.net)),
+        isToday: rank === 0 && d === td
+      });
+    }
+
+    const byStatus = (s: PaymentStatus) =>
+      sum(events.filter((e) => e.status === s).map((e) => e.gross));
+
+    return {
+      year,
+      monthIndex: mi,
+      label: `${MONTHS[mi]} ${year}`,
+      short: `${MONTHS[mi]} '${String(year).slice(2)}`,
+      // Monday-first grid, so Sunday (0) becomes the last column.
+      leadingBlanks: (new Date(year, mi, 1).getDay() + 6) % 7,
+      days,
+      events,
+      gross: sum(events.map((e) => e.gross)),
+      netTotal: sum(events.map((e) => e.net)),
+      paid: byStatus('Paid'),
+      declared: byStatus('Declared'),
+      estimated: byStatus('Estimated'),
+      count: events.length
+    };
+  }
+
+  /** Twelve months of calendar totals, split by status for the bar chart. */
+  calendarYear(year: number, mi: number): CalendarMonth[] {
+    const out: CalendarMonth[] = [];
+    for (let i = 0; i < 12; i++) {
+      const m = mi + i;
+      const y = year + Math.floor(m / 12);
+      out.push(this.calendarMonth(y, ((m % 12) + 12) % 12));
+    }
+    return out;
   }
 
   /* ---- goal projection -------------------------------------------------- */

@@ -8,7 +8,7 @@
  */
 
 import { describe, expect, it } from 'bun:test';
-import { Engine } from '../src/index.js';
+import { editCategories, Engine, type CategoryEdit, type CategoryModel } from '../src/index.js';
 import seed from '../../../apps/api/src/db/seed-data.json' with { type: 'json' };
 import reference from './reference.json' with { type: 'json' };
 
@@ -23,6 +23,23 @@ const engine = new Engine({
 
 /** Money and percentages must agree to well below a displayed digit. */
 const near = (a: number, b: number, eps = 1e-9) => expect(Math.abs(a - b)).toBeLessThan(eps);
+
+describe('category editor mutations', () => {
+  for (const scenario of reference.categoryEdits) {
+    it(scenario.name, () => {
+      let categoryModel: CategoryModel | null = null;
+      for (const step of scenario.steps) {
+        const current = new Engine({
+          positions: engine.positions, constants: engine.constants,
+          dividendHistory: engine.dividendHistory, categoryTargets: engine.categoryTargets,
+          categoryModel
+        });
+        categoryModel = editCategories(current, step.edit as CategoryEdit);
+        expect(categoryModel).toEqual(step.model);
+      }
+    });
+  }
+});
 
 describe('totals', () => {
   const T = engine.totals();
@@ -334,5 +351,73 @@ describe('per-holding dividends', () => {
   it('returns nothing for a non-payer or a closed position', () => {
     expect(engine.dividendsFor('AMZN')).toHaveLength(0);
     expect(engine.dividendsFor('TSM')).toHaveLength(0);
+  });
+});
+
+describe('dividend calendar', () => {
+  it('reproduces the forward year month for month', () => {
+    const year = engine.calendarYear(engine.constants.today.year, engine.constants.today.monthIndex);
+    expect(year).toHaveLength(12);
+    year.forEach((m, i) => {
+      const r = reference.calendarYear[i] as any;
+      expect(m.label).toBe(r.label);
+      expect(m.short).toBe(r.short);
+      expect(m.leadingBlanks).toBe(r.leadingBlanks);
+      expect(m.count).toBe(r.count);
+      near(m.gross, r.gross);
+      near(m.netTotal, r.netTotal);
+      near(m.paid, r.paid);
+      near(m.declared, r.declared);
+      near(m.estimated, r.estimated);
+    });
+  });
+
+  it('reproduces individual months, including a past one and a year boundary', () => {
+    const months = [
+      [2026, 0], [2026, 1], [2025, 11], [2026, 7], [2027, 1]
+    ] as const;
+    months.forEach(([y, mi], i) => {
+      const m = engine.calendarMonth(y, mi);
+      const r = reference.calendarMonths[i] as any;
+      expect(m.label).toBe(r.label);
+      expect(m.days).toHaveLength(r.days.length);
+      expect(m.events).toHaveLength(r.events.length);
+      m.events.forEach((e, j) => {
+        const re = r.events[j];
+        expect(e.ticker).toBe(re.ticker);
+        expect(e.status).toBe(re.status);
+        expect(e.payDate).toBe(re.payDate);
+        expect(e.exDate).toBe(re.exDate);
+        near(e.gross, re.gross);
+        near(e.net, re.net);
+        near(e.perShare, re.perShare);
+      });
+    });
+  });
+
+  it('agrees with the forward schedule on the current month', () => {
+    const { today } = engine.constants;
+    const cal = engine.calendarMonth(today.year, today.monthIndex);
+    const fwd = engine.forwardPayments()[0];
+    near(cal.gross, fwd.total, 1e-9);
+  });
+
+  it('marks today only in the current month', () => {
+    const { today } = engine.constants;
+    const now = engine.calendarMonth(today.year, today.monthIndex);
+    expect(now.days.filter((d) => d.isToday)).toHaveLength(1);
+    const later = engine.calendarMonth(today.year + 1, today.monthIndex);
+    expect(later.days.filter((d) => d.isToday)).toHaveLength(0);
+  });
+
+  it('lays every event on a day that exists in the month', () => {
+    for (let mi = 0; mi < 12; mi++) {
+      const m = engine.calendarMonth(2026, mi);
+      m.events.forEach((e) => {
+        expect(e.day).toBeGreaterThanOrEqual(1);
+        expect(e.day).toBeLessThanOrEqual(m.days.length);
+        expect(e.exDay).toBeGreaterThanOrEqual(1);
+      });
+    }
   });
 });

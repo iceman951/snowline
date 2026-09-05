@@ -216,6 +216,39 @@ export const app = new Elysia()
     };
   })
 
+  /* ---- composite: the Dividend calendar ---------------------------------- */
+
+  /**
+   * `offset` moves the open month, `windowOffset` moves the 12-month chart, both
+   * in months from today. Filtering stays client-side, so the raw events for
+   * both are returned unfiltered.
+   */
+  .get('/api/screens/dividend-calendar', ({ query }) => {
+    const e = engine();
+    const { today } = e.constants;
+
+    const shift = (n: number) => {
+      const t = today.year * 12 + today.monthIndex + n;
+      return { year: Math.floor(t / 12), monthIndex: ((t % 12) + 12) % 12 };
+    };
+
+    const offset = Number(query.offset ?? 0) || 0;
+    const windowOffset = Number(query.windowOffset ?? 0) || 0;
+    const cur = shift(offset);
+    const win = shift(windowOffset * 12);
+
+    return {
+      constants: e.constants,
+      totals: e.totals(),
+      month: e.calendarMonth(cur.year, cur.monthIndex),
+      year: e.calendarYear(win.year, win.monthIndex),
+      paymentCount: e.paymentCountNext12(),
+      payerCount: e.payers().length
+    };
+  }, {
+    query: t.Object({ offset: t.Optional(t.String()), windowOffset: t.Optional(t.String()) })
+  })
+
   /* ---- composite: the Corporate actions screen --------------------------- */
 
   .get('/api/screens/corporate-actions', () => {

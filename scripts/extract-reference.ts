@@ -13,6 +13,7 @@
 
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { categoryEditCases } from './category-edit-cases.js';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const BUNDLE = join(root, 'snowline/project/snowline-data.js');
@@ -52,11 +53,32 @@ await Bun.write(
 const T = D.totals();
 const pr = D.projection();
 
+const categoryEdits = categoryEditCases.map(({ name, edits }) => {
+  D.resetCategories();
+  const steps = edits.map((edit) => {
+    let model;
+    switch (edit.kind) {
+      case 'create': model = D.createCategory(edit.name, edit.target); break;
+      case 'rename': model = D.renameCategory(edit.name, edit.to); break;
+      case 'target': model = D.setCategoryTarget(edit.name, edit.target); break;
+      case 'assign': model = D.assignHolding(edit.ticker, edit.name); break;
+      case 'delete': model = D.deleteCategory(edit.name, edit.moveTo); break;
+      case 'move': model = D.moveCategory(edit.name, edit.delta); break;
+      case 'normalise': model = D.normaliseTargets(); break;
+      case 'reset': model = D.resetCategories(); break;
+    }
+    return { edit, model: structuredClone(model) };
+  });
+  D.resetCategories();
+  return { name, steps };
+});
+
 await Bun.write(
   join(root, 'packages/core/test/reference.json'),
   JSON.stringify(
     {
       totals: T,
+      categoryEdits,
       categories: D.categories().map((c: any) => ({
         name: c.name, count: c.count, value: c.value, invested: c.invested,
         gainAbs: c.gainAbs, gainPctN: c.gainPctN,
@@ -105,7 +127,13 @@ await Bun.write(
       ),
       priceSeries: Object.fromEntries(
         D.positions.map((p: any) => [p.ticker, D.priceSeries(p.ticker, 60)])
-      )
+      ),
+      // The forward year plus a past month and a year boundary, so the status
+      // rules and the leading-blank arithmetic are both covered.
+      calendarYear: D.calendarYear(D.constants.today.year, D.constants.today.monthIndex),
+      calendarMonths: [
+        [2026, 0], [2026, 1], [2025, 11], [2026, 7], [2027, 1]
+      ].map(([y, m]: any) => D.calendarMonth(y, m))
     },
     null,
     2

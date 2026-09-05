@@ -220,6 +220,51 @@ export interface ForwardMonth {
   rows: Array<ScheduleRow & { status: PaymentStatus }>;
 }
 
+/** One projected payment on a calendar day. */
+export interface CalendarEvent {
+  ticker: string;
+  name: string;
+  mono: string;
+  frequency: Frequency;
+  shares: number;
+  yieldPct: number;
+  status: PaymentStatus;
+  /** Pay day of month. */
+  day: number;
+  /** Ex-dividend day of month. */
+  exDay: number;
+  exDate: string;
+  payDate: string;
+  gross: number;
+  net: number;
+  perShare: number;
+}
+
+export interface CalendarDay {
+  day: number;
+  events: CalendarEvent[];
+  gross: number;
+  net: number;
+  isToday: boolean;
+}
+
+export interface CalendarMonth {
+  year: number;
+  monthIndex: number;
+  label: string;
+  short: string;
+  /** Blank cells before the 1st in a Monday-first grid. */
+  leadingBlanks: number;
+  days: CalendarDay[];
+  events: CalendarEvent[];
+  gross: number;
+  netTotal: number;
+  paid: number;
+  declared: number;
+  estimated: number;
+  count: number;
+}
+
 export interface GoalConfig {
   mode: 'value' | 'income';
   valueTarget: number;

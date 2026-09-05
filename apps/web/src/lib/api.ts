@@ -1,6 +1,7 @@
 /** Typed access to the Elysia API. Called from `load`, never from a component. */
 
 import type {
+  CalendarMonth,
   Category,
   CategoryEdit,
   CategoryModel,
@@ -135,7 +136,21 @@ export interface CorporateActionsScreenPayload {
   reconciliation: TransactionsScreenPayload['reconciliation'];
 }
 
+export interface DividendCalendarPayload {
+  constants: Constants;
+  totals: Totals;
+  month: CalendarMonth;
+  year: CalendarMonth[];
+  paymentCount: number;
+  payerCount: number;
+}
+
 export const api = {
+  dividendCalendar: (f: Fetch, offset = 0, windowOffset = 0) =>
+    get<DividendCalendarPayload>(
+      f,
+      `/api/screens/dividend-calendar?offset=${offset}&windowOffset=${windowOffset}`
+    ),
   corporateActionsScreen: (f: Fetch) =>
     get<CorporateActionsScreenPayload>(f, '/api/screens/corporate-actions'),
   transactionsScreen: (f: Fetch) => get<TransactionsScreenPayload>(f, '/api/screens/transactions'),
