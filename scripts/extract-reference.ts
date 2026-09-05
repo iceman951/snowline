@@ -41,7 +41,8 @@ await Bun.write(
       positions: D.positions,
       constants: D.constants,
       dividendHistory: D.dividendHistory,
-      categoryTargets: D.categoryTargets
+      categoryTargets: D.categoryTargets,
+      corporateActions: D.corporateActions
     },
     null,
     2
@@ -79,7 +80,32 @@ await Bun.write(
         span: pr.span, startYear: pr.startYear,
         endValue: pr.endValue, endSafe: pr.endSafe, shortfall: pr.shortfall,
         P: pr.P, S: pr.S
-      }
+      },
+      holdings: D.holdings(true).map((h: any) => ({
+        ticker: h.p.ticker, capitalGain: h.capitalGain, capitalGainPct: h.capitalGainPct,
+        totalProfit: h.totalProfit, totalProfitPct: h.totalProfitPct,
+        annualGross: h.annualGross, annualNet: h.annualNet,
+        perShareGross: h.perShareGross, dividendsPerShare: h.dividendsPerShare,
+        yieldOnCost: h.yieldOnCost, shareOfPortfolio: h.shareOfPortfolio,
+        shareOfCategory: h.shareOfCategory, categoryName: h.categoryName
+      })),
+      ledger: D.ledger().map((r: any) => ({
+        id: r.id, kind: r.kind, operation: r.operation, ticker: r.ticker, date: r.date,
+        shares: r.shares, price: r.price, amount: r.amount, fee: r.fee, tax: r.tax, signed: r.signed
+      })),
+      ledgerTotals: D.ledgerTotals(),
+      ledgerReconciliation: D.ledgerReconciliation(),
+      corporateActionLog: D.corporateActionLog(),
+      corporateActionStats: D.corporateActionStats(),
+      transactionsFor: Object.fromEntries(
+        D.positions.map((p: any) => [p.ticker, D.transactionsFor(p.ticker)])
+      ),
+      dividendsFor: Object.fromEntries(
+        D.positions.map((p: any) => [p.ticker, D.dividendsFor(p.ticker, 5)])
+      ),
+      priceSeries: Object.fromEntries(
+        D.positions.map((p: any) => [p.ticker, D.priceSeries(p.ticker, 60)])
+      )
     },
     null,
     2

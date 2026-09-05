@@ -81,6 +81,58 @@ export interface CategoryModel {
   assign: Record<string, string>;
 }
 
+/**
+ * An event that changed a position without being a trade. Two of them move
+ * real numbers (splits and return of capital); the rest are numerically
+ * neutral by construction.
+ */
+export interface CorporateAction {
+  id: string;
+  date: string;
+  type: string;
+  ticker: string;
+  headline: string;
+  detail: string;
+  /** Share ratio. 4 = 4-for-1 forward split, 0.25 = 1-for-4 reverse. */
+  ratio: number;
+  ratioLabel?: string | null;
+  /** Cost-basis reduction booked by a return of capital. */
+  basisAdjust: number;
+  status: 'Completed' | 'Announced';
+  cash: number;
+  fromTicker?: string | null;
+}
+
+/** One generated trade lot. */
+export interface Lot {
+  date: string;
+  type: 'Buy' | 'Sell';
+  shares: number;
+  price: number;
+  total: number;
+  /** Restated onto its pre-split basis. */
+  presplit?: boolean;
+}
+
+export interface LedgerRow {
+  id: string;
+  kind: 'trade' | 'income';
+  operation: 'Buy' | 'Sell' | 'Dividends';
+  ticker: string;
+  name: string;
+  mono: string;
+  currency: string;
+  date: string;
+  shares: number;
+  price: number;
+  amount: number;
+  fee: number;
+  tax: number;
+  /** Cash effect: negative for a buy. */
+  signed: number;
+  note: string;
+}
+
 /** Everything a derivation needs. One snapshot, read once per request. */
 export interface Dataset {
   positions: Position[];
@@ -88,6 +140,7 @@ export interface Dataset {
   dividendHistory: DividendHistory;
   categoryTargets: Record<string, number>;
   categoryModel?: CategoryModel | null;
+  corporateActions?: CorporateAction[];
 }
 
 /* ---- derived shapes ----------------------------------------------------- */

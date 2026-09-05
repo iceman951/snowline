@@ -11,6 +11,7 @@ import { fileURLToPath } from 'node:url';
 import type {
   CategoryModel,
   Constants,
+  CorporateAction,
   Dataset,
   DividendHistory,
   GoalConfig,
@@ -138,7 +139,32 @@ export function loadDataset(): Dataset {
     categoryTargets[row.name] = row.target_pct;
   }
 
-  return { positions, constants, dividendHistory, categoryTargets, categoryModel: loadCategoryModel() };
+  const corporateActions: CorporateAction[] = d
+    .query<Record<string, any>, []>('SELECT * FROM corporate_actions ORDER BY sort_order')
+    .all()
+    .map((r) => ({
+      id: r.id,
+      date: r.date,
+      type: r.type,
+      ticker: r.ticker,
+      headline: r.headline,
+      detail: r.detail,
+      ratio: r.ratio,
+      ratioLabel: r.ratio_label,
+      basisAdjust: r.basis_adjust,
+      status: r.status,
+      cash: r.cash,
+      fromTicker: r.from_ticker
+    }));
+
+  return {
+    positions,
+    constants,
+    dividendHistory,
+    categoryTargets,
+    corporateActions,
+    categoryModel: loadCategoryModel()
+  };
 }
 
 export function loadCategoryModel(): CategoryModel | null {

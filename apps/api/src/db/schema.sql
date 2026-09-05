@@ -95,6 +95,29 @@ CREATE TABLE IF NOT EXISTS category_overrides (
   model_json TEXT NOT NULL
 );
 
+-- Events that changed a position without being a trade. Splits and returns of
+-- capital move real numbers; the rest are numerically neutral. The ledger is
+-- generated against these, so they must be stored, not derived.
+CREATE TABLE IF NOT EXISTS corporate_actions (
+  id           TEXT PRIMARY KEY,
+  date         TEXT    NOT NULL,
+  type         TEXT    NOT NULL,
+  ticker       TEXT    NOT NULL REFERENCES positions (ticker),
+  headline     TEXT    NOT NULL,
+  detail       TEXT    NOT NULL,
+  -- Share ratio: 4 = 4-for-1 forward split, 0.25 = 1-for-4 reverse, 1 = neutral.
+  ratio        REAL    NOT NULL DEFAULT 1,
+  ratio_label  TEXT,
+  -- Cost-basis reduction booked by a return of capital.
+  basis_adjust REAL    NOT NULL DEFAULT 0,
+  status       TEXT    NOT NULL CHECK (status IN ('Completed', 'Announced')),
+  cash         REAL    NOT NULL DEFAULT 0,
+  from_ticker  TEXT,
+  sort_order   INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE INDEX IF NOT EXISTS idx_corporate_actions_ticker ON corporate_actions (ticker);
+
 -- Saved goal settings, written by the My goal screen.
 CREATE TABLE IF NOT EXISTS goal_config (
   id          INTEGER PRIMARY KEY CHECK (id = 1),

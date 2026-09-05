@@ -498,5 +498,107 @@
     "Consumer Staples": 7,
     "Information Technology": 7,
     "Consumer Discretionary": 3
-  }
+  },
+  "corporateActions": [
+    {
+      "id": "ca1",
+      "date": "06 Jun 2025",
+      "type": "Split",
+      "ticker": "NVDA",
+      "headline": "4-for-1 forward stock split",
+      "detail": "Each share held became four. The cost basis per share fell to a quarter of its previous level; the total basis is unchanged.",
+      "ratio": 4,
+      "ratioLabel": "4:1",
+      "basisAdjust": 0,
+      "status": "Completed",
+      "cash": 0
+    },
+    {
+      "id": "ca2",
+      "date": "18 Sep 2025",
+      "type": "Reverse split",
+      "ticker": "GLDI",
+      "headline": "1-for-4 reverse split",
+      "detail": "The issuer consolidated four notes into one to lift the quoted price. Share count fell to a quarter, basis per share rose four-fold, total basis unchanged.",
+      "ratio": 0.25,
+      "ratioLabel": "1:4",
+      "basisAdjust": 0,
+      "status": "Completed",
+      "cash": 0
+    },
+    {
+      "id": "ca3",
+      "date": "12 Dec 2025",
+      "type": "Special dividend",
+      "ticker": "PEP",
+      "headline": "Special cash dividend of $0.62 a share",
+      "detail": "Paid in cash alongside the regular quarterly distribution. No effect on shares or cost basis; the amount is inside the dividends already recorded for this holding.",
+      "ratio": 1,
+      "basisAdjust": 0,
+      "status": "Completed",
+      "cash": 11.43
+    },
+    {
+      "id": "ca4",
+      "date": "31 Dec 2025",
+      "type": "Return of capital",
+      "ticker": "GLDI",
+      "headline": "Year-end return of capital, $5.57 a share",
+      "detail": "The issuer classified part of the year’s distributions as a return of capital. It is not taxed as income — it reduces the cost basis instead, so the eventual capital gain is larger.",
+      "ratio": 1,
+      "basisAdjust": 142.6,
+      "status": "Completed",
+      "cash": 0
+    },
+    {
+      "id": "ca5",
+      "date": "31 Dec 2025",
+      "type": "Return of capital",
+      "ticker": "SLVO",
+      "headline": "Year-end return of capital, $10.02 a share",
+      "detail": "Same treatment as the gold note: basis reduced, nothing taxed as income this year.",
+      "ratio": 1,
+      "basisAdjust": 88.4,
+      "status": "Completed",
+      "cash": 0
+    },
+    {
+      "id": "ca6",
+      "date": "04 Feb 2026",
+      "type": "Ticker change",
+      "ticker": "SLVO",
+      "headline": "Ticker changed from CSLS to SLVO",
+      "detail": "Listing symbol only. Shares, cost basis and the distribution schedule all carried over unchanged.",
+      "ratio": 1,
+      "basisAdjust": 0,
+      "status": "Completed",
+      "cash": 0,
+      "fromTicker": "CSLS"
+    },
+    {
+      "id": "ca7",
+      "date": "09 Mar 2026",
+      "type": "Merger",
+      "ticker": "QQQI",
+      "headline": "Fund reorganisation, shares exchanged 1-for-1",
+      "detail": "The fund was reorganised into a new trust. Holdings were exchanged one for one and the original cost basis carried over, so nothing changed on the position.",
+      "ratio": 1,
+      "ratioLabel": "1:1",
+      "basisAdjust": 0,
+      "status": "Completed",
+      "cash": 0
+    },
+    {
+      "id": "ca8",
+      "date": "20 Aug 2026",
+      "type": "Spin-off",
+      "ticker": "GOOGL",
+      "headline": "Announced separation of a business unit",
+      "detail": "A distribution ratio and the basis allocation between the parent and the new entity have not been published. Nothing is applied to the position until the distribution date.",
+      "ratio": 1,
+      "basisAdjust": 0,
+      "status": "Announced",
+      "cash": 0
+    }
+  ]
 }

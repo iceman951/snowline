@@ -24,6 +24,7 @@ import type {
   TimelinePoint,
   Totals
 } from './types.js';
+import { EXCHANGES, LedgerEngine } from './ledger.js';
 
 export const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] as const;
 const QUARTER_MONTHS: Record<string, 1> = { Mar: 1, Jun: 1, Sep: 1, Dec: 1 };
@@ -38,6 +39,8 @@ export class Engine {
   readonly constants: Dataset['constants'];
   readonly dividendHistory: DividendHistory;
   readonly categoryTargets: Record<string, number>;
+  /** Trade lots, income rows, corporate actions and price series. */
+  readonly ledger: LedgerEngine;
   private readonly savedCategoryModel: CategoryModel | null;
 
   constructor(data: Dataset) {
@@ -46,6 +49,54 @@ export class Engine {
     this.dividendHistory = data.dividendHistory;
     this.categoryTargets = data.categoryTargets;
     this.savedCategoryModel = data.categoryModel ?? null;
+    this.ledger = new LedgerEngine(
+      data.positions,
+      data.corporateActions ?? [],
+      data.constants.withholdingTax,
+      data.constants.today
+    );
+  }
+
+  /** Most recent payments for a holding, newest first. */
+  dividendsFor(ticker: string, count = 6) {
+    const p = this.byTicker(ticker);
+    if (!p || !p.yieldPct || !p.shares) return [];
+    const gross = p.frequency === 'Monthly' ? this.annualGross(p) / 12 : this.annualGross(p) / 4;
+    const stepMonths = p.frequency === 'Monthly' ? 1 : 3;
+    const out = [];
+    for (let i = 1; i <= count; i++) {
+      const back = i * stepMonths;
+      let mi = this.constants.today.monthIndex - back;
+      const year = this.constants.today.year + Math.floor(mi / 12);
+      mi = ((mi % 12) + 12) % 12;
+      out.push({
+        payDate: `${p.frequency === 'Monthly' ? 4 : 22} ${MONTHS[mi]} ${year}`,
+        perShare: gross / p.shares,
+        gross,
+        net: this.net(gross),
+        status: 'Paid' as const
+      });
+    }
+    return out;
+  }
+
+  /**
+   * Cross-listings for the ticker combobox. Only the US line is a real
+   * position; the others are the same company on other exchanges.
+   */
+  exchangesFor(ticker: string) {
+    const p = this.byTicker(ticker);
+    if (!p) return [];
+    return EXCHANGES.map((e) => ({
+      ticker: p.ticker,
+      exchange: e.code,
+      exchangeName: e.label,
+      display: `${p.ticker} (${e.code})`,
+      name: p.name,
+      mono: p.mono,
+      currency: e.cur,
+      heldShares: e.code === 'US' && p.status === 'open' ? p.shares : 0
+    }));
   }
 
   /* ---- helpers ---------------------------------------------------------- */

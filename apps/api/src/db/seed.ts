@@ -24,6 +24,8 @@ export function runSeed(): void {
   const db = getDb();
 
   db.transaction(() => {
+    // Corporate actions reference positions, so they clear first.
+    db.run('DELETE FROM corporate_actions');
     db.run('DELETE FROM positions');
     db.run('DELETE FROM dividend_history');
     db.run('DELETE FROM category_targets');
@@ -95,6 +97,20 @@ export function runSeed(): void {
     );
     Object.entries(seed.categoryTargets as Record<string, number>).forEach(([name, pct], i) =>
       insertCategory.run(name, pct, i)
+    );
+
+    const insertAction = db.prepare(`
+      INSERT INTO corporate_actions (
+        id, date, type, ticker, headline, detail, ratio, ratio_label,
+        basis_adjust, status, cash, from_ticker, sort_order
+      ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13)
+    `);
+    (seed.corporateActions as any[]).forEach((e, i) =>
+      insertAction.run(
+        e.id, e.date, e.type, e.ticker, e.headline, e.detail,
+        e.ratio, e.ratioLabel ?? null, e.basisAdjust ?? 0, e.status, e.cash ?? 0,
+        e.fromTicker ?? null, i
+      )
     );
   })();
 }

@@ -78,6 +78,45 @@ export const app = new Elysia()
 
   .get('/api/dividends/schedule/:month', ({ params }) => engine().scheduleFor(params.month))
 
+  /* ---- ledger and corporate actions ------------------------------------- */
+
+  .get('/api/ledger', ({ query }) => {
+    const e = engine();
+    let rows = e.ledger.ledger();
+    if (query.ticker) rows = rows.filter((r) => r.ticker === query.ticker!.toUpperCase());
+    if (query.kind) rows = rows.filter((r) => r.kind === query.kind);
+    return { rows, totals: e.ledger.ledgerTotals(rows) };
+  }, {
+    query: t.Object({ ticker: t.Optional(t.String()), kind: t.Optional(t.String()) })
+  })
+
+  .get('/api/ledger/reconciliation', () => engine().ledger.ledgerReconciliation())
+
+  .get('/api/corporate-actions', () => {
+    const e = engine();
+    return { log: e.ledger.corporateActionLog(), stats: e.ledger.corporateActionStats() };
+  })
+
+  /* ---- per-holding detail, for the holdings drawer ---------------------- */
+
+  .get('/api/holdings/:ticker/detail', ({ params, set }) => {
+    const e = engine();
+    const ticker = params.ticker.toUpperCase();
+    const p = e.byTicker(ticker);
+    if (!p) {
+      set.status = 404;
+      return { error: `No position ${ticker}` };
+    }
+    return {
+      holding: e.holding(p),
+      transactions: e.ledger.transactionsFor(ticker),
+      dividends: e.dividendsFor(ticker, 5),
+      priceSeries: e.ledger.priceSeries(ticker, 60),
+      corporateActions: e.ledger.corporateActionsFor(ticker),
+      exchanges: e.exchangesFor(ticker)
+    };
+  })
+
   /* ---- goal ------------------------------------------------------------- */
 
   .get('/api/goal/projection', () => engine().projection(loadGoalConfig()))
@@ -137,6 +176,19 @@ export const app = new Elysia()
       paymentCount: e.paymentCountNext12(),
       schedules,
       projection: e.projection(loadGoalConfig())
+    };
+  })
+
+  /* ---- composite: the Holdings screen ----------------------------------- */
+
+  .get('/api/screens/holdings', () => {
+    const e = engine();
+    return {
+      constants: e.constants,
+      totals: e.totals(),
+      // Sold positions are included so the table's "show sold" toggle needs no
+      // second request; the client filters.
+      holdings: e.holdings(true)
     };
   });
 

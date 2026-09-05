@@ -17,6 +17,7 @@ const engine = new Engine({
   constants: seed.constants as any,
   dividendHistory: seed.dividendHistory as any,
   categoryTargets: seed.categoryTargets as any,
+  corporateActions: seed.corporateActions as any,
   categoryModel: null
 });
 
@@ -181,5 +182,157 @@ describe('holdings', () => {
     expect(tsm.capitalGainPct).toBe(0);
     expect(tsm.yieldOnCost).toBe(0);
     expect(Number.isFinite(tsm.totalProfitPct)).toBe(true);
+  });
+
+  it('matches the reference figure for figure', () => {
+    const actual = engine.holdings(true);
+    reference.holdings.forEach((r) => {
+      const h = actual.find((x) => x.p.ticker === r.ticker)!;
+      expect(h).toBeDefined();
+      near(h.capitalGain, r.capitalGain);
+      near(h.capitalGainPct, r.capitalGainPct);
+      near(h.totalProfit, r.totalProfit);
+      near(h.totalProfitPct, r.totalProfitPct);
+      near(h.annualGross, r.annualGross);
+      near(h.annualNet, r.annualNet);
+      near(h.perShareGross, r.perShareGross);
+      near(h.dividendsPerShare, r.dividendsPerShare);
+      near(h.yieldOnCost, r.yieldOnCost);
+      near(h.shareOfPortfolio, r.shareOfPortfolio);
+      near(h.shareOfCategory, r.shareOfCategory);
+      expect(h.categoryName).toBe(r.categoryName);
+    });
+  });
+});
+
+describe('ledger', () => {
+  const L = engine.ledger;
+
+  it('reproduces every generated row', () => {
+    const rows = L.ledger();
+    expect(rows).toHaveLength(reference.ledger.length);
+    rows.forEach((r, i) => {
+      const ref = reference.ledger[i];
+      expect(r.id).toBe(ref.id);
+      expect(r.kind).toBe(ref.kind);
+      expect(r.operation).toBe(ref.operation);
+      expect(r.ticker).toBe(ref.ticker);
+      expect(r.date).toBe(ref.date);
+      near(r.shares, ref.shares);
+      near(r.price, ref.price);
+      near(r.amount, ref.amount);
+      near(r.fee, ref.fee);
+      near(r.tax, ref.tax);
+      near(r.signed, ref.signed);
+    });
+  });
+
+  it('matches the reference totals', () => {
+    const t = L.ledgerTotals();
+    near(t.buy, reference.ledgerTotals.buy);
+    near(t.sell, reference.ledgerTotals.sell);
+    near(t.income, reference.ledgerTotals.income);
+    near(t.fee, reference.ledgerTotals.fee);
+    near(t.tax, reference.ledgerTotals.tax);
+    expect(t.count).toBe(reference.ledgerTotals.count);
+  });
+
+  it('reconciles to the stored positions — the invariant the ledger rests on', () => {
+    L.ledgerReconciliation().forEach((r) => {
+      expect(Math.abs(r.sharesDelta)).toBeLessThanOrEqual(1e-5);
+      expect(Math.abs(r.costDelta)).toBeLessThanOrEqual(0.01);
+      expect(Math.abs(r.incomeDelta)).toBeLessThanOrEqual(0.01);
+    });
+  });
+
+  it('sums income rows to the lifetime dividend total', () => {
+    const income = L.ledger()
+      .filter((r) => r.kind === 'income')
+      .reduce((s, r) => s + r.amount, 0);
+    near(income, engine.totals().dividendsReceived, 0.01);
+  });
+
+  it('reproduces per-ticker trade lots', () => {
+    for (const [ticker, ref] of Object.entries(reference.transactionsFor)) {
+      const tx = L.transactionsFor(ticker);
+      expect(tx).toHaveLength((ref as any[]).length);
+      tx.forEach((t, i) => {
+        const r = (ref as any[])[i];
+        expect(t.date).toBe(r.date);
+        expect(t.type).toBe(r.type);
+        near(t.shares, r.shares);
+        near(t.price, r.price);
+        near(t.total, r.total);
+      });
+    }
+  });
+
+  it('reproduces the seeded price series exactly', () => {
+    for (const [ticker, ref] of Object.entries(reference.priceSeries)) {
+      const series = L.priceSeries(ticker, 60);
+      expect(series).toHaveLength((ref as number[]).length);
+      series.forEach((v, i) => near(v, (ref as number[])[i], 1e-9));
+    }
+  });
+});
+
+describe('corporate actions', () => {
+  it('reproduces the log event for event', () => {
+    const log = engine.ledger.corporateActionLog();
+    expect(log).toHaveLength(reference.corporateActionLog.length);
+    log.forEach((e, i) => {
+      const r = reference.corporateActionLog[i] as any;
+      expect(e.id).toBe(r.id);
+      expect(e.displayTicker).toBe(r.displayTicker);
+      expect(e.pending).toBe(r.pending);
+      near(e.sharesBefore, r.sharesBefore);
+      near(e.sharesAfter, r.sharesAfter);
+      near(e.basisBefore, r.basisBefore);
+      near(e.basisAfter, r.basisAfter);
+      near(e.perShareBefore, r.perShareBefore);
+      near(e.perShareAfter, r.perShareAfter);
+    });
+  });
+
+  it('matches the reference stats', () => {
+    const s = engine.ledger.corporateActionStats();
+    const r = reference.corporateActionStats as any;
+    expect(s.count).toBe(r.count);
+    expect(s.completed).toBe(r.completed);
+    expect(s.pending).toBe(r.pending);
+    expect(s.tickers).toEqual(r.tickers);
+    near(s.basisReduced, r.basisReduced);
+    near(s.cash, r.cash);
+  });
+
+  it('restates a pre-split lot without changing what the trade cost', () => {
+    // NVDA split 4:1 in Jun 2025, so a lot bought before it is shown on its
+    // pre-split basis: shares / 4, price × 4, cash total untouched.
+    const nvda = engine.byTicker('NVDA')!;
+    const lots = engine.ledger.lotsFor(nvda);
+    const presplit = lots.filter((l) => l.presplit);
+    expect(presplit.length).toBeGreaterThan(0);
+    presplit.forEach((l) => near(l.shares * l.price, l.total, 0.02));
+  });
+});
+
+describe('per-holding dividends', () => {
+  it('reproduces the recent payment list', () => {
+    for (const [ticker, ref] of Object.entries(reference.dividendsFor)) {
+      const divs = engine.dividendsFor(ticker, 5);
+      expect(divs).toHaveLength((ref as any[]).length);
+      divs.forEach((d, i) => {
+        const r = (ref as any[])[i];
+        expect(d.payDate).toBe(r.payDate);
+        near(d.perShare, r.perShare);
+        near(d.gross, r.gross);
+        near(d.net, r.net);
+      });
+    }
+  });
+
+  it('returns nothing for a non-payer or a closed position', () => {
+    expect(engine.dividendsFor('AMZN')).toHaveLength(0);
+    expect(engine.dividendsFor('TSM')).toHaveLength(0);
   });
 });
