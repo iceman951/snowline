@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <script src="snowline-data.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --canvas:#FAFAF9; --card:#FFFFFF; --t1:#171717; --t2:#737373; --t3:#A3A3A3; --line:#E7E5E4;
+      --accent:#0F7B57; --neg:#B91C1C; --amber:#B45309; --hover:#F5F5F4; --on-accent:#FFFFFF;
+      --grey-series:#A8A29E; --shadow:0 10px 28px rgba(23,23,23,.10);
+      --accent-2:color-mix(in oklab, var(--accent) 74%, var(--card));
+      --accent-3:color-mix(in oklab, var(--accent) 48%, var(--card));
+      --accent-4:color-mix(in oklab, var(--accent) 26%, var(--card));
+      --accent-soft:color-mix(in oklab, var(--accent) 9%, var(--card));
+      --accent-tint:color-mix(in oklab, var(--accent) 16%, var(--card));
+      --tag-bg:color-mix(in oklab, var(--amber) 8%, var(--card));
+      --tag-fg:var(--amber); --chip-bg:var(--hover);
+      --track:#E4E1DF; --tick:#CFCAC6; --off:#FAFAF9;
+    }
+    html[data-theme="dark"]{
+      --canvas:#0C0C0C; --card:#171717; --t1:#FAFAF9; --t2:#A3A3A3; --t3:#737373; --line:#292524;
+      --accent:#34D399; --neg:#F87171; --amber:#F59E0B; --hover:#201E1D; --on-accent:#0C0C0C;
+      --grey-series:#57534E; --shadow:0 10px 28px rgba(0,0,0,.55);
+      --tag-bg:color-mix(in oklab, var(--amber) 7%, var(--card));
+      --tag-fg:color-mix(in oklab, var(--amber) 58%, var(--t2));
+      --chip-bg:var(--hover); --track:#3A3431; --tick:#3A3431; --off:#121110;
+    }
+    html,body{margin:0;padding:0;background:var(--canvas)}
+    *{box-sizing:border-box}
+    body{font-family:'Inter',system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif;font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
+    a{color:var(--accent);text-decoration:none}
+    a:hover{color:var(--accent);text-decoration:underline}
+    button,input,select{font-family:inherit;font-variant-numeric:tabular-nums}
+    ::selection{background:var(--accent-tint)}
+    @keyframes menuIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+    @media (max-width:1180px){
+      [data-r="kpi"]{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+      [data-r="two"]{grid-template-columns:minmax(0,1fr)!important}
+    }
+    @media (max-width:960px){
+      [data-r="navd"]{display:none!important}
+      [data-r="navm"]{display:flex!important}
+      [data-r="tabbar"]{display:flex!important}
+      [data-r="main"]{padding:16px 16px 104px!important}
+      [data-r="kpi"]{grid-template-columns:minmax(0,1fr)!important}
+      [data-r="flowwrap"]{min-width:760px}
+      [data-r="movewrap"]{min-width:880px}
+    }
+  </style>
+</helmet>
+<div style="min-height:100vh;background:var(--canvas);color:var(--t1);font-size:14px;line-height:1.45">
+
+  <dc-import name="TopNav" active="Portfolio" sub-active="Cash" hint-size="100%,56px"></dc-import>
+
+  <main data-r="main" data-screen-label="Portfolio — Cash" style="max-width:1392px;margin:0 auto;padding:24px 24px 88px;display:flex;flex-direction:column;gap:18px">
+
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap">
+      <div style="display:flex;flex-direction:column;gap:5px;min-width:0">
+        <div style="display:flex;align-items:center;gap:8px;position:relative">
+          <h1 style="margin:0;font-size:32px;font-weight:600;letter-spacing:-0.028em;line-height:1.1;color:var(--t1)">Cash</h1>
+          <span onMouseEnter="{{ titleTipOn }}" onMouseLeave="{{ titleTipOff }}" style="width:16px;height:16px;margin-top:6px;flex:none;border:1px solid var(--line);border-radius:50%;font-size:10px;font-weight:500;color:var(--t3);display:flex;align-items:center;justify-content:center;cursor:help" style-hover="border-color:var(--t3);color:var(--t2)">?</span>
+          <sc-if value="{{ titleTip }}" hint-placeholder-val="{{ false }}">
+            <span style="position:absolute;top:44px;left:0;z-index:40;width:340px;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:10px 12px;font-size:11.5px;line-height:1.55;color:var(--t2)">{{ titleTipText }}</span>
+          </sc-if>
+          <span style="font-size:13px;color:var(--t3);padding-top:6px">{{ portfolioName }}</span>
+        </div>
+        <span style="font-size:12px;color:var(--t3)">{{ headNote }}</span>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <a href="Transactions.dc.html" style="display:inline-flex;align-items:center;gap:7px;height:32px;padding:0 13px;border:1px solid var(--line);border-radius:7px;font-size:12.5px;font-weight:500;color:var(--t1);white-space:nowrap" style-hover="background:var(--hover);text-decoration:none">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
+          Update cash balance
+        </a>
+        <div style="position:relative">
+          <button onClick="{{ togMore }}" title="More" style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;border:1px solid var(--line);border-radius:7px;background:{{ moreBg }};color:var(--t2);cursor:pointer" style-hover="background:var(--hover)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.6"></circle><circle cx="12" cy="12" r="1.6"></circle><circle cx="19" cy="12" r="1.6"></circle></svg>
+          </button>
+          <sc-if value="{{ mMore }}" hint-placeholder-val="{{ false }}">
+            <div onClick="{{ stop }}" style="position:absolute;top:38px;right:0;z-index:50;min-width:216px;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:6px;animation:menuIn .12s ease-out">
+              <sc-for list="{{ moreRows }}" as="m" hint-placeholder-count="3">
+                <button onClick="{{ m.onClick }}" style="display:flex;align-items:center;width:100%;padding:8px 10px;border:none;border-radius:6px;background:transparent;text-align:left;cursor:pointer;font-size:12.5px;color:var(--t1)" style-hover="background:var(--hover)">{{ m.label }}</button>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+    </div>
+
+    <div data-r="kpi" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px">
+      <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
+        <div style="background:var(--card);border:1px solid var(--line);border-radius:8px;padding:20px;display:flex;flex-direction:column;gap:14px">
+          <dc-import name="Metric" label="{{ k.label }}" tip="{{ k.tip }}" dotted="{{ true }}" primary="{{ k.primary }}" primary-tone="{{ k.tone }}" primary-delta="{{ k.delta }}" delta-tone="{{ k.deltaTone }}" secondary="{{ k.secondary }}" secondary-note="{{ k.note }}" hint-size="100%,84px"></dc-import>
+          <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--t3)">
+            <span>{{ k.footA }}</span>
+            <span style="width:1px;height:10px;background:var(--line)"></span>
+            <span>{{ k.footB }}</span>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+
+    <div data-r="two" style="display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:18px;align-items:start">
+
+      <div style="display:flex;flex-direction:column;gap:0;background:var(--card);border:1px solid var(--line);border-radius:8px;overflow:hidden">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:15px 20px;border-bottom:1px solid var(--line)">
+          <span style="font-size:14px;font-weight:600;color:var(--t1)">Balances by currency</span>
+          <span style="font-size:11.5px;color:var(--t3)">{{ balancesNote }}</span>
+        </div>
+        <div style="display:grid;grid-template-columns:minmax(120px,1fr) 120px 96px 104px 132px;border-bottom:1px solid var(--line)">
+          <sc-for list="{{ curHead }}" as="h" hint-placeholder-count="5">
+            <div style="display:flex;align-items:center;justify-content:{{ h.justify }};padding:9px 16px">
+              <span style="font-size:12px;font-weight:500;color:var(--t2);white-space:nowrap">{{ h.label }}</span>
+            </div>
+          </sc-for>
+        </div>
+        <sc-for list="{{ curRows }}" as="r" hint-placeholder-count="1">
+          <div style="display:grid;grid-template-columns:minmax(120px,1fr) 120px 96px 104px 132px;border-bottom:1px solid var(--line)">
+            <div style="display:flex;align-items:center;gap:9px;padding:11px 16px;min-width:0">
+              <span style="width:26px;height:26px;flex:none;border-radius:6px;background:var(--accent-soft);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--accent)">{{ r.symbol }}</span>
+              <dc-import name="TwoLineCell" primary="{{ r.currency }}" secondary="{{ r.sub }}" align="left" hint-size="120px,36px"></dc-import>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:flex-end;padding:11px 16px">
+              <dc-import name="TwoLineCell" primary="{{ r.balance }}" secondary="{{ r.inBase }}" align="right" hint-size="110px,36px"></dc-import>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:flex-end;padding:11px 16px">
+              <span style="font-size:13px;color:var(--t1)">{{ r.share }}</span>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:flex-end;padding:11px 16px">
+              <span style="font-size:13px;color:var(--t1)">{{ r.yield }}</span>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:flex-end;padding:11px 16px">
+              <dc-import name="TwoLineCell" primary="{{ r.income }}" secondary="{{ r.monthly }}" align="right" hint-size="120px,36px"></dc-import>
+            </div>
+          </div>
+        </sc-for>
+        <div style="display:flex;flex-direction:column;gap:10px;padding:15px 20px">
+          <span style="font-size:12px;font-weight:500;color:var(--t2)">What the balance is held in</span>
+          <sc-for list="{{ holdRows }}" as="h" hint-placeholder-count="1">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:11px 13px;border:1px solid var(--line);border-radius:8px;flex-wrap:wrap">
+              <span style="display:flex;align-items:center;gap:10px;min-width:0">
+                <span style="width:28px;height:28px;flex:none;border-radius:6px;background:var(--hover);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:var(--t2)">{{ h.mono }}</span>
+                <dc-import name="TwoLineCell" primary="{{ h.ticker }}" secondary="{{ h.name }}" align="left" hint-size="180px,36px"></dc-import>
+              </span>
+              <span style="display:flex;align-items:center;gap:18px">
+                <dc-import name="TwoLineCell" primary="{{ h.value }}" secondary="{{ h.freq }}" align="right" hint-size="110px,36px"></dc-import>
+                <dc-import name="TwoLineCell" primary="{{ h.yield }}" secondary="{{ h.income }}" align="right" hint-size="110px,36px"></dc-import>
+              </span>
+            </div>
+            <sc-if value="{{ h.caveat }}" hint-placeholder-val="{{ true }}">
+              <span style="display:flex;align-items:flex-start;gap:8px;border-left:2px solid var(--amber);padding:2px 0 2px 10px;font-size:11.5px;line-height:1.5;color:var(--t2)">{{ h.caveat }}</span>
+            </sc-if>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:16px;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:20px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+          <span style="font-size:14px;font-weight:600;color:var(--t1)">Cash drag</span>
+          <span style="font-size:11.5px;color:var(--t3)">{{ dragHead }}</span>
+        </div>
+        <dc-import name="NumberLineGauge" min="{{ gaugeMin }}" max="{{ gaugeMax }}" min-label="{{ gaugeMinLabel }}" max-label="{{ gaugeMaxLabel }}" statement="{{ gaugeStatement }}" verdict="{{ gaugeVerdict }}" verdict-tone="{{ gaugeTone }}" note="{{ gaugeNote }}" tick-values="{{ gaugeTicks }}" markers="{{ gaugeMarkers }}" hint-size="100%,150px"></dc-import>
+        <div style="display:flex;flex-direction:column;gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden">
+          <sc-for list="{{ dragRows }}" as="d" hint-placeholder-count="4">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 13px;border-bottom:1px solid var(--line)">
+              <span style="display:flex;flex-direction:column;gap:1px;min-width:0">
+                <span style="font-size:12.5px;color:var(--t2)">{{ d.label }}</span>
+                <span style="font-size:11px;color:var(--t3)">{{ d.note }}</span>
+              </span>
+              <span style="font-size:13px;font-weight:600;color:{{ d.color }};white-space:nowrap">{{ d.value }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:14px;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:20px 22px 18px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
+        <div style="display:flex;flex-direction:column;gap:3px">
+          <span style="font-size:14px;font-weight:600;color:var(--t1)">Cash movements by month</span>
+          <span style="font-size:11.5px;color:var(--t3)">{{ flowNote }}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+          <sc-for list="{{ flowLegend }}" as="l" hint-placeholder-count="2">
+            <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--t2);white-space:nowrap">
+              <span style="width:9px;height:9px;border-radius:2px;background:{{ l.color }}"></span>{{ l.label }}
+            </span>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;padding-top:9px">
+        <div data-r="flowwrap" style="display:flex;gap:12px">
+          <div style="width:58px;flex:none;position:relative;height:212px">
+            <sc-for list="{{ flowTicks }}" as="t" hint-placeholder-count="5">
+              <span style="position:absolute;right:0;top:{{ t.top }};transform:translateY(-50%);font-size:10.5px;color:var(--t3);white-space:nowrap">{{ t.label }}</span>
+            </sc-for>
+          </div>
+          <div onMouseLeave="{{ flowOff }}" style="position:relative;flex:1;min-width:0;height:212px">
+            <sc-for list="{{ flowTicks }}" as="t" hint-placeholder-count="5">
+              <span style="position:absolute;left:0;right:0;top:{{ t.top }};height:1px;background:{{ t.color }};border-top:{{ t.border }}"></span>
+            </sc-for>
+            <div style="position:absolute;inset:0;display:flex;gap:3px">
+              <sc-for list="{{ flowBars }}" as="b" hint-placeholder-count="23">
+                <div onMouseEnter="{{ b.onEnter }}" style="flex:1;min-width:0;display:flex;flex-direction:column;justify-content:flex-start;align-items:center;cursor:default;background:{{ b.slotBg }};border-radius:5px">
+                  <span style="height:96px;width:100%;display:flex;align-items:flex-end;justify-content:center">
+                    <span style="width:64%;max-width:26px;height:{{ b.inH }};background:var(--accent);display:block"></span>
+                  </span>
+                  <span style="height:96px;width:100%;display:flex;align-items:flex-start;justify-content:center">
+                    <span style="width:64%;max-width:26px;height:{{ b.outH }};background:var(--grey-series);display:block"></span>
+                  </span>
+                  <span style="font-size:10px;color:{{ b.labelColor }};white-space:nowrap;padding-top:3px">{{ b.label }}</span>
+                </div>
+              </sc-for>
+            </div>
+            <sc-if value="{{ flowTip }}" hint-placeholder-val="{{ false }}">
+              <div style="position:absolute;left:{{ tipLeft }};top:0;transform:{{ tipShift }};z-index:20;pointer-events:none">
+                <dc-import name="ChartTooltip" tip="{{ flowTip }}" hint-size="240px,200px"></dc-import>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+      </div>
+      <span style="font-size:11px;line-height:1.5;color:var(--t3)">{{ flowFootnote }}</span>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:0;background:var(--card);border:1px solid var(--line);border-radius:8px;overflow:hidden">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:16px 20px 14px;border-bottom:1px solid var(--line)">
+        <div style="display:flex;flex-direction:column;gap:3px">
+          <span style="font-size:14px;font-weight:600;color:var(--t1)">Movements</span>
+          <span style="font-size:11.5px;color:var(--t3)">{{ moveNote }}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <sc-if value="{{ searchOpen }}" hint-placeholder-val="{{ false }}">
+            <input value="{{ query }}" onChange="{{ onQuery }}" placeholder="Filter by ticker…" autofocus="{{ true }}" style="height:30px;width:160px;padding:0 11px;border:1px solid var(--line);border-radius:7px;background:var(--card);font-size:12px;color:var(--t1);outline:none">
+          </sc-if>
+          <button onClick="{{ togSearch }}" title="Search" style="display:flex;align-items:center;justify-content:center;width:30px;height:30px;border:1px solid var(--line);border-radius:7px;background:{{ searchBg }};color:var(--t2);cursor:pointer" style-hover="background:var(--hover)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+          </button>
+          <div style="display:flex;gap:2px;padding:2px;border:1px solid var(--line);border-radius:7px;flex-wrap:wrap">
+            <sc-for list="{{ filters }}" as="f" hint-placeholder-count="6">
+              <button onClick="{{ f.onClick }}" style="height:26px;padding:0 10px;border:none;border-radius:5px;background:{{ f.bg }};color:{{ f.color }};font-size:11.5px;font-weight:{{ f.weight }};cursor:pointer;white-space:nowrap" style-hover="background:var(--hover)">{{ f.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+      <div style="max-width:100%;overflow-x:auto;overscroll-behavior-x:contain">
+        <div data-r="movewrap">
+          <div style="display:grid;grid-template-columns:{{ moveCols }};border-bottom:1px solid var(--line)">
+            <sc-for list="{{ moveHead }}" as="h" hint-placeholder-count="6">
+              <div style="display:flex;align-items:center;justify-content:{{ h.justify }};padding:10px 16px">
+                <span style="font-size:12px;font-weight:500;color:var(--t2);white-space:nowrap">{{ h.label }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <sc-for list="{{ moveRows }}" as="r" hint-placeholder-count="12">
+            <div style="display:grid;grid-template-columns:{{ moveCols }};border-bottom:1px solid var(--line)">
+              <div style="display:flex;align-items:center;padding:9px 16px">
+                <span style="font-size:13px;color:var(--t1);white-space:nowrap">{{ r.date }}</span>
+              </div>
+              <div style="display:flex;align-items:center;padding:9px 16px">
+                <span style="display:inline-flex;align-items:center;gap:6px;height:22px;padding:0 9px;border-radius:5px;background:{{ r.typeBg }};color:{{ r.typeFg }};font-size:11px;font-weight:500;white-space:nowrap">
+                  <span style="width:5px;height:5px;border-radius:1px;background:{{ r.typeDot }}"></span>{{ r.type }}
+                </span>
+              </div>
+              <div style="display:flex;align-items:center;padding:9px 16px;min-width:0">
+                <dc-import name="TwoLineCell" primary="{{ r.label }}" secondary="{{ r.detail }}" align="left" hint-size="220px,36px"></dc-import>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:flex-end;padding:9px 16px">
+                <span style="font-size:13px;font-weight:500;color:var(--accent);white-space:nowrap">{{ r.in }}</span>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:flex-end;padding:9px 16px">
+                <span style="font-size:13px;color:var(--t1);white-space:nowrap">{{ r.out }}</span>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:flex-end;padding:9px 16px">
+                <span style="font-size:13px;color:var(--t2);white-space:nowrap">{{ r.balance }}</span>
+              </div>
+            </div>
+          </sc-for>
+          <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:7px;padding:40px 20px">
+              <span style="font-size:14px;font-weight:500;color:var(--t1)">No movements match</span>
+              <span style="font-size:12.5px;color:var(--t3)">{{ emptyHint }}</span>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:13px 20px">
+        <span style="font-size:11.5px;color:var(--t3)">{{ pageNote }}</span>
+        <sc-if value="{{ hasMore }}" hint-placeholder-val="{{ true }}">
+          <button onClick="{{ showMore }}" style="height:30px;padding:0 14px;border:1px solid var(--line);border-radius:7px;background:transparent;font-size:12.5px;font-weight:500;color:var(--t1);cursor:pointer" style-hover="background:var(--hover)">{{ moreLabel }}</button>
+        </sc-if>
+      </div>
+    </div>
+
+    <span style="font-size:11px;line-height:1.55;color:var(--t3);max-width:900px">{{ footnote }}</span>
+  </main>
+
+  <div data-r="tabbar" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:60;height:60px;background:var(--card);border-top:1px solid var(--line);align-items:stretch;padding:0 4px">
+    <sc-for list="{{ tabRows }}" as="t" hint-placeholder-count="4">
+      <a href="{{ t.href }}" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-decoration:none;color:{{ t.color }}">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="{{ t.d }}"></path></svg>
+        <span style="font-size:10px;font-weight:500">{{ t.label }}</span>
+      </a>
+    </sc-for>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;pageSize&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:25,&quot;min&quot;:10,&quot;max&quot;:100,&quot;step&quot;:5,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Movements&quot;},&quot;defaultFilter&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;All&quot;,&quot;Deposits&quot;,&quot;Withdrawals&quot;,&quot;Purchases&quot;,&quot;Proceeds&quot;,&quot;Dividends&quot;],&quot;default&quot;:&quot;All&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Movements&quot;}}">
+class Component extends DCLogic {
+  state = { menu: null, titleTip: false, filter: null, query: '', searchOpen: false, limit: null, hover: null };
+
+  componentDidMount() {
+    this.doc = () => { if (this.state.menu) this.setState({ menu: null }); };
+    document.addEventListener('click', this.doc);
+    if (!window.SnowlineData) {
+      const check = () => { if (window.SnowlineData) this.forceUpdate(); else setTimeout(check, 30); };
+      setTimeout(check, 20);
+    }
+  }
+  componentWillUnmount() { if (this.doc) document.removeEventListener('click', this.doc); }
+
+  niceMax(v) {
+    if (v <= 0) return 1;
+    const e = Math.pow(10, Math.floor(Math.log10(v)));
+    return ([1, 2, 2.5, 5, 10].map((m) => m * e).filter((s) => s >= v)[0]) || e * 10;
+  }
+
+  renderVals() {
+    const st = Object.assign({}, this.state);
+    const pageSize = Math.max(5, Math.round(this.props.pageSize || 25));
+    if (st.filter === null) st.filter = this.props.defaultFilter || 'All';
+    if (st.limit === null) st.limit = pageSize;
+    const I = {
+      bars: 'M4 20V10M10 20V4M16 20v-7M22 20H2', table: 'M3 5h18v14H3V5Zm0 5h18M9 10v9',
+      home: 'M4 11l8-7 8 7v9H4v-9Zm5 9v-6h6v6',
+      scale: 'M12 4v16M6 8l-3 6h6l-3-6Zm12 0l-3 6h6l-3-6ZM5 8h14', dots: 'M5 12h.01M12 12h.01M19 12h.01'
+    };
+    const base = {
+      tabRows: [
+        { label: 'Dashboard', d: I.home, href: 'Snowline.dc.html', color: 'var(--t3)' },
+        { label: 'Analytics', d: I.bars, href: 'Analytics.dc.html', color: 'var(--t3)' },
+        { label: 'Portfolio', d: I.table, href: 'Holdings.dc.html', color: 'var(--accent)' },
+        { label: 'Tools', d: I.scale, href: 'Rebalancing.dc.html', color: 'var(--t3)' }
+      ],
+      stop: (e) => e.stopPropagation()
+    };
+    if (!window.SnowlineData) return base;
+
+    const D = window.SnowlineData, F = D.fmt, K = D.constants, T = D.totals();
+    const cf = D.cashFlow(), cs = D.cashStats();
+    const money = (v) => F.money(v);
+
+    /* ---- movements ---- */
+    const GROUPS = {
+      All: null, Deposits: ['Deposit'], Withdrawals: ['Withdrawal'],
+      Purchases: ['Buy'], Proceeds: ['Sell'], Dividends: ['Dividend']
+    };
+    const TYPE = {
+      Deposit: { dot: 'var(--accent)', bg: 'var(--accent-soft)', fg: 'var(--accent)' },
+      Sell: { dot: 'var(--accent-2)', bg: 'var(--hover)', fg: 'var(--t1)' },
+      Dividend: { dot: 'var(--accent-3)', bg: 'var(--hover)', fg: 'var(--t1)' },
+      Buy: { dot: 'var(--grey-series)', bg: 'var(--hover)', fg: 'var(--t2)' },
+      Withdrawal: { dot: 'var(--t2)', bg: 'var(--hover)', fg: 'var(--t2)' }
+    };
+    const q = st.query.trim().toLowerCase();
+    const keep = cf.rows.filter((r) => {
+      const g = GROUPS[st.filter];
+      if (g && g.indexOf(r.type) < 0) return false;
+      if (!q) return true;
+      return ((r.ticker || '') + ' ' + r.label + ' ' + r.type).toLowerCase().indexOf(q) >= 0;
+    });
+    const shown = keep.slice(0, st.limit);
+    const filtered = st.filter !== 'All' || q;
+    const kept = { in: keep.filter((r) => r.signed > 0).reduce((a, r) => a + r.amount, 0), out: keep.filter((r) => r.signed < 0).reduce((a, r) => a + r.amount, 0) };
+
+    /* ---- monthly flow chart ---- */
+    const months = cf.months;
+    const peak = Math.max.apply(null, months.map((m) => Math.max(m.inflow, m.outflow)).concat([1]));
+    const axis = this.niceMax(peak);
+    const hov = st.hover === null || st.hover === undefined ? null : months[st.hover];
+    const flowTicks = [1, 0.5, 0, -0.5, -1].map((f) => ({
+      label: f === 0 ? '$0' : (f < 0 ? '-' : '+') + '$' + F.num(Math.abs(f) * axis / 1000, axis >= 10000 ? 0 : 1) + 'k',
+      top: (100 - (f + 1) / 2 * 100) * 0.906 + '%',
+      color: f === 0 ? 'var(--t3)' : 'transparent',
+      border: f === 0 ? 'none' : '1px dashed var(--tick, var(--line))'
+    }));
+
+    return Object.assign(base, {
+      portfolioName: K.portfolioName,
+      headNote: cf.currency + ' ' + money(cf.balance) + ' \u00b7 ' + F.pct(cs.weight, 2)
+        + ' of the portfolio \u00b7 ' + cf.count + ' movements since ' + cf.rows[cf.rows.length - 1].date,
+      titleTip: st.titleTip,
+      titleTipOn: () => this.setState({ titleTip: true }),
+      titleTipOff: () => this.setState({ titleTip: false }),
+      titleTipText: 'Cash is the ' + cs.positions.map((p) => p.ticker).join(', ')
+        + ' money-market line. Deposits and withdrawals are not stored anywhere \u2014 they are solved from the '
+        + D.ledger().length + ' dated rows that moved cash, under one rule: top up before a purchase would take the balance below the '
+        + money(cf.float) + ' float, sweep back anything more than $500 above it after money comes in.',
+
+      togMore: (e) => { e.stopPropagation(); this.setState({ menu: st.menu === 'more' ? null : 'more' }); },
+      mMore: st.menu === 'more',
+      moreBg: st.menu === 'more' ? 'var(--hover)' : 'var(--card)',
+      moreRows: [
+        { label: 'Clear filters', onClick: (e) => { e.stopPropagation(); this.setState({ filter: 'All', query: '', searchOpen: false, limit: pageSize, menu: null }); } },
+        { label: 'Show every movement', onClick: (e) => { e.stopPropagation(); this.setState({ limit: cf.count, menu: null }); } },
+        { label: 'Open transactions', onClick: (e) => { e.stopPropagation(); this.setState({ menu: null }); window.location.href = 'Transactions.dc.html'; } }
+      ],
+
+      kpis: [
+        {
+          label: 'Cash balance', tip: 'The money-market line, which is what this portfolio holds instead of an idle cash account.',
+          primary: money(cf.balance), tone: 'plain',
+          secondary: F.pct(cs.yieldPct, 2), note: 'yield \u00b7 ' + money(cs.monthlyIncome) + ' a month',
+          footA: cs.positions.length + (cs.positions.length === 1 ? ' cash line' : ' cash lines'),
+          footB: money(cs.income) + ' a year'
+        },
+        {
+          label: 'Share of portfolio', tip: 'Cash against total portfolio value, and against the target weight set for the Cash category.',
+          primary: F.pct(cs.weight, 2), tone: 'plain',
+          delta: (cs.drift >= 0 ? '\u25b2' : '\u25bc') + F.num(Math.abs(cs.drift), 2) + 'pp',
+          deltaTone: cs.drift > 0 ? 'neg' : 'pos',
+          secondary: F.pct(cs.target, 0), note: 'target',
+          footA: money(cs.cash), footB: 'of ' + money(T.value)
+        },
+        {
+          label: 'Net deposits', tip: 'Everything paid in, less everything swept back out, over the life of the portfolio.',
+          primary: money(cf.netDeposits), tone: 'plain',
+          secondary: money(cf.deposits), note: 'in',
+          footA: cf.depositCount + ' deposits', footB: cf.withdrawalCount + ' withdrawals \u00b7 ' + money(cf.withdrawals) + ' out'
+        },
+        {
+          label: 'Cash drag', tip: 'What holding cash costs a year: the cash weight times the gap between the expected portfolio return and the cash yield.',
+          primary: F.num(cs.dragPct, 2) + 'pp', tone: 'plain',
+          secondary: money(cs.dragAnnual), note: 'a year forgone',
+          footA: F.pct(cs.expectedReturn, 2) + ' expected', footB: F.pct(cs.yieldPct, 2) + ' on cash'
+        }
+      ],
+
+      balancesNote: cf.currency + ' is the base currency \u00b7 no other currency is held',
+      curHead: [
+        { label: 'Currency', justify: 'flex-start' }, { label: 'Balance', justify: 'flex-end' },
+        { label: 'Share', justify: 'flex-end' }, { label: 'Yield', justify: 'flex-end' },
+        { label: 'Income a year', justify: 'flex-end' }
+      ],
+      curRows: D.cashByCurrency().map((c) => ({
+        currency: c.currency, symbol: c.currency.slice(0, 2),
+        sub: c.isBase ? 'base currency' : 'converted at ' + F.num(1, 4),
+        balance: money(c.balance), inBase: money(c.inBase) + ' in ' + K.baseCurrency,
+        share: F.pct(c.pct, 1), yield: F.pct(c.yieldPct, 2),
+        income: money(c.income), monthly: money(c.income / 12) + ' a month'
+      })),
+      holdRows: cs.positions.map((p) => ({
+        ticker: p.ticker, name: p.name, mono: p.mono,
+        value: money(p.value), freq: p.frequency + ' distribution',
+        yield: F.pct(p.yieldPct, 2), income: money(p.income) + ' a year',
+        caveat: p.caveat || ''
+      })),
+
+      dragHead: F.pct(cs.weight, 2) + ' held in cash',
+      gaugeMin: 0, gaugeMax: 20,
+      gaugeMinLabel: '0% fully invested', gaugeMaxLabel: '20% heavy in cash',
+      gaugeTicks: [0, 5, 10, 15, 20],
+      gaugeMarkers: [
+        { value: cs.weight, label: 'now', display: F.pct(cs.weight, 2), primary: true },
+        { value: cs.target, label: 'target', display: F.pct(cs.target, 0), primary: false, shape: 'diamond' }
+      ],
+      gaugeStatement: 'Cash sits ' + F.num(Math.abs(cs.drift), 2) + 'pp ' + (cs.drift >= 0 ? 'above' : 'below') + ' its target weight',
+      gaugeVerdict: cs.weight > cs.target + 3 ? 'requires attention' : cs.weight > cs.target + 1 ? 'slightly heavy' : 'o.k.',
+      gaugeTone: cs.weight > cs.target + 3 ? 'attention' : cs.weight > cs.target + 1 ? 'neutral' : 'good',
+      gaugeNote: 'The cash line yields ' + F.pct(cs.yieldPct, 2) + ', so it is not idle \u2014 the drag is only the '
+        + F.num(cs.gap, 2) + 'pp it gives up against the ' + F.pct(cs.expectedReturn, 2)
+        + ' return the goal projection assumes.',
+      dragRows: [
+        { label: 'Cash held', note: 'money-market line at ' + F.pct(cs.yieldPct, 2), value: money(cs.cash), color: 'var(--t1)' },
+        { label: 'Target weight', note: F.pct(cs.target, 0) + ' of ' + money(T.value), value: money(T.value * cs.target / 100), color: 'var(--t1)' },
+        { label: 'Above target', note: 'could be invested', value: money(cs.cash - T.value * cs.target / 100), color: cs.drift > 0 ? 'var(--amber)' : 'var(--accent)' },
+        { label: 'Forgone a year', note: F.num(cs.gap, 2) + 'pp on ' + money(cs.cash), value: money(cs.dragAnnual), color: 'var(--t1)' }
+      ],
+
+      flowNote: 'Money in and out of the cash account, ' + months[0].short + ' \u2013 ' + months[months.length - 1].short,
+      flowLegend: [{ label: 'In', color: 'var(--accent)' }, { label: 'Out', color: 'var(--grey-series)' }],
+      flowTicks: flowTicks,
+      flowBars: months.map((m, i) => ({
+        label: i === 0 || m.monthIndex === 0 || m.monthIndex === 6 ? m.short : m.label.slice(0, 1),
+        inH: Math.max(m.inflow > 0 ? 2 : 0, m.inflow / axis * 96).toFixed(1) + 'px',
+        outH: Math.max(m.outflow > 0 ? 2 : 0, m.outflow / axis * 96).toFixed(1) + 'px',
+        slotBg: st.hover === i ? 'var(--hover)' : 'transparent',
+        labelColor: st.hover === i ? 'var(--t1)' : 'var(--t3)',
+        onEnter: () => this.setState({ hover: i })
+      })),
+      flowOff: () => this.setState({ hover: null }),
+      tipLeft: hov ? ((st.hover + 0.5) / months.length * 100).toFixed(2) + '%' : '0%',
+      tipShift: !hov ? 'none' : (st.hover < months.length * 0.3 ? 'translateX(-8%)' : st.hover > months.length * 0.7 ? 'translateX(-92%)' : 'translateX(-50%)'),
+      flowTip: hov ? {
+        title: hov.key,
+        headline: (hov.net >= 0 ? '+' : '-') + money(Math.abs(hov.net)).replace('-', ''),
+        sub: 'net movement \u00b7 closing balance ' + money(hov.end),
+        rows: [
+          { label: 'Deposits', value: money(hov.deposits), color: 'var(--accent)' },
+          { label: 'Dividends', value: money(hov.income), color: 'var(--accent-3)' },
+          { label: 'Sale proceeds', value: money(hov.proceeds), color: 'var(--accent-2)' },
+          { label: 'Purchases', value: money(hov.invested), color: 'var(--grey-series)' },
+          { label: 'Withdrawals', value: money(hov.withdrawals), color: 'var(--t2)' }
+        ].filter((r) => r.value !== money(0)),
+        footer: money(hov.inflow) + ' in \u00b7 ' + money(hov.outflow) + ' out'
+      } : null,
+      flowFootnote: 'Purchases include the trade fee. The balance never falls below the ' + money(cf.float)
+        + ' float, because the deposits are solved to keep it there.',
+
+      moveNote: filtered
+        ? keep.length + ' of ' + cf.count + ' movements \u00b7 ' + money(kept.in) + ' in, ' + money(kept.out) + ' out'
+        : cf.count + ' movements \u00b7 ' + money(cf.deposits + cf.proceeds + cf.income) + ' in, ' + money(cf.withdrawals + cf.invested) + ' out',
+      searchOpen: st.searchOpen, query: st.query,
+      searchBg: st.searchOpen ? 'var(--hover)' : 'var(--card)',
+      togSearch: (e) => { e.stopPropagation(); this.setState({ searchOpen: !st.searchOpen, query: '' }); },
+      onQuery: (e) => this.setState({ query: e.target.value, limit: pageSize }),
+      filters: Object.keys(GROUPS).map((f) => ({
+        label: f, onClick: () => this.setState({ filter: f, limit: pageSize }),
+        bg: st.filter === f ? 'var(--accent-soft)' : 'transparent',
+        color: st.filter === f ? 'var(--accent)' : 'var(--t2)',
+        weight: st.filter === f ? 600 : 500
+      })),
+      moveCols: '128px 124px minmax(220px,1fr) 132px 132px 136px',
+      moveHead: [
+        { label: 'Date', justify: 'flex-start' }, { label: 'Type', justify: 'flex-start' },
+        { label: 'Details', justify: 'flex-start' }, { label: 'In', justify: 'flex-end' },
+        { label: 'Out', justify: 'flex-end' }, { label: 'Balance', justify: 'flex-end' }
+      ],
+      moveRows: shown.map((r) => ({
+        date: r.date, type: r.type,
+        typeBg: TYPE[r.type].bg, typeFg: TYPE[r.type].fg, typeDot: TYPE[r.type].dot,
+        label: r.label, detail: r.detail,
+        in: r.signed > 0 ? money(r.amount) : '',
+        out: r.signed < 0 ? money(r.amount) : '',
+        balance: money(r.balance)
+      })),
+      isEmpty: keep.length === 0,
+      emptyHint: 'No ' + st.filter.toLowerCase() + (q ? ' matching “' + st.query + '”' : '') + ' in this account.',
+      pageNote: 'Showing ' + shown.length + ' of ' + keep.length + (filtered ? ' matching movements' : ' movements'),
+      hasMore: shown.length < keep.length,
+      moreLabel: 'Show ' + Math.min(40, keep.length - shown.length) + ' more',
+      showMore: () => this.setState({ limit: st.limit + 40 }),
+      footnote: 'The cash account is derived, not stored. Its balance is the ' + cs.positions.map((p) => p.ticker).join(' and ')
+        + ' money-market line — ' + money(cf.float) + ' — and every movement above comes from a dated row in the transaction ledger: '
+        + money(cf.invested) + ' of purchases including fees out, ' + money(cf.proceeds) + ' of proceeds and '
+        + money(cf.income) + ' of dividends in. Deposits and withdrawals are solved so the balance never goes negative and closes exactly on the money-market line: '
+        + money(cf.netDeposits) + ' net paid in − ' + money(cf.invested) + ' + ' + money(cf.proceeds) + ' + ' + money(cf.income) + ' = ' + money(cf.balance) + '.'
+    });
+  }
+}
+</script>
+</body>
+</html>

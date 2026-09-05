@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <script src="snowline-data.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --canvas:#FAFAF9; --card:#FFFFFF; --t1:#171717; --t2:#737373; --t3:#A3A3A3; --line:#E7E5E4;
+      --accent:#0F7B57; --neg:#B91C1C; --amber:#B45309; --hover:#F5F5F4; --on-accent:#FFFFFF;
+      --grey-series:#A8A29E; --shadow:0 10px 28px rgba(23,23,23,.10);
+      --accent-2:color-mix(in oklab, var(--accent) 74%, var(--card));
+      --accent-3:color-mix(in oklab, var(--accent) 48%, var(--card));
+      --accent-4:color-mix(in oklab, var(--accent) 26%, var(--card));
+      --accent-soft:color-mix(in oklab, var(--accent) 9%, var(--card));
+      --accent-tint:color-mix(in oklab, var(--accent) 16%, var(--card));
+      --neg-soft:color-mix(in oklab, var(--neg) 8%, var(--card));
+      --tag-bg:color-mix(in oklab, var(--amber) 8%, var(--card));
+      --tag-fg:var(--amber);
+      --scrim:rgba(23,23,23,.34);
+    }
+    html[data-theme="dark"]{
+      --canvas:#0C0C0C; --card:#171717; --t1:#FAFAF9; --t2:#A3A3A3; --t3:#737373; --line:#292524;
+      --accent:#34D399; --neg:#F87171; --amber:#F59E0B; --hover:#201E1D; --on-accent:#0C0C0C;
+      --grey-series:#57534E; --shadow:0 10px 28px rgba(0,0,0,.55);
+      --tag-bg:color-mix(in oklab, var(--amber) 7%, var(--card));
+      --tag-fg:color-mix(in oklab, var(--amber) 58%, var(--t2));
+      --scrim:rgba(0,0,0,.6);
+    }
+    html,body{margin:0;padding:0;background:var(--canvas)}
+    *{box-sizing:border-box}
+    body{font-family:'Inter',system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif;font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
+    a{color:var(--accent);text-decoration:none}
+    a:hover{color:var(--accent);text-decoration:underline}
+    button,input,select,textarea{font-family:inherit;font-variant-numeric:tabular-nums}
+    input,select,textarea{color:var(--t1)}
+    input::placeholder,textarea::placeholder{color:var(--t3)}
+    ::selection{background:var(--accent-tint)}
+    @keyframes menuIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes sheetIn{from{opacity:0;transform:translateY(10px) scale(.99)}to{opacity:1;transform:translateY(0) scale(1)}}
+    @media (max-width:960px){
+      [data-r="navd"]{display:none!important}
+      [data-r="navm"]{display:flex!important}
+      [data-r="tabbar"]{display:flex!important}
+      [data-r="main"]{padding:16px 16px 104px!important}
+    }
+  </style>
+</helmet>
+<div style="min-height:100vh;background:var(--canvas);color:var(--t1);font-size:14px;line-height:1.45">
+
+  <dc-import name="TopNav" active="Portfolio" sub-active="Transactions" hint-size="100%,56px"></dc-import>
+
+  <main data-r="main" data-screen-label="Portfolio — Transactions" style="max-width:1392px;margin:0 auto;padding:24px 24px 88px;display:flex;flex-direction:column;gap:18px">
+
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap">
+      <div style="display:flex;flex-direction:column;gap:5px;min-width:0">
+        <div style="display:flex;align-items:center;gap:9px">
+          <h1 style="margin:0;font-size:32px;font-weight:600;letter-spacing:-0.028em;line-height:1.1;color:var(--t1)">Transactions</h1>
+          <span style="font-size:13px;color:var(--t3);padding-top:6px">{{ portfolioName }}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:9px;font-size:12px;color:var(--t3);flex-wrap:wrap">
+          <span>{{ headCount }}</span>
+          <span style="width:1px;height:10px;background:var(--line)"></span>
+          <span>{{ headSpan }}</span>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <sc-for list="{{ topActions }}" as="a" hint-placeholder-count="3">
+          <button onClick="{{ a.onClick }}" style="display:inline-flex;align-items:center;gap:7px;height:32px;padding:0 12px;border:1px solid var(--line);border-radius:7px;background:var(--card);color:var(--t1);font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap" style-hover="background:var(--hover)">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="color:var(--t3)"><path d="{{ a.d }}"></path></svg>
+            {{ a.label }}
+          </button>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;border-bottom:1px solid var(--line)">
+      <div style="display:flex;align-items:center;gap:2px">
+        <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="3">
+          <button onClick="{{ t.onClick }}" style="position:relative;height:38px;padding:0 14px;border:none;background:transparent;color:{{ t.color }};font-size:13px;font-weight:{{ t.weight }};cursor:pointer;white-space:nowrap" style-hover="color:var(--t1)">
+            {{ t.label }}
+            <span style="position:absolute;left:8px;right:8px;bottom:-1px;height:2px;border-radius:2px;background:{{ t.rule }}"></span>
+          </button>
+        </sc-for>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding-bottom:6px">
+        <button onClick="{{ openAdd }}" style="display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 13px;border:1px solid var(--accent);border-radius:7px;background:var(--accent);color:var(--on-accent);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap" style-hover="opacity:.9">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
+          Add
+        </button>
+        <div style="display:inline-flex;align-items:center;gap:7px;height:32px;padding:0 11px;border:1px solid var(--line);border-radius:7px;background:var(--card)">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" style="color:var(--t3);flex:none"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+          <input value="{{ query }}" onChange="{{ onQuery }}" placeholder="Search transactions…" style="width:172px;border:none;outline:none;background:transparent;font-size:12px"></input>
+        </div>
+        <button onClick="{{ togFilters }}" style="display:inline-flex;align-items:center;gap:7px;height:32px;padding:0 12px;border:1px solid {{ filterBorder }};border-radius:7px;background:{{ filterBg }};color:var(--t1);font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap" style-hover="background:var(--hover)">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" style="color:var(--t3)"><path d="M3 6h18M7 12h10M11 18h2"></path></svg>
+          {{ filterLabel }}
+        </button>
+        <div style="position:relative">
+          <button onClick="{{ togCols }}" title="Column settings" style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;border:1px solid var(--line);border-radius:7px;background:{{ colsBg }};color:var(--t2);cursor:pointer" style-hover="background:var(--hover)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 5h16M4 12h16M4 19h16"></path><circle cx="9" cy="5" r="1.6" fill="currentColor"></circle><circle cx="15" cy="12" r="1.6" fill="currentColor"></circle><circle cx="7" cy="19" r="1.6" fill="currentColor"></circle></svg>
+          </button>
+          <sc-if value="{{ mCols }}" hint-placeholder-val="{{ false }}">
+            <div onClick="{{ stop }}" style="position:absolute;top:38px;right:0;z-index:50;width:214px;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:6px;animation:menuIn .12s ease-out">
+              <span style="display:block;padding:7px 10px 6px;font-size:11px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;color:var(--t3)">Columns</span>
+              <sc-for list="{{ colToggles }}" as="c" hint-placeholder-count="4">
+                <button onClick="{{ c.onClick }}" style="display:flex;align-items:center;gap:10px;width:100%;padding:8px 10px;border:none;border-radius:6px;background:transparent;text-align:left;cursor:pointer;font-size:12.5px;color:var(--t1)" style-hover="background:var(--hover)">
+                  <span style="flex:none;width:15px;height:15px;border:1px solid {{ c.boxBorder }};border-radius:4px;background:{{ c.boxBg }};display:flex;align-items:center;justify-content:center">
+                    <svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="{{ c.tick }}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6.5l2.6 2.5L10 3.5"></path></svg>
+                  </span>
+                  {{ c.label }}
+                </button>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+    </div>
+
+    <sc-if value="{{ filtersOpen }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 14px;border:1px solid var(--line);border-radius:8px;background:var(--card)">
+        <span style="font-size:12px;font-weight:500;color:var(--t2)">Operation</span>
+        <sc-for list="{{ opFilters }}" as="o" hint-placeholder-count="4">
+          <button onClick="{{ o.onClick }}" style="height:28px;padding:0 11px;border:1px solid {{ o.border }};border-radius:999px;background:{{ o.bg }};color:{{ o.color }};font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap" style-hover="background:var(--hover)">{{ o.label }}</button>
+        </sc-for>
+        <span style="flex:1"></span>
+        <button onClick="{{ resetFilters }}" style="border:none;background:transparent;padding:0;font-size:12px;font-weight:500;color:var(--accent);cursor:pointer;text-decoration:underline;text-underline-offset:2px">Reset</button>
+      </div>
+    </sc-if>
+
+    <div style="display:flex;align-items:center;gap:22px;flex-wrap:wrap;padding:13px 16px;border:1px solid var(--line);border-radius:8px;background:var(--card)">
+      <sc-for list="{{ summary }}" as="s" hint-placeholder-count="3">
+        <span style="display:flex;align-items:center;gap:9px;min-width:0">
+          <span style="width:8px;height:8px;flex:none;border-radius:2px;background:{{ s.color }}"></span>
+          <span style="font-size:12px;color:var(--t2)">{{ s.label }}</span>
+          <span style="font-size:14px;font-weight:600;color:var(--t1);white-space:nowrap">{{ s.value }}</span>
+        </span>
+      </sc-for>
+      <span style="flex:1"></span>
+      <sc-if value="{{ anySelected }}" hint-placeholder-val="{{ false }}">
+        <span style="display:flex;align-items:center;gap:12px">
+          <span style="font-size:12px;color:var(--t2)">{{ selectedLabel }}</span>
+          <button onClick="{{ deleteSelected }}" style="display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 11px;border:1px solid var(--line);border-radius:7px;background:var(--card);color:var(--neg);font-size:12px;font-weight:500;cursor:pointer" style-hover="background:var(--neg-soft)">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M9 7V5h6v2M7 7l1 13h8l1-13"></path></svg>
+            Delete
+          </button>
+        </span>
+      </sc-if>
+    </div>
+
+    <div data-r="scroller" style="position:relative;max-width:100%;border:1px solid var(--line);border-radius:8px;background:var(--card);overflow-x:auto;overflow-y:visible;overscroll-behavior-x:contain">
+      <div style="min-width:{{ minWidth }}">
+
+        <div style="display:grid;grid-template-columns:{{ gridCols }};border-bottom:1px solid var(--line);background:var(--card)">
+          <div style="position:sticky;left:0;z-index:3;background:var(--card);display:flex;align-items:center;justify-content:center;padding:10px 0 10px 12px">
+            <span onClick="{{ toggleAll }}" style="width:15px;height:15px;border:1px solid {{ allBorder }};border-radius:4px;background:{{ allBg }};display:flex;align-items:center;justify-content:center;cursor:pointer">
+              <svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="{{ allTick }}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6.5l2.6 2.5L10 3.5"></path></svg>
+            </span>
+          </div>
+          <div style="position:sticky;left:44px;z-index:3;background:var(--card);border-right:1px solid var(--line);display:flex;align-items:center;padding:10px 12px">
+            <span style="font-size:12px;font-weight:500;color:var(--t2)">Operation</span>
+          </div>
+          <sc-for list="{{ headers }}" as="h" hint-placeholder-count="8">
+            <div style="display:flex;align-items:center;justify-content:{{ h.justify }};padding:10px 12px">
+              <button onClick="{{ h.onSort }}" style="display:flex;align-items:center;gap:5px;border:none;background:transparent;padding:0;cursor:{{ h.cursor }};font-size:12px;font-weight:500;color:{{ h.color }};white-space:nowrap" style-hover="color:var(--t1)">
+                {{ h.label }}
+                <span style="font-size:9px;color:var(--accent);opacity:{{ h.arrowOp }}">{{ h.arrow }}</span>
+              </button>
+            </div>
+          </sc-for>
+          <div style="position:sticky;right:0;z-index:3;background:var(--card);border-left:1px solid var(--line);padding:10px 0"></div>
+        </div>
+
+        <sc-for list="{{ rows }}" as="r" hint-placeholder-count="14">
+          <div onMouseEnter="{{ r.onEnter }}" onMouseLeave="{{ r.onLeave }}" style="display:grid;grid-template-columns:{{ gridCols }};border-bottom:1px solid var(--line);background:{{ r.bg }}">
+            <div style="position:sticky;left:0;z-index:2;background:{{ r.bg }};display:flex;align-items:center;justify-content:center;padding:0 0 0 12px">
+              <span onClick="{{ r.onSelect }}" style="width:15px;height:15px;border:1px solid {{ r.selBorder }};border-radius:4px;background:{{ r.selBg }};display:flex;align-items:center;justify-content:center;cursor:pointer">
+                <svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="{{ r.selTick }}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6.5l2.6 2.5L10 3.5"></path></svg>
+              </span>
+            </div>
+            <div style="position:sticky;left:44px;z-index:2;background:{{ r.bg }};border-right:1px solid var(--line);display:flex;align-items:center;padding:11px 12px">
+              <span style="display:inline-flex;align-items:center;gap:7px;height:23px;padding:0 9px;border-radius:5px;background:{{ r.opBg }};color:{{ r.opFg }};font-size:11.5px;font-weight:500;white-space:nowrap">
+                <span style="width:5px;height:5px;border-radius:1px;background:currentColor;opacity:.8"></span>{{ r.operation }}
+              </span>
+            </div>
+
+            <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;min-width:0">
+              <span style="width:28px;height:28px;flex:none;border-radius:6px;background:var(--hover);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:var(--t2)">{{ r.mono }}</span>
+              <dc-import name="TwoLineCell" primary="{{ r.name }}" secondary="{{ r.ticker }}" align="left" hint-size="140px,36px"></dc-import>
+            </div>
+            <div style="display:flex;align-items:center;padding:9px 12px">
+              <span style="font-size:13px;color:var(--t1);white-space:nowrap">{{ r.date }}</span>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:flex-end;padding:9px 12px">
+              <span style="font-size:13px;color:var(--t1);white-space:nowrap">{{ r.shares }}</span>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:flex-end;padding:9px 12px">
+              <span style="font-size:13px;color:var(--t1);white-space:nowrap">{{ r.price }}</span>
+            </div>
+            <sc-if value="{{ showFee }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex;align-items:center;justify-content:flex-end;padding:9px 12px">
+                <span style="font-size:13px;color:{{ r.feeColor }};white-space:nowrap">{{ r.fee }}</span>
+              </div>
+            </sc-if>
+            <div style="display:flex;align-items:center;justify-content:flex-end;padding:9px 12px">
+              <span style="font-size:13px;font-weight:500;color:{{ r.summColor }};white-space:nowrap">{{ r.summ }}</span>
+            </div>
+            <sc-if value="{{ showProfit }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex;align-items:center;justify-content:flex-end;padding:9px 12px">
+                <dc-import name="TwoLineCell" primary="{{ r.profitPrimary }}" secondary="{{ r.profitSecondary }}" tone="{{ r.profitTone }}" align="right" hint-size="110px,36px"></dc-import>
+              </div>
+            </sc-if>
+            <sc-if value="{{ showNote }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex;align-items:center;padding:9px 12px;min-width:0">
+                <span style="font-size:12px;color:var(--t3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.note }}</span>
+              </div>
+            </sc-if>
+
+            <div style="position:sticky;right:0;z-index:2;background:{{ r.bg }};border-left:1px solid var(--line);display:flex;align-items:center;justify-content:center;gap:2px;padding:0 6px">
+              <sc-for list="{{ r.actions }}" as="a" hint-placeholder-count="3">
+                <button onClick="{{ a.onClick }}" title="{{ a.title }}" style="display:flex;align-items:center;justify-content:center;width:26px;height:26px;border:none;border-radius:6px;background:transparent;color:{{ a.color }};cursor:pointer;opacity:{{ r.actionOp }}" style-hover="background:var(--hover)">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="{{ a.d }}"></path></svg>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+        </sc-for>
+
+        <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:52px 20px">
+            <span style="font-size:14px;font-weight:500;color:var(--t1)">No transactions match</span>
+            <span style="font-size:12.5px;color:var(--t3)">{{ emptyHint }}</span>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap">
+      <span style="font-size:12px;color:var(--t3)">{{ pageNote }}</span>
+      <sc-if value="{{ hasMore }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ showMore }}" style="height:32px;padding:0 14px;border:1px solid var(--line);border-radius:7px;background:var(--card);color:var(--t1);font-size:12px;font-weight:500;cursor:pointer" style-hover="background:var(--hover)">Show more</button>
+      </sc-if>
+    </div>
+
+    <span style="font-size:11px;line-height:1.5;color:var(--t3);max-width:860px">{{ footnote }}</span>
+  </main>
+
+  <sc-if value="{{ modalOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeModal }}" style="position:fixed;inset:0;z-index:80;background:var(--scrim);display:flex;align-items:flex-start;justify-content:center;padding:40px 20px;overflow-y:auto">
+      <div onClick="{{ stop }}" style="width:100%;max-width:580px;background:var(--card);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);animation:sheetIn .16s ease-out;display:flex;flex-direction:column">
+
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:18px 20px 0">
+          <div style="display:flex;flex-direction:column;gap:2px">
+            <span style="font-size:17px;font-weight:600;letter-spacing:-0.015em;color:var(--t1)">{{ modalTitle }}</span>
+            <span style="font-size:12px;color:var(--t3)">{{ modalSub }}</span>
+          </div>
+          <button onClick="{{ closeModal }}" title="Close" style="display:flex;align-items:center;justify-content:center;width:28px;height:28px;border:none;border-radius:6px;background:transparent;color:var(--t3);cursor:pointer" style-hover="background:var(--hover)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+          </button>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:2px;padding:14px 20px 0;border-bottom:1px solid var(--line)">
+          <sc-for list="{{ modalTabs }}" as="t" hint-placeholder-count="3">
+            <button onClick="{{ t.onClick }}" style="position:relative;height:36px;padding:0 14px;border:none;background:transparent;color:{{ t.color }};font-size:13px;font-weight:{{ t.weight }};cursor:pointer" style-hover="color:var(--t1)">
+              {{ t.label }}
+              <span style="position:absolute;left:6px;right:6px;bottom:-1px;height:2px;border-radius:2px;background:{{ t.rule }}"></span>
+            </button>
+          </sc-for>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:14px;padding:18px 20px;max-height:min(62vh,560px);overflow-y:auto">
+          <sc-for list="{{ fieldRows }}" as="row" hint-placeholder-count="6">
+            <div style="display:grid;grid-template-columns:{{ row.cols }};gap:14px">
+              <sc-for list="{{ row.fields }}" as="f" hint-placeholder-count="1">
+                <div style="display:flex;flex-direction:column;gap:6px;min-width:0">
+
+                  <sc-if value="{{ f.hasLabel }}" hint-placeholder-val="{{ true }}">
+                    <div style="display:flex;align-items:center;gap:5px;position:relative">
+                      <span style="font-size:12px;font-weight:500;color:var(--t2)">{{ f.label }}</span>
+                      <sc-if value="{{ f.required }}" hint-placeholder-val="{{ false }}">
+                        <span style="font-size:12px;font-weight:600;color:var(--accent)">*</span>
+                      </sc-if>
+                      <span onMouseEnter="{{ f.tipOn }}" onMouseLeave="{{ f.tipOff }}" style="width:14px;height:14px;flex:none;border:1px solid var(--line);border-radius:50%;font-size:9px;font-weight:500;color:var(--t3);display:flex;align-items:center;justify-content:center;cursor:help" style-hover="border-color:var(--t3);color:var(--t2)">?</span>
+                      <sc-if value="{{ f.showTip }}" hint-placeholder-val="{{ false }}">
+                        <span style="position:absolute;top:22px;left:0;z-index:30;width:250px;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:9px 11px;font-size:11px;line-height:1.5;color:var(--t2);pointer-events:none">{{ f.tip }}</span>
+                      </sc-if>
+                    </div>
+                  </sc-if>
+
+                  <sc-if value="{{ f.isCombo }}" hint-placeholder-val="{{ false }}">
+                    <div style="position:relative">
+                      <input value="{{ f.value }}" onChange="{{ f.onChange }}" onFocus="{{ f.onFocus }}" onClick="{{ f.onClick }}" placeholder="{{ f.placeholder }}" style="width:100%;height:36px;padding:0 11px;border:1px solid {{ f.border }};border-radius:7px;background:var(--card);font-size:13px;outline:none"></input>
+                      <sc-if value="{{ f.listOpen }}" hint-placeholder-val="{{ false }}">
+                        <div style="position:absolute;top:40px;left:0;right:0;z-index:40;max-height:236px;overflow-y:auto;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:5px">
+                          <sc-for list="{{ f.matches }}" as="m" hint-placeholder-count="4">
+                            <button onClick="{{ m.onPick }}" style="display:flex;align-items:center;gap:10px;width:100%;padding:8px 9px;border:none;border-radius:6px;background:transparent;text-align:left;cursor:pointer" style-hover="background:var(--hover)">
+                              <span style="width:28px;height:28px;flex:none;border-radius:6px;background:var(--hover);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:var(--t2)">{{ m.mono }}</span>
+                              <span style="display:flex;flex-direction:column;gap:1px;min-width:0;flex:1">
+                                <span style="font-size:12.5px;font-weight:500;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ m.title }}</span>
+                                <span style="font-size:11px;color:var(--t3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ m.name }}</span>
+                              </span>
+                              <span style="font-size:11.5px;color:var(--t2);flex:none">{{ m.currency }}</span>
+                            </button>
+                          </sc-for>
+                          <sc-if value="{{ f.noMatches }}" hint-placeholder-val="{{ false }}">
+                            <span style="display:block;padding:12px 10px;font-size:12px;color:var(--t3)">No matching listing.</span>
+                          </sc-if>
+                        </div>
+                      </sc-if>
+                    </div>
+                    <sc-if value="{{ f.customLink }}" hint-placeholder-val="{{ true }}">
+                      <button onClick="{{ f.onCustom }}" style="align-self:flex-start;border:none;background:transparent;padding:0;font-size:11.5px;color:var(--accent);cursor:pointer;text-decoration:underline;text-underline-offset:2px">{{ f.customLabel }}</button>
+                    </sc-if>
+                  </sc-if>
+
+                  <sc-if value="{{ f.isInput }}" hint-placeholder-val="{{ false }}">
+                    <div style="display:flex;align-items:center;gap:0;border:1px solid {{ f.border }};border-radius:7px;background:var(--card);height:36px;overflow:hidden">
+                      <sc-if value="{{ f.prefix }}" hint-placeholder-val="{{ false }}">
+                        <span style="padding:0 0 0 11px;font-size:13px;color:var(--t3)">{{ f.prefix }}</span>
+                      </sc-if>
+                      <input value="{{ f.value }}" onChange="{{ f.onChange }}" type="{{ f.type }}" placeholder="{{ f.placeholder }}" style="flex:1;min-width:0;height:100%;padding:0 11px;border:none;outline:none;background:transparent;font-size:13px"></input>
+                      <sc-if value="{{ f.suffix }}" hint-placeholder-val="{{ false }}">
+                        <span style="padding:0 11px 0 0;font-size:12px;color:var(--t3);white-space:nowrap">{{ f.suffix }}</span>
+                      </sc-if>
+                      <sc-if value="{{ f.hasCurrency }}" hint-placeholder-val="{{ false }}">
+                        <select value="{{ f.currency }}" onChange="{{ f.onCurrency }}" style="height:100%;border:none;border-left:1px solid var(--line);background:var(--hover);font-size:12px;padding:0 8px;outline:none;cursor:pointer">
+                          <sc-for list="{{ f.currencies }}" as="c" hint-placeholder-count="4">
+                            <option value="{{ c.value }}">{{ c.label }}</option>
+                          </sc-for>
+                        </select>
+                      </sc-if>
+                    </div>
+                  </sc-if>
+
+                  <sc-if value="{{ f.isSelect }}" hint-placeholder-val="{{ false }}">
+                    <select value="{{ f.value }}" onChange="{{ f.onChange }}" style="width:100%;height:36px;padding:0 9px;border:1px solid {{ f.border }};border-radius:7px;background:var(--card);font-size:13px;outline:none;cursor:pointer">
+                      <sc-for list="{{ f.options }}" as="o" hint-placeholder-count="2">
+                        <option value="{{ o.value }}">{{ o.label }}</option>
+                      </sc-for>
+                    </select>
+                  </sc-if>
+
+                  <sc-if value="{{ f.isCheck }}" hint-placeholder-val="{{ false }}">
+                    <button onClick="{{ f.onToggle }}" style="display:flex;align-items:center;gap:9px;border:none;background:transparent;padding:0;cursor:pointer;text-align:left">
+                      <span style="flex:none;width:16px;height:16px;border:1px solid {{ f.boxBorder }};border-radius:4px;background:{{ f.boxBg }};display:flex;align-items:center;justify-content:center">
+                        <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="{{ f.tick }}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6.5l2.6 2.5L10 3.5"></path></svg>
+                      </span>
+                      <span style="font-size:12.5px;color:var(--t1)">{{ f.label }}</span>
+                    </button>
+                  </sc-if>
+
+                  <sc-if value="{{ f.help }}" hint-placeholder-val="{{ false }}">
+                    <span style="font-size:11px;color:{{ f.helpColor }};line-height:1.45">{{ f.help }}</span>
+                  </sc-if>
+                </div>
+              </sc-for>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:14px 20px;border-top:1px solid var(--line);background:var(--canvas);border-radius:0 0 10px 10px">
+          <span style="font-size:11.5px;color:{{ modalHintColor }}">{{ modalHint }}</span>
+          <div style="display:flex;align-items:center;gap:8px">
+            <button onClick="{{ closeModal }}" style="height:34px;padding:0 14px;border:1px solid var(--line);border-radius:7px;background:var(--card);color:var(--t1);font-size:12.5px;font-weight:500;cursor:pointer" style-hover="background:var(--hover)">Cancel</button>
+            <button onClick="{{ saveMore }}" style="height:34px;padding:0 14px;border:1px solid var(--line);border-radius:7px;background:var(--card);color:var(--t1);font-size:12.5px;font-weight:500;cursor:pointer;white-space:nowrap" style-hover="background:var(--hover)">Save and add more</button>
+            <button onClick="{{ save }}" style="height:34px;padding:0 18px;border:1px solid var(--accent);border-radius:7px;background:var(--accent);color:var(--on-accent);font-size:12.5px;font-weight:600;cursor:pointer" style-hover="opacity:.9">Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <div data-r="tabbar" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:60;height:60px;background:var(--card);border-top:1px solid var(--line);align-items:stretch;padding:0 4px">
+    <sc-for list="{{ tabRows }}" as="t" hint-placeholder-count="4">
+      <a href="{{ t.href }}" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-decoration:none;color:{{ t.color }}">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="{{ t.d }}"></path></svg>
+        <span style="font-size:10px;font-weight:500">{{ t.label }}</span>
+      </a>
+    </sc-for>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;pageSize&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:40,&quot;min&quot;:10,&quot;max&quot;:200,&quot;step&quot;:10,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Table&quot;},&quot;showIncomeRows&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Table&quot;}}">
+class Component extends DCLogic {
+  state = {
+    tab: 'Trades', query: '', sort: { key: 'date', dir: -1 }, limit: null,
+    selected: [], added: [], deleted: [], hover: null, menu: null, editId: null,
+    filtersOpen: false, ops: [], cols: { fee: true, profit: true, note: true },
+    modal: null, mtab: 'Trades', ftip: null, comboOpen: false, custom: false,
+    form: {}, touched: false, toast: ''
+  };
+
+  componentDidMount() {
+    this.doc = () => {
+      if (this.state.menu || this.state.comboOpen) this.setState({ menu: null, comboOpen: false });
+    };
+    document.addEventListener('click', this.doc);
+    if (!window.SnowlineData) {
+      const check = () => { if (window.SnowlineData) this.forceUpdate(); else setTimeout(check, 30); };
+      setTimeout(check, 20);
+    }
+  }
+  componentWillUnmount() {
+    if (this.doc) document.removeEventListener('click', this.doc);
+    if (this.toastT) clearTimeout(this.toastT);
+  }
+
+  say(msg) {
+    if (this.toastT) clearTimeout(this.toastT);
+    this.setState({ toast: msg });
+    this.toastT = setTimeout(() => this.setState({ toast: '' }), 3200);
+  }
+
+  blank(tab) {
+    const D = window.SnowlineData;
+    const today = D ? D.constants.today : { year: 2026, monthIndex: 7 };
+    const iso = today.year + '-' + String(today.monthIndex + 1).padStart(2, '0') + '-28';
+    return {
+      pick: null, text: '', operation: tab === 'Trades' ? 'Buy' : tab === 'Incomes' ? 'Dividends' : 'Fee',
+      date: iso, shares: '', price: '', fee: '', tax: '', total: '', perShare: '',
+      currency: '$', note: '', cash: true
+    };
+  }
+
+  openModal(tab, prefill, editId) {
+    this.setState({
+      modal: prefill ? 'edit' : 'add', editId: editId || null,
+      mtab: tab, custom: false, comboOpen: false,
+      touched: false, form: Object.assign(this.blank(tab), prefill || {})
+    });
+  }
+
+  labelToIso(label) {
+    const M = window.SnowlineData ? window.SnowlineData.MONTHS : [];
+    const p = String(label || '').split(' ');
+    if (p.length !== 3) return '';
+    const mi = M.indexOf(p[1]);
+    if (mi < 0) return '';
+    return p[2] + '-' + String(mi + 1).padStart(2, '0') + '-' + String(+p[0]).padStart(2, '0');
+  }
+
+  /* inputs get human precision, not raw floats */
+  dp(n, d) {
+    if (!n) return '';
+    return String(Math.round(n * Math.pow(10, d)) / Math.pow(10, d));
+  }
+
+  setF(k, v) { this.setState({ form: Object.assign({}, this.state.form, { [k]: v }) }); }
+
+  isoToLabel(iso) {
+    const M = window.SnowlineData ? window.SnowlineData.MONTHS : [];
+    const p = String(iso || '').split('-');
+    if (p.length !== 3) return iso || '';
+    return String(+p[2]).padStart(2, '0') + ' ' + (M[+p[1] - 1] || '') + ' ' + p[0];
+  }
+
+  validate() {
+    const f = this.state.form, t = this.state.mtab, bad = {};
+    if (t !== 'Expenses' && !f.pick && !f.text.trim()) bad.ticker = 1;
+    if (!f.date) bad.date = 1;
+    if (t === 'Trades') {
+      if (!(parseFloat(f.shares) > 0)) bad.shares = 1;
+      if (!(parseFloat(f.price) > 0)) bad.price = 1;
+    }
+    if (t === 'Incomes' && !(parseFloat(f.total) > 0)) bad.total = 1;
+    if (t === 'Expenses' && !(parseFloat(f.fee) > 0)) bad.fee = 1;
+    return bad;
+  }
+
+  build() {
+    const f = this.state.form, t = this.state.mtab;
+    const num = (v) => parseFloat(v) || 0;
+    const pick = f.pick;
+    const label = pick ? pick.ticker : (f.text.trim().toUpperCase() || '—');
+    const name = pick ? pick.name : (f.text.trim() || 'Custom asset');
+    const mono = pick ? pick.mono : label.slice(0, 2);
+    const date = this.isoToLabel(f.date);
+    if (t === 'Trades') {
+      const amount = Math.round(num(f.shares) * num(f.price) * 100) / 100;
+      return {
+        kind: 'trade', operation: f.operation, ticker: label, name: name, mono: mono,
+        date: date, shares: num(f.shares), price: num(f.price), amount: amount,
+        fee: num(f.fee), tax: 0, signed: f.operation === 'Buy' ? -amount : amount,
+        note: f.note, added: true
+      };
+    }
+    if (t === 'Incomes') {
+      const amount = num(f.total);
+      return {
+        kind: 'income', operation: 'Dividends', ticker: label, name: name, mono: mono,
+        date: date, shares: pick ? pick.heldShares : 0, price: num(f.perShare),
+        amount: amount, fee: num(f.fee), tax: num(f.tax), signed: amount,
+        note: f.note, added: true
+      };
+    }
+    return {
+      kind: 'expense', operation: 'Fee', ticker: pick ? label : '—',
+      name: pick ? name : 'Portfolio fee', mono: pick ? mono : 'FE',
+      date: date, shares: 0, price: 0, amount: num(f.fee), fee: num(f.fee), tax: 0,
+      signed: -num(f.fee), note: f.note, added: true
+    };
+  }
+
+  commit(keepOpen) {
+    const bad = this.validate();
+    if (Object.keys(bad).length) { this.setState({ touched: true }); return; }
+    const editing = this.state.editId;
+    const row = Object.assign({ id: 'new' + Date.now() }, this.build());
+    this.setState({
+      added: [row].concat(this.state.added),
+      deleted: editing ? this.state.deleted.concat([editing]) : this.state.deleted,
+      editId: keepOpen ? null : editing,
+      touched: false,
+      modal: keepOpen ? 'add' : null,
+      comboOpen: false, custom: false,
+      form: keepOpen ? this.blank(this.state.mtab) : this.state.form
+    });
+    this.say(row.operation + ' ' + row.ticker + (editing ? ' updated.' : ' added.'));
+  }
+
+  renderVals() {
+    const page = this.props.pageSize || 40;
+    const withIncome = this.props.showIncomeRows !== false;
+    const st = Object.assign({}, this.state);
+    if (st.limit === null) st.limit = page;
+    const I = {
+      bars: 'M4 20V10M10 20V4M16 20v-7M22 20H2', table: 'M3 5h18v14H3V5Zm0 5h18M9 10v9',
+      home: 'M4 11l8-7 8 7v9H4v-9Zm5 9v-6h6v6',
+      scale: 'M12 4v16M6 8l-3 6h6l-3-6Zm12 0l-3 6h6l-3-6ZM5 8h14', dots: 'M5 12h.01M12 12h.01M19 12h.01',
+      up: 'M12 20V6m0 0l-4 4m4-4l4 4M4 4h16', down: 'M12 3v11m0 0l-4-4m4 4l4-4M4 17v3h16v-3',
+      clock: 'M12 7v5l3 2M12 21a9 9 0 100-18 9 9 0 000 18',
+      note: 'M7 4h10v16H7zM10 9h4M10 13h4', pencil: 'M4 20h4L19 9l-4-4L4 16v4Z',
+      trash: 'M4 7h16M9 7V5h6v2M7 7l1 13h8l1-13'
+    };
+    const base = {
+      tabRows: [
+        { label: 'Dashboard', d: I.home, href: 'Snowline.dc.html', color: 'var(--t3)' },
+        { label: 'Analytics', d: I.bars, href: 'Analytics.dc.html', color: 'var(--t3)' },
+        { label: 'Portfolio', d: I.table, href: 'Holdings.dc.html', color: 'var(--accent)' },
+        { label: 'Tools', d: I.scale, href: 'Rebalancing.dc.html', color: 'var(--t3)' }
+      ],
+      stop: (e) => e.stopPropagation()
+    };
+    if (!window.SnowlineData) return base;
+
+    const D = window.SnowlineData, F = D.fmt, K = D.constants;
+    const priceNow = {};
+    D.positions.forEach((p) => { priceNow[p.ticker] = p; });
+
+    /* ---- rows: generated ledger + anything the modal added --------------- */
+    const all = st.added.concat(D.ledger())
+      .filter((r) => st.deleted.indexOf(r.id) < 0)
+      .filter((r) => withIncome || r.kind !== 'income');
+    const byTab = all.filter((r) =>
+      st.tab === 'All' ? true : st.tab === 'Trades' ? r.kind !== 'income' : r.kind === 'income');
+    const byOps = st.ops.length ? byTab.filter((r) => st.ops.indexOf(r.operation) >= 0) : byTab;
+    const q = st.query.trim().toLowerCase();
+    const filtered = !q ? byOps : byOps.filter((r) =>
+      (r.ticker + ' ' + r.name + ' ' + r.operation + ' ' + r.date + ' ' + (r.note || '')).toLowerCase().indexOf(q) >= 0);
+
+    const SORTS = {
+      date: (r) => {
+        const p = String(r.date).split(' ');
+        return (+p[2] || 0) * 10000 + (D.MONTHS.indexOf(p[1]) + 1) * 100 + (+p[0] || 0);
+      },
+      shares: (r) => r.shares, price: (r) => r.price,
+      summ: (r) => r.signed, profit: (r) => this.profitOf(r, priceNow).abs
+    };
+    const key = SORTS[st.sort.key] ? st.sort.key : 'date';
+    const sorted = filtered.slice().sort((a, b) => (SORTS[key](a) - SORTS[key](b)) * st.sort.dir);
+    const shown = sorted.slice(0, st.limit);
+
+    const totals = D.ledgerTotals(filtered);
+
+    /* ---- per-row profit -------------------------------------------------- */
+    const profitOf = (r) => {
+      const p = priceNow[r.ticker];
+      if (r.kind === 'income') return { primary: F.signed(r.amount), secondary: r.tax > 0 ? 'after ' + F.money(r.tax) + ' tax' : 'no tax withheld', tone: 'pos' };
+      if (r.kind === 'expense') return { primary: F.signed(-r.amount), secondary: 'expense', tone: 'neg' };
+      if (!p) return { primary: '—', secondary: 'no price feed', tone: 'plain' };
+      if (r.operation === 'Sell') {
+        const cost = p.soldCost ? p.soldCost : r.amount;
+        const gain = r.amount - cost;
+        return { primary: F.caret(cost ? gain / cost * 100 : 0), secondary: F.signed(gain), tone: F.tone(gain) };
+      }
+      const gain = r.shares * p.price - r.amount;
+      return { primary: F.caret(r.amount ? gain / r.amount * 100 : 0), secondary: F.signed(gain), tone: F.tone(gain) };
+    };
+
+    const opTone = (op) => op === 'Buy' ? { bg: 'var(--accent-soft)', fg: 'var(--accent)' }
+      : op === 'Sell' ? { bg: 'var(--neg-soft)', fg: 'var(--neg)' }
+        : op === 'Dividends' ? { bg: 'var(--hover)', fg: 'var(--t1)' }
+          : { bg: 'var(--tag-bg)', fg: 'var(--tag-fg)' };
+
+    const cols = st.cols;
+    const widths = ['44px', '132px', '218px', '116px', '116px', '106px']
+      .concat(cols.fee ? ['104px'] : [])
+      .concat(['126px'])
+      .concat(cols.profit ? ['136px'] : [])
+      .concat(cols.note ? ['minmax(150px,1fr)'] : [])
+      .concat(['96px']);
+    const minWidth = widths.reduce((a, w) => a + (parseInt(w, 10) || 150), 0);
+
+    const sortBtn = (k, label, justify) => ({
+      label: label, justify: justify || 'flex-start', cursor: 'pointer',
+      color: st.sort.key === k ? 'var(--t1)' : 'var(--t2)',
+      arrow: st.sort.dir < 0 ? '▼' : '▲',
+      arrowOp: st.sort.key === k ? 1 : 0,
+      onSort: () => this.setState({
+        sort: { key: k, dir: st.sort.key === k ? -st.sort.dir : -1 }, limit: 40
+      })
+    });
+    const plain = (label, justify) => ({
+      label: label, justify: justify || 'flex-start', cursor: 'default',
+      color: 'var(--t2)', arrow: '', arrowOp: 0, onSort: () => {}
+    });
+
+    const headers = [plain('Holding'), sortBtn('date', 'Date'),
+      sortBtn('shares', 'Shares', 'flex-end'), sortBtn('price', 'Price', 'flex-end')]
+      .concat(cols.fee ? [plain('Fee / Tax', 'flex-end')] : [])
+      .concat([sortBtn('summ', 'Summ', 'flex-end')])
+      .concat(cols.profit ? [sortBtn('profit', 'Total profit', 'flex-end')] : [])
+      .concat(cols.note ? [plain('Note')] : []);
+
+    const allOn = shown.length > 0 && shown.every((r) => st.selected.indexOf(r.id) >= 0);
+
+    /* ---- modal ----------------------------------------------------------- */
+    const f = st.form, bad = st.touched ? this.validate() : {};
+    const border = (k) => bad[k] ? 'var(--neg)' : 'var(--line)';
+    const tipFor = (id, text) => ({
+      tip: text, showTip: st.ftip === id,
+      tipOn: () => this.setState({ ftip: id }), tipOff: () => this.setState({ ftip: null })
+    });
+    const listings = [];
+    D.positions.forEach((p) => { D.exchangesFor(p.ticker).forEach((e) => listings.push(e)); });
+    const cq = (f.text || '').trim().toLowerCase();
+    const matches = (!cq ? listings : listings.filter((l) =>
+      (l.ticker + ' ' + l.name).toLowerCase().indexOf(cq) >= 0)).slice(0, 24);
+
+    const combo = (required) => Object.assign({
+      hasLabel: true, label: 'Ticker / Company', required: required,
+      isCombo: !st.custom, isInput: st.custom, isSelect: false, isCheck: false,
+      type: 'text', border: border('ticker'),
+      value: f.pick ? f.pick.display + ' — ' + f.pick.name : f.text,
+      placeholder: st.custom ? 'Custom asset name' : 'Start typing a ticker…',
+      onChange: (e) => this.setState({
+        form: Object.assign({}, f, { text: e.target.value, pick: null }), comboOpen: true
+      }),
+      onFocus: (e) => { e.stopPropagation(); this.setState({ comboOpen: true }); },
+      onClick: (e) => { e.stopPropagation(); this.setState({ comboOpen: true }); },
+      listOpen: st.comboOpen && !st.custom,
+      noMatches: matches.length === 0,
+      matches: matches.map((m) => ({
+        mono: m.mono, currency: m.currency, name: m.name,
+        title: m.display + (m.heldShares ? ' · ' + F.shares(m.heldShares) + ' shares in portfolio' : ''),
+        onPick: (e) => {
+          e.stopPropagation();
+          this.setState({ form: Object.assign({}, f, { pick: m, text: '' }), comboOpen: false });
+        }
+      })),
+      customLink: true,
+      customLabel: st.custom ? '← back to the ticker search' : 'or add a custom asset',
+      onCustom: (e) => {
+        e.stopPropagation();
+        this.setState({ custom: !st.custom, comboOpen: false, form: Object.assign({}, f, { pick: null, text: '' }) });
+      },
+      help: st.custom ? 'A custom asset has no price feed — value and profit stay at the figures you enter.' : '',
+      helpColor: 'var(--t3)'
+    }, tipFor('ticker', 'The listing you traded. The same company on a different exchange is a separate line, priced in that exchange\'s currency.'));
+
+    const input = (id, label, opts) => Object.assign({
+      hasLabel: true, label: label, required: !!opts.required,
+      isInput: true, isCombo: false, isSelect: false, isCheck: false,
+      type: opts.type || 'text', border: border(id),
+      value: f[opts.field] ?? '', placeholder: opts.placeholder || '',
+      prefix: opts.prefix || '', suffix: opts.suffix || '',
+      hasCurrency: !!opts.currency, currency: f.currency,
+      currencies: ['$', 'ARS', 'CA$', 'Mex$'].map((c) => ({ value: c, label: c })),
+      onCurrency: (e) => this.setF('currency', e.target.value),
+      onChange: (e) => this.setF(opts.field, e.target.value),
+      help: opts.help || '', helpColor: 'var(--t3)'
+    }, tipFor(id, opts.tip));
+
+    const select = (id, label, field, options, tip) => Object.assign({
+      hasLabel: true, label: label, required: false,
+      isSelect: true, isCombo: false, isInput: false, isCheck: false,
+      border: 'var(--line)', value: f[field],
+      options: options.map((o) => ({ value: o, label: o })),
+      onChange: (e) => this.setF(field, e.target.value)
+    }, tipFor(id, tip));
+
+    const cashLine = D.open().filter((p) => p.assetClass === 'Cash')
+      .reduce((a, p) => a + p.value, 0);
+    const check = (help) => ({
+      hasLabel: false, isCheck: true, isCombo: false, isInput: false, isSelect: false,
+      label: 'Update cash balance', required: false,
+      boxBg: f.cash ? 'var(--accent)' : 'transparent',
+      boxBorder: f.cash ? 'var(--accent)' : 'var(--line)',
+      tick: f.cash ? 'var(--on-accent)' : 'transparent',
+      onToggle: () => this.setF('cash', !f.cash),
+      help: help || '', helpColor: 'var(--t3)'
+    });
+
+    const one = (fld) => ({ cols: 'minmax(0,1fr)', fields: [fld] });
+    const two = (a, b) => ({ cols: 'minmax(0,1fr) minmax(0,1fr)', fields: [a, b] });
+
+    let fieldRows = [];
+    if (st.mtab === 'Trades') {
+      fieldRows = [
+        one(combo(true)),
+        two(select('operation', 'Operation', 'operation', ['Buy', 'Sell'], 'Buy adds shares to the position; Sell reduces it and realises a gain or loss.'),
+          input('date', 'Date', { field: 'date', type: 'date', required: true, tip: 'Trade date, not settlement date.' })),
+        two(input('shares', 'Shares', { field: 'shares', type: 'number', required: true, placeholder: '0', tip: 'Fractional shares are allowed — the ledger keeps six decimal places.' }),
+          input('price', 'Price', { field: 'price', type: 'number', required: true, placeholder: '0.00', prefix: '$', tip: 'Price per share in the listing currency, excluding any fee.' })),
+        one(input('fee', 'Fee', { field: 'fee', type: 'number', placeholder: '0.00', prefix: '$', tip: 'Commission charged by the broker. Fees are recorded but do not enter the cost basis.' })),
+        one(input('note', 'Note', { field: 'note', placeholder: 'Optional', tip: 'Free text, shown in the Note column.' })),
+        one(check())
+      ];
+    } else if (st.mtab === 'Incomes') {
+      fieldRows = [
+        one(combo(true)),
+        two(select('operation', 'Operation', 'operation', ['Dividends'], 'Only cash distributions are recorded here.'),
+          input('date', 'Date', { field: 'date', type: 'date', required: true, tip: 'The date the cash was paid, not the ex-date.' })),
+        two(input('total', 'Total received', { field: 'total', type: 'number', required: true, placeholder: '0.00', prefix: '$', tip: 'Cash actually received, after withholding tax.' }),
+          input('perShare', 'per share', { field: 'perShare', type: 'number', placeholder: '0.0000', prefix: '$', tip: 'Distribution per share, before tax.' })),
+        two(input('fee', 'Fee', { field: 'fee', type: 'number', placeholder: '0.00', prefix: '$', tip: 'Any fee deducted from the payment.' }),
+          input('tax', 'Tax', { field: 'tax', type: 'number', placeholder: '0.00', prefix: '$', tip: 'Withholding tax deducted at source. This portfolio assumes ' + F.num(K.withholdingTax * 100, 0) + '%.' })),
+        one(input('note', 'Note', { field: 'note', placeholder: 'Optional', tip: 'Free text, shown in the Note column.' })),
+        one(check())
+      ];
+    } else {
+      fieldRows = [
+        two(select('operation', 'Operation', 'operation', ['Fee'], 'Expenses cover account and platform charges.'),
+          input('date', 'Date', { field: 'date', type: 'date', required: true, tip: 'The date the charge was taken.' })),
+        one(Object.assign(combo(false), { label: 'Ticker / Company', required: false })),
+        one(input('fee', 'Fee', { field: 'fee', type: 'number', required: true, placeholder: '0.00', currency: true, tip: 'The amount charged, in the currency you were billed.' })),
+        one(input('note', 'Note', { field: 'note', placeholder: 'Optional', tip: 'Free text, shown in the Note column.' })),
+        one(check('Current cash balance: ' + F.money(cashLine)))
+      ];
+    }
+
+    return Object.assign(base, {
+      portfolioName: K.portfolioName,
+      headCount: all.length + ' transactions · ' + D.positions.length + ' instruments',
+      headSpan: F.money(D.ledgerTotals().buy) + ' in buys · ' + F.money(D.totals().invested) + ' in open positions',
+
+      topActions: [
+        { label: 'Import', d: I.up, onClick: () => this.say('Import accepts a broker CSV — not wired in this prototype.') },
+        { label: 'Import history', d: I.clock, onClick: () => this.say('No previous imports for this portfolio.') },
+        { label: 'Export', d: I.down, onClick: () => this.say('Export mirrors the Report screen’s CSV download.') }
+      ],
+
+      tabs: (withIncome ? ['Trades', 'Incomes', 'All'] : ['Trades', 'All']).map((t) => ({
+        label: t, onClick: () => this.setState({ tab: t, limit: page, selected: [] }),
+        color: st.tab === t ? 'var(--t1)' : 'var(--t2)',
+        weight: st.tab === t ? 600 : 500,
+        rule: st.tab === t ? 'var(--accent)' : 'transparent'
+      })),
+
+      query: st.query,
+      onQuery: (e) => this.setState({ query: e.target.value, limit: 40 }),
+      openAdd: (e) => { e.stopPropagation(); this.openModal('Trades'); },
+
+      togFilters: (e) => { e.stopPropagation(); this.setState({ filtersOpen: !st.filtersOpen }); },
+      filtersOpen: st.filtersOpen,
+      filterLabel: st.ops.length ? 'Filters · ' + st.ops.length : 'Filters',
+      filterBg: st.ops.length ? 'var(--accent-soft)' : 'var(--card)',
+      filterBorder: st.ops.length ? 'var(--accent)' : 'var(--line)',
+      opFilters: ['Buy', 'Sell', 'Dividends', 'Fee'].map((o) => {
+        const on = st.ops.indexOf(o) >= 0;
+        return {
+          label: o, border: on ? 'var(--accent)' : 'var(--line)',
+          bg: on ? 'var(--accent-soft)' : 'var(--card)',
+          color: on ? 'var(--accent)' : 'var(--t2)',
+          onClick: () => this.setState({
+            ops: on ? st.ops.filter((x) => x !== o) : st.ops.concat([o]), limit: 40
+          })
+        };
+      }),
+      resetFilters: () => this.setState({ ops: [], query: '' }),
+
+      togCols: (e) => { e.stopPropagation(); this.setState({ menu: st.menu === 'cols' ? null : 'cols' }); },
+      mCols: st.menu === 'cols',
+      colsBg: st.menu === 'cols' ? 'var(--hover)' : 'var(--card)',
+      colToggles: [{ k: 'fee', label: 'Fee / Tax' }, { k: 'profit', label: 'Total profit' }, { k: 'note', label: 'Note' }]
+        .map((c) => ({
+          label: c.label,
+          boxBg: cols[c.k] ? 'var(--accent)' : 'transparent',
+          boxBorder: cols[c.k] ? 'var(--accent)' : 'var(--line)',
+          tick: cols[c.k] ? 'var(--on-accent)' : 'transparent',
+          onClick: (e) => {
+            e.stopPropagation();
+            this.setState({ cols: Object.assign({}, cols, { [c.k]: !cols[c.k] }) });
+          }
+        })),
+
+      summary: (st.tab === 'Incomes'
+        ? [{ label: 'Income', value: F.money(totals.income), color: 'var(--accent-3)' },
+          { label: 'Tax withheld', value: F.money(totals.tax), color: 'var(--tag-fg)' }]
+        : [{ label: 'Buy', value: F.money(totals.buy), color: 'var(--accent)' },
+          { label: 'Sell', value: F.money(totals.sell), color: 'var(--grey-series)' },
+          { label: 'Fee', value: F.money(totals.fee), color: 'var(--tag-fg)' }]
+          .concat(st.tab === 'All' ? [{ label: 'Income', value: F.money(totals.income), color: 'var(--accent-3)' }] : [])),
+      anySelected: st.selected.length > 0,
+      selectedLabel: st.selected.length + ' selected',
+      deleteSelected: () => this.setState({
+        deleted: st.deleted.concat(st.selected), selected: []
+      }),
+
+      gridCols: widths.join(' '),
+      minWidth: minWidth + 'px',
+      showFee: cols.fee, showProfit: cols.profit, showNote: cols.note,
+      headers: headers,
+      allBg: allOn ? 'var(--accent)' : 'transparent',
+      allBorder: allOn ? 'var(--accent)' : 'var(--line)',
+      allTick: allOn ? 'var(--on-accent)' : 'transparent',
+      toggleAll: () => this.setState({
+        selected: allOn ? [] : shown.map((r) => r.id)
+      }),
+
+      rows: shown.map((r) => {
+        const on = st.selected.indexOf(r.id) >= 0;
+        const hovered = st.hover === r.id;
+        const tone = opTone(r.operation);
+        const pr = profitOf(r);
+        const feeTax = r.kind === 'income' ? r.tax : r.fee;
+        return {
+          operation: r.operation, opBg: tone.bg, opFg: tone.fg,
+          mono: r.mono, name: r.name, ticker: r.ticker, date: r.date,
+          shares: r.shares ? F.shares(r.shares) : '—',
+          price: r.price ? '$' + F.num(r.price, r.price < 1 ? 4 : 2) : '—',
+          fee: feeTax ? F.money(feeTax) : '—',
+          feeColor: feeTax ? 'var(--t1)' : 'var(--t3)',
+          summ: F.signed(r.signed),
+          summColor: r.signed < 0 ? 'var(--neg)' : 'var(--accent)',
+          profitPrimary: pr.primary, profitSecondary: pr.secondary, profitTone: pr.tone,
+          note: r.note || '—',
+          bg: on ? 'var(--accent-soft)' : hovered ? 'var(--hover)' : 'var(--card)',
+          selBg: on ? 'var(--accent)' : 'transparent',
+          selBorder: on ? 'var(--accent)' : 'var(--line)',
+          selTick: on ? 'var(--on-accent)' : 'transparent',
+          actionOp: hovered || on ? 1 : 0.45,
+          onEnter: () => this.setState({ hover: r.id }),
+          onLeave: () => this.setState({ hover: null }),
+          onSelect: () => this.setState({
+            selected: on ? st.selected.filter((x) => x !== r.id) : st.selected.concat([r.id])
+          }),
+          actions: [
+            { d: I.note, title: r.note || 'No note', color: 'var(--t3)', onClick: () => this.say(r.note ? r.ticker + ' — ' + r.note : 'No note on this transaction.') },
+            {
+              d: I.pencil, title: 'Edit', color: 'var(--t3)',
+              onClick: (e) => {
+                e.stopPropagation();
+                this.openModal(r.kind === 'income' ? 'Incomes' : r.kind === 'expense' ? 'Expenses' : 'Trades', {
+                  pick: { ticker: r.ticker, display: r.ticker + ' (US)', name: r.name, mono: r.mono, heldShares: r.shares, currency: '$' },
+                  operation: r.operation,
+                  date: this.labelToIso(r.date),
+                  shares: this.dp(r.shares, 6),
+                  price: this.dp(r.price, 2),
+                  perShare: this.dp(r.price, 6),
+                  fee: this.dp(r.fee, 2), tax: this.dp(r.tax, 2), total: this.dp(r.amount, 2),
+                  note: r.note || ''
+                }, r.id);
+              }
+            },
+            { d: I.trash, title: 'Delete', color: 'var(--neg)', onClick: () => this.setState({ deleted: st.deleted.concat([r.id]), selected: st.selected.filter((x) => x !== r.id) }) }
+          ]
+        };
+      }),
+
+      isEmpty: shown.length === 0,
+      emptyHint: q ? 'Nothing matches “' + st.query + '” in this tab.' : 'Try a different tab or clear the filters.',
+      pageNote: 'Showing ' + shown.length + ' of ' + sorted.length + (st.toast ? ' · ' + st.toast : ''),
+      hasMore: sorted.length > shown.length,
+      showMore: () => this.setState({ limit: st.limit + page }),
+      footnote: 'Every row is generated from the position ledger: buy lots sum to each holding’s share count and cost basis, and income rows sum to the ' + F.money(D.ledgerTotals().income) + ' received to date. Fees are recorded against trades but do not enter the cost basis.',
+
+      modalOpen: !!st.modal,
+      modalTitle: st.modal === 'edit' ? 'Edit transaction' : 'New transaction',
+      modalSub: K.portfolioName + ' · ' + K.baseCurrency,
+      modalTabs: ['Trades', 'Incomes', 'Expenses'].map((t) => ({
+        label: t,
+        onClick: () => this.setState({ mtab: t, touched: false, custom: false, comboOpen: false, form: this.blank(t) }),
+        color: st.mtab === t ? 'var(--t1)' : 'var(--t2)',
+        weight: st.mtab === t ? 600 : 500,
+        rule: st.mtab === t ? 'var(--accent)' : 'transparent'
+      })),
+      fieldRows: fieldRows,
+      modalHint: Object.keys(bad).length
+        ? 'Fill the fields marked with an asterisk.'
+        : st.modal === 'edit'
+          ? 'Updates this row in the table; portfolio totals are not recalculated.'
+          : 'Adds a row to this table; portfolio totals are not recalculated.',
+      modalHintColor: Object.keys(bad).length ? 'var(--neg)' : 'var(--t3)',
+      closeModal: () => this.setState({ modal: null, editId: null, comboOpen: false, ftip: null, touched: false }),
+      save: () => this.commit(false),
+      saveMore: () => this.commit(true)
+    });
+  }
+
+  profitOf(r, priceNow) {
+    const p = priceNow[r.ticker];
+    if (r.kind !== 'trade' || !p) return { abs: r.amount };
+    return { abs: r.shares * p.price - r.amount };
+  }
+}
+</script>
+</body>
+</html>

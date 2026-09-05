@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <script src="snowline-data.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --canvas:#FAFAF9; --card:#FFFFFF; --t1:#171717; --t2:#737373; --t3:#A3A3A3; --line:#E7E5E4;
+      --accent:#0F7B57; --neg:#B91C1C; --amber:#B45309; --hover:#F5F5F4; --on-accent:#FFFFFF;
+      --grey-series:#A8A29E; --shadow:0 10px 28px rgba(23,23,23,.10); --pad:20px;
+      --accent-2:color-mix(in oklab, var(--accent) 74%, var(--card));
+      --accent-3:color-mix(in oklab, var(--accent) 48%, var(--card));
+      --accent-4:color-mix(in oklab, var(--accent) 26%, var(--card));
+      --accent-soft:color-mix(in oklab, var(--accent) 9%, var(--card));
+      --accent-tint:color-mix(in oklab, var(--accent) 16%, var(--card));
+      --neg-soft:color-mix(in oklab, var(--neg) 9%, var(--card));
+      --amber-soft:color-mix(in oklab, var(--amber) 9%, var(--card));
+      --tag-bg:color-mix(in oklab, var(--amber) 8%, var(--card));
+      --tag-fg:var(--amber);
+    }
+    html[data-theme="dark"]{
+      --canvas:#0C0C0C; --card:#171717; --t1:#FAFAF9; --t2:#A3A3A3; --t3:#737373; --line:#292524;
+      --accent:#34D399; --neg:#F87171; --amber:#F59E0B; --hover:#201E1D; --on-accent:#0C0C0C;
+      --grey-series:#57534E; --shadow:0 10px 28px rgba(0,0,0,.55);
+      --tag-bg:color-mix(in oklab, var(--amber) 7%, var(--card));
+      --tag-fg:color-mix(in oklab, var(--amber) 58%, var(--t2));
+    }
+    html,body{margin:0;padding:0;background:var(--canvas)}
+    *{box-sizing:border-box}
+    body{font-family:'Inter',system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif;font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
+    a{color:var(--accent);text-decoration:none}
+    a:hover{color:var(--accent);text-decoration:underline}
+    button,input{font-family:inherit;font-variant-numeric:tabular-nums}
+    ::selection{background:var(--accent-tint)}
+    @keyframes menuIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+    @media (max-width:1180px){
+      [data-r="kpi"]{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+      [data-r="why"]{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+    }
+    @media (max-width:960px){
+      [data-r="kpi"],[data-r="ins"],[data-r="pair"],[data-r="alloc"],[data-r="why"]{grid-template-columns:minmax(0,1fr)!important}
+      [data-r="quotes"]{overflow-x:auto!important}
+      [data-r="navd"]{display:none!important}
+      [data-r="navm"]{display:flex!important}
+      [data-r="tabbar"]{display:flex!important}
+      [data-r="main"]{padding:16px 16px 104px!important}
+      [data-r="navwrap"]{padding:0 16px!important}
+    }
+    @media (max-width:620px){
+      [data-r="kpi"]{grid-template-columns:minmax(0,1fr)!important}
+    }
+  </style>
+</helmet>
+<div style="min-height:100vh;background:var(--canvas);color:var(--t1);font-size:14px;line-height:1.45">
+
+  <dc-import name="TopNav" active="Dashboard" hint-size="100%,56px"></dc-import>
+
+  <main data-r="main" data-screen-label="Dashboard" style="max-width:1392px;margin:0 auto;padding:24px 24px 88px;display:flex;flex-direction:column;gap:24px">
+
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px">
+      <div style="display:flex;flex-direction:column;gap:5px;min-width:0">
+        <div style="display:flex;align-items:center;gap:9px">
+          <h1 style="margin:0;font-size:32px;font-weight:600;letter-spacing:-0.028em;line-height:1.1;color:var(--t1)">{{ portfolioName }}</h1>
+        </div>
+        <div style="display:flex;align-items:center;gap:9px;font-size:12px;color:var(--t3)">
+          <span>{{ headHoldings }}</span>
+          <span style="width:1px;height:10px;background:var(--line)"></span>
+          <span>{{ headTax }}</span>
+          <span style="width:1px;height:10px;background:var(--line)"></span>
+          <span>{{ headUpdated }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div data-r="kpi" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px">
+      <div style="position:relative;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:var(--pad,20px)">
+        <dc-import name="Metric" label="Value" tip="Market value of all holdings plus cash, in your base currency." primary="{{ kValue }}" secondary="{{ kInvested }}" secondary-note="invested" masked="{{ mask }}" hint-size="100%,84px"></dc-import>
+        <button onClick="{{ toggleMask }}" title="Hide amounts" style="position:absolute;top:14px;right:14px;display:flex;align-items:center;justify-content:center;width:28px;height:28px;border:none;border-radius:6px;background:transparent;color:var(--t3);cursor:pointer" style-hover="background:var(--hover);color:var(--t1)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2.5 12S6.2 6.2 12 6.2 21.5 12 21.5 12 17.8 17.8 12 17.8 2.5 12 2.5 12z"></path><circle cx="12" cy="12" r="2.6"></circle><path d="M4 4l16 16" opacity="{{ eyeSlash }}"></path></svg>
+        </button>
+        <div style="margin-top:14px">
+          <a href="MyGoal.dc.html" style="display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border:1px solid var(--line);border-radius:999px;background:transparent;color:var(--t2);font-size:11px;font-weight:500;text-decoration:none" style-hover="background:var(--hover);color:var(--t1);border-color:var(--t3);text-decoration:none">Worth in 10 years?
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h13M13 6l6 6-6 6"></path></svg>
+          </a>
+        </div>
+      </div>
+
+      <div style="background:var(--card);border:1px solid var(--line);border-radius:8px;padding:var(--pad,20px)">
+        <dc-import name="Metric" label="Total profit" tip="Capital gain plus dividends received and realised P&amp;L, net of fees and taxes." primary="{{ kProfit }}" primary-tone="pos" primary-delta="{{ kProfitPct }}" secondary="{{ kDaily }}" secondary-tone="neg" secondary-note="daily" masked="{{ mask }}" hint-size="100%,84px"></dc-import>
+        <div style="margin-top:14px;display:flex;align-items:center;gap:8px;font-size:11px;color:var(--t3)">
+          <span>{{ kCapitalGain }}</span>
+          <span style="width:1px;height:10px;background:var(--line)"></span>
+          <span>{{ kDividends }}</span>
+        </div>
+      </div>
+
+      <div style="background:var(--card);border:1px solid var(--line);border-radius:8px;padding:var(--pad,20px)">
+        <dc-import name="Metric" label="IRR" tip="Money-weighted annualised return. Accounts for the timing and size of every deposit." dotted="{{ true }}" primary="{{ kIrr }}" primary-tone="pos" secondary="{{ kIrrHoldings }}" secondary-note="current holdings" hint-size="100%,84px"></dc-import>
+        <div style="margin-top:14px;display:flex;align-items:center;gap:8px;font-size:11px;color:var(--t3)">
+          <span>{{ kTwr }}</span>
+          <span style="width:1px;height:10px;background:var(--line)"></span>
+          <span>{{ kBench }}</span>
+        </div>
+      </div>
+
+      <div style="background:var(--card);border:1px solid var(--line);border-radius:8px;padding:var(--pad,20px)">
+        <dc-import name="Metric" label="Passive income" tip="Forward 12-month dividend income at current yields, before withholding tax." primary="{{ kYield }}" primary-delta="{{ kIncomeGrowth }}" delta-tone="pos" secondary="{{ kIncomeAnnual }}" secondary-note="annually, gross" masked="{{ mask }}" hint-size="100%,84px"></dc-import>
+        <div style="margin-top:14px;display:flex;align-items:center;gap:8px;font-size:11px;color:var(--t3)">
+          <span>{{ kIncomeMonthly }}</span>
+          <span style="width:1px;height:10px;background:var(--line)"></span>
+          <span>{{ kIncomeNet }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:14px;font-weight:600;color:var(--t1)">Portfolio insights</span>
+          <span style="font-size:12px;color:var(--t3)">{{ insightCount }}</span>
+        </div>
+        <sc-if value="{{ hasDismissed }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ restore }}" style="border:none;background:transparent;color:var(--t2);font-size:12px;cursor:pointer;padding:0" style-hover="color:var(--t1)">{{ dismissedLabel }} · Restore</button>
+        </sc-if>
+      </div>
+      <div data-r="ins" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px">
+        <sc-if value="{{ ins1 }}" hint-placeholder-val="{{ true }}">
+          <div style="position:relative;background:var(--card);border:1px solid var(--line);border-left:2px solid var(--amber);border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:9px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+              <span style="font-size:11px;font-weight:500;color:var(--tag-fg);background:var(--tag-bg);padding:3px 8px;border-radius:4px">Concentration</span>
+              <button onClick="{{ dismiss1 }}" title="Dismiss" style="display:flex;align-items:center;justify-content:center;width:22px;height:22px;border:none;border-radius:5px;background:transparent;color:var(--t3);cursor:pointer" style-hover="background:var(--hover);color:var(--t1)">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+              </button>
+            </div>
+            <span style="font-size:14px;font-weight:600;color:var(--t1);letter-spacing:-0.01em">Asset allocation is concentrated</span>
+            <span style="font-size:12px;color:var(--t2);line-height:1.5;text-wrap:pretty">{{ ins1Line }}</span>
+            <a href="Categories.dc.html" style="font-size:12px;font-weight:500;margin-top:2px">See details</a>
+          </div>
+        </sc-if>
+        <sc-if value="{{ ins2 }}" hint-placeholder-val="{{ true }}">
+          <div style="position:relative;background:var(--card);border:1px solid var(--line);border-left:2px solid var(--amber);border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:9px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+              <span style="font-size:11px;font-weight:500;color:var(--tag-fg);background:var(--tag-bg);padding:3px 8px;border-radius:4px">Diversification</span>
+              <button onClick="{{ dismiss2 }}" title="Dismiss" style="display:flex;align-items:center;justify-content:center;width:22px;height:22px;border:none;border-radius:5px;background:transparent;color:var(--t3);cursor:pointer" style-hover="background:var(--hover);color:var(--t1)">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+              </button>
+            </div>
+            <span style="font-size:14px;font-weight:600;color:var(--t1);letter-spacing:-0.01em">Sector allocation is uneven</span>
+            <span style="font-size:12px;color:var(--t2);line-height:1.5;text-wrap:pretty">{{ ins2Line }}</span>
+            <a href="Diversification.dc.html" style="font-size:12px;font-weight:500;margin-top:2px">See details</a>
+          </div>
+        </sc-if>
+        <sc-if value="{{ ins3 }}" hint-placeholder-val="{{ true }}">
+          <div style="position:relative;background:var(--card);border:1px solid var(--line);border-left:2px solid var(--amber);border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:9px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+              <span style="font-size:11px;font-weight:500;color:var(--tag-fg);background:var(--tag-bg);padding:3px 8px;border-radius:4px">Performance</span>
+              <button onClick="{{ dismiss3 }}" title="Dismiss" style="display:flex;align-items:center;justify-content:center;width:22px;height:22px;border:none;border-radius:5px;background:transparent;color:var(--t3);cursor:pointer" style-hover="background:var(--hover);color:var(--t1)">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+              </button>
+            </div>
+            <span style="font-size:14px;font-weight:600;color:var(--t1);letter-spacing:-0.01em">“Dead weight” holdings</span>
+            <span style="font-size:12px;color:var(--t2);line-height:1.5;text-wrap:pretty">{{ ins3Line }}</span>
+            <a href="Growth.dc.html" style="font-size:12px;font-weight:500;margin-top:2px">See details</a>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+
+    <div style="background:var(--card);border:1px solid var(--line);border-radius:8px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 20px;border-bottom:1px solid var(--line)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:14px;font-weight:600;color:var(--t1)">Allocation</span>
+          <span style="font-size:12px;color:var(--t3)">by category · target vs current</span>
+        </div>
+        <a href="Categories.dc.html" style="font-size:12px;font-weight:500">Categories →</a>
+      </div>
+      <div data-r="alloc" style="display:grid;grid-template-columns:340px minmax(0,1fr);gap:28px;padding:20px">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:10px">
+          <div style="position:relative;width:100%;max-width:300px">
+          <svg viewBox="0 0 300 300" style="width:100%;height:auto;display:block">
+            <circle cx="150" cy="150" r="100" fill="none" stroke="var(--line)" stroke-width="24"></circle>
+            <sc-for list="{{ donutSegs }}" as="s" hint-placeholder-count="5">
+              <circle cx="150" cy="150" r="100" fill="none" stroke="{{ s.color }}" stroke-width="{{ s.sw }}" stroke-dasharray="{{ s.dash }}" stroke-dashoffset="{{ s.offset }}" opacity="{{ s.op }}" transform="rotate(-90 150 150)" onMouseEnter="{{ s.onEnter }}" onMouseLeave="{{ s.onLeave }}" style="cursor:default;transition:opacity .15s ease,stroke-width .15s ease"></circle>
+            </sc-for>
+            <sc-for list="{{ donutTargets }}" as="t" hint-placeholder-count="5">
+              <path d="{{ t.d }}" fill="none" stroke="{{ t.color }}" stroke-width="2" stroke-dasharray="2 3.5" opacity="{{ t.op }}"></path>
+            </sc-for>
+          </svg>
+          <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;pointer-events:none">
+            <span style="font-size:19px;font-weight:600;letter-spacing:-0.02em;color:var(--t1)">{{ centerValue }}</span>
+            <span style="font-size:11px;color:var(--t2);text-align:center;max-width:160px;line-height:1.3">{{ centerLabel }}</span>
+            <span style="font-size:11px;color:var(--t3)">{{ centerSub }}</span>
+          </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:14px;font-size:11px;color:var(--t3)">
+            <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:3px;background:var(--accent);display:inline-block"></span>Current</span>
+            <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:2px;background:var(--t3);display:inline-block;opacity:.6"></span>Target (dashed)</span>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;min-width:0">
+          <div style="display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1.15fr) minmax(0,1.05fr) minmax(0,1.05fr);gap:12px;padding:0 0 9px 0;border-bottom:1px solid var(--line)">
+            <button onClick="{{ sortName }}" style="display:flex;align-items:center;gap:4px;border:none;background:transparent;padding:0;cursor:pointer;font-size:12px;font-weight:500;color:var(--t2);text-align:left" style-hover="color:var(--t1)">Name<span style="color:var(--accent);font-size:9px">{{ arrowName }}</span></button>
+            <div style="position:relative;display:flex;justify-content:flex-end">
+              <button onClick="{{ sortValue }}" onMouseEnter="{{ hdrOnValue }}" onMouseLeave="{{ hdrOff }}" style="display:flex;align-items:center;gap:4px;border:none;background:transparent;padding:0;cursor:pointer;font-size:12px;font-weight:500;color:var(--t2);border-bottom:1px dotted var(--t3)" style-hover="color:var(--t1)">Value / Invested<span style="color:var(--accent);font-size:9px">{{ arrowValue }}</span></button>
+              <sc-if value="{{ hdrValue }}" hint-placeholder-val="{{ false }}">
+                <span style="position:absolute;top:22px;right:0;z-index:20;width:210px;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:9px 11px;font-size:11px;line-height:1.5;color:var(--t2);pointer-events:none">Market value today over the amount invested, excluding dividends received.</span>
+              </sc-if>
+            </div>
+            <div style="position:relative;display:flex;justify-content:flex-end">
+              <button onClick="{{ sortGain }}" onMouseEnter="{{ hdrOnGain }}" onMouseLeave="{{ hdrOff }}" style="display:flex;align-items:center;gap:4px;border:none;background:transparent;padding:0;cursor:pointer;font-size:12px;font-weight:500;color:var(--t2);border-bottom:1px dotted var(--t3)" style-hover="color:var(--t1)">Gain<span style="color:var(--accent);font-size:9px">{{ arrowGain }}</span></button>
+              <sc-if value="{{ hdrGain }}" hint-placeholder-val="{{ false }}">
+                <span style="position:absolute;top:22px;right:0;z-index:20;width:210px;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:9px 11px;font-size:11px;line-height:1.5;color:var(--t2);pointer-events:none">Unrealised capital gain only. Dividends received are counted in total profit.</span>
+              </sc-if>
+            </div>
+            <div style="position:relative;display:flex;justify-content:flex-end">
+              <button onClick="{{ sortAlloc }}" onMouseEnter="{{ hdrOnAlloc }}" onMouseLeave="{{ hdrOff }}" style="display:flex;align-items:center;gap:4px;border:none;background:transparent;padding:0;cursor:pointer;font-size:12px;font-weight:500;color:var(--t2);border-bottom:1px dotted var(--t3)" style-hover="color:var(--t1)">Allocation<span style="color:var(--accent);font-size:9px">{{ arrowAlloc }}</span></button>
+              <sc-if value="{{ hdrAlloc }}" hint-placeholder-val="{{ false }}">
+                <span style="position:absolute;top:22px;right:0;z-index:20;width:210px;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:9px 11px;font-size:11px;line-height:1.5;color:var(--t2);pointer-events:none">Current share of portfolio value over the target you set for this category.</span>
+              </sc-if>
+            </div>
+          </div>
+
+          <sc-for list="{{ allocRows }}" as="row" hint-placeholder-count="5">
+            <div onMouseEnter="{{ row.onEnter }}" onMouseLeave="{{ row.onLeave }}" style="display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1.15fr) minmax(0,1.05fr) minmax(0,1.05fr);gap:12px;align-items:center;padding:11px 6px 11px 0;border-bottom:1px solid var(--line);background:{{ row.bg }};transition:background .12s ease">
+              <div style="display:flex;align-items:center;gap:11px;min-width:0">
+                <span style="width:3px;height:30px;flex:none;border-radius:1px;background:{{ row.color }}"></span>
+                <span style="display:flex;flex-direction:column;gap:2px;min-width:0">
+                  <span style="font-size:13px;font-weight:500;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ row.name }}</span>
+                  <span style="font-size:12px;color:var(--t3)">{{ row.items }}</span>
+                </span>
+              </div>
+              <dc-import name="TwoLineCell" align="right" primary="{{ row.value }}" secondary="{{ row.invested }}" hint-size="100%,36px"></dc-import>
+              <dc-import name="TwoLineCell" align="right" primary="{{ row.gain }}" secondary="{{ row.gainPct }}" tone="{{ row.tone }}" secondary-tone="{{ row.tone }}" hint-size="100%,36px"></dc-import>
+              <dc-import name="TwoLineCell" align="right" primary="{{ row.alloc }}" secondary="{{ row.target }}" hint-size="100%,36px"></dc-import>
+            </div>
+          </sc-for>
+
+          <div style="display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1.15fr) minmax(0,1.05fr) minmax(0,1.05fr);gap:12px;align-items:center;padding:12px 6px 0 0">
+            <span style="font-size:12px;font-weight:500;color:var(--t2);padding-left:14px">Total</span>
+            <dc-import name="TwoLineCell" align="right" primary="{{ totValue }}" secondary="{{ totInvested }}" hint-size="100%,36px"></dc-import>
+            <dc-import name="TwoLineCell" align="right" primary="{{ totGain }}" secondary="{{ totGainPct }}" tone="pos" secondary-tone="pos" hint-size="100%,36px"></dc-import>
+            <dc-import name="TwoLineCell" align="right" primary="100.0%" secondary="100.0% target" hint-size="100%,36px"></dc-import>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:var(--card);border:1px solid var(--line);border-radius:8px;padding:15px 20px;display:flex;align-items:center;gap:18px;justify-content:space-between">
+      <span style="font-size:14px;font-weight:600;color:var(--t1);flex:none">My Quotes</span>
+      <div data-r="quotes" style="display:flex;align-items:center;gap:0;flex:1;min-width:0;overflow:hidden">
+        <sc-for list="{{ quotes }}" as="q" hint-placeholder-count="6">
+          <div style="display:flex;flex-direction:column;gap:2px;padding:0 18px;border-left:1px solid var(--line);min-width:0">
+            <span style="font-size:12px;color:var(--t2);white-space:nowrap">{{ q.name }}</span>
+            <span style="display:flex;align-items:baseline;gap:7px">
+              <span style="font-size:13px;font-weight:500;color:var(--t1);white-space:nowrap">{{ q.price }}</span>
+              <span style="font-size:12px;color:{{ q.color }};white-space:nowrap">{{ q.chg }}</span>
+            </span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:14px;font-weight:600;color:var(--t1)">Why is it moving?</span>
+        <span style="font-size:12px;color:var(--t3)">unusual daily moves · 30 Aug</span>
+      </div>
+      <div data-r="why" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;align-items:stretch">
+        <div style="background:var(--card);border:1px solid var(--line);border-radius:8px;padding:15px;display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+            <span style="display:flex;align-items:center;gap:9px">
+              <span style="width:26px;height:26px;flex:none;border-radius:5px;background:var(--hover);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:var(--t2)">NV</span>
+              <span style="font-size:13px;font-weight:600;color:var(--t1)">NVDA</span>
+            </span>
+            <span style="font-size:13px;font-weight:500;color:var(--accent)">{{ whyNVDA }}</span>
+          </div>
+          <span style="font-size:12px;color:var(--t2);line-height:1.55;text-wrap:pretty">Datacenter revenue came in above consensus and guidance was raised; suppliers across the AI chain traded up with it.</span>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--line);border-radius:8px;padding:15px;display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+            <span style="display:flex;align-items:center;gap:9px">
+              <span style="width:26px;height:26px;flex:none;border-radius:5px;background:var(--hover);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:var(--t2)">GL</span>
+              <span style="font-size:13px;font-weight:600;color:var(--t1)">GLDI</span>
+            </span>
+            <span style="font-size:13px;font-weight:500;color:var(--neg)">{{ whyGLDI }}</span>
+          </div>
+          <span style="font-size:12px;color:var(--t2);line-height:1.55;text-wrap:pretty">Gold spot fell 1.9% as real yields rose. The covered-call overlay caps how much of a rebound this ETN can capture.</span>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--line);border-radius:8px;padding:15px;display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+            <span style="display:flex;align-items:center;gap:9px">
+              <span style="width:26px;height:26px;flex:none;border-radius:5px;background:var(--hover);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:var(--t2)">V</span>
+              <span style="font-size:13px;font-weight:600;color:var(--t1)">V</span>
+            </span>
+            <span style="font-size:13px;font-weight:500;color:var(--accent)">{{ whyV }}</span>
+          </div>
+          <span style="font-size:12px;color:var(--t2);line-height:1.55;text-wrap:pretty">Cross-border card volumes were revised up for the quarter and payment networks led the sector through the session.</span>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--line);border-radius:8px;padding:15px;display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+            <span style="display:flex;align-items:center;gap:9px">
+              <span style="width:26px;height:26px;flex:none;border-radius:5px;background:var(--hover);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:var(--t2)">JE</span>
+              <span style="font-size:13px;font-weight:600;color:var(--t1)">JEPQ</span>
+            </span>
+            <span style="font-size:13px;font-weight:500;color:var(--neg)">{{ whyJEPQ }}</span>
+          </div>
+          <span style="font-size:12px;color:var(--t2);line-height:1.55;text-wrap:pretty">Premium harvested on the Nasdaq overlay narrowed as implied volatility compressed, trimming the distribution estimate.</span>
+        </div>
+      </div>
+    </div>
+
+    <div data-r="pair" style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px">
+      <div style="background:var(--card);border:1px solid var(--line);border-radius:8px">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:15px 20px;border-bottom:1px solid var(--line)">
+          <span style="font-size:14px;font-weight:600;color:var(--t1)">Top day gainers</span>
+          <span style="font-size:12px;color:var(--accent)">{{ gainSum }}</span>
+        </div>
+        <div style="padding:6px 8px 10px">
+          <sc-for list="{{ gainers }}" as="h" hint-placeholder-count="5">
+            <div style="display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:6px" style-hover="background:var(--hover)">
+              <span style="width:30px;height:30px;flex:none;border-radius:6px;background:var(--hover);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:var(--t2)">{{ h.mono }}</span>
+              <span style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:0">
+                <span style="font-size:13px;font-weight:500;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ h.name }}</span>
+                <span style="font-size:12px;color:var(--t3)">{{ h.t }}</span>
+              </span>
+              <dc-import name="TwoLineCell" align="right" primary="{{ h.val }}" secondary="{{ h.chg }}" secondary-tone="pos" hint-size="120px,36px"></dc-import>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--line);border-radius:8px">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:15px 20px;border-bottom:1px solid var(--line)">
+          <span style="font-size:14px;font-weight:600;color:var(--t1)">Top day losers</span>
+          <span style="font-size:12px;color:var(--neg)">{{ lossSum }}</span>
+        </div>
+        <div style="padding:6px 8px 10px">
+          <sc-for list="{{ losers }}" as="h" hint-placeholder-count="5">
+            <div style="display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:6px" style-hover="background:var(--hover)">
+              <span style="width:30px;height:30px;flex:none;border-radius:6px;background:var(--hover);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:var(--t2)">{{ h.mono }}</span>
+              <span style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:0">
+                <span style="font-size:13px;font-weight:500;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ h.name }}</span>
+                <span style="font-size:12px;color:var(--t3)">{{ h.t }}</span>
+              </span>
+              <dc-import name="TwoLineCell" align="right" primary="{{ h.val }}" secondary="{{ h.chg }}" secondary-tone="neg" hint-size="120px,36px"></dc-import>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+
+    <div data-r="pair" style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px">
+      <div style="background:var(--card);border:1px solid var(--line);border-radius:8px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 20px;border-bottom:1px solid var(--line)">
+          <span style="font-size:14px;font-weight:600;color:var(--t1)">Future payments</span>
+          <div style="display:flex;align-items:center;gap:10px">
+            <a href="DividendCalendar.dc.html" style="font-size:12px;font-weight:500">Calendar →</a>
+          </div>
+        </div>
+        <div style="padding:16px 20px 20px;display:flex;flex-direction:column;gap:18px">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap">
+            <div style="display:flex;gap:26px">
+              <div style="display:flex;gap:9px">
+                <span style="width:3px;flex:none;border-radius:1px;background:var(--accent)"></span>
+                <dc-import name="Metric" size="mini" label="Next 12m" help="{{ false }}" primary="{{ fpNext12 }}" secondary="{{ fpCount }}" hint-size="120px,58px"></dc-import>
+              </div>
+              <div style="display:flex;gap:9px">
+                <span style="width:3px;flex:none;border-radius:1px;background:var(--accent-3)"></span>
+                <dc-import name="Metric" size="mini" label="Monthly" help="{{ false }}" primary="{{ fpMonthly }}" secondary="average, gross" hint-size="120px,58px"></dc-import>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:14px;font-size:11px;color:var(--t3);padding-top:4px">
+              <span style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;background:var(--accent);display:inline-block;border-radius:1px"></span>Received</span>
+              <span style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;background:var(--accent-3);display:inline-block;border-radius:1px"></span>Projected</span>
+            </div>
+          </div>
+          <div style="position:relative">
+            <div style="position:relative">
+              <svg viewBox="0 0 624 154" style="width:100%;height:auto;display:block">
+                <sc-for list="{{ fpGrid }}" as="g" hint-placeholder-count="5">
+                  <line x1="34" y1="{{ g.y }}" x2="616" y2="{{ g.y }}" stroke="var(--line)" stroke-width="1" stroke-dasharray="3 4"></line>
+                </sc-for>
+                <sc-for list="{{ fpBars }}" as="b" hint-placeholder-count="12">
+                  <rect x="{{ b.sx }}" y="12" width="{{ b.sw }}" height="136" fill="var(--hover)" opacity="{{ b.hop }}" onMouseEnter="{{ b.onEnter }}" onMouseLeave="{{ b.onLeave }}"></rect>
+                  <rect x="{{ b.x }}" y="{{ b.y }}" width="{{ b.w }}" height="{{ b.h }}" fill="var(--accent-3)" pointer-events="none"></rect>
+                  <rect x="{{ b.x }}" y="{{ b.ry }}" width="{{ b.w }}" height="{{ b.rh }}" fill="var(--accent)" pointer-events="none"></rect>
+                </sc-for>
+              </svg>
+              <sc-for list="{{ fpGrid }}" as="g" hint-placeholder-count="5">
+                <span style="position:absolute;left:0;top:{{ g.top }};width:4.4%;transform:translateY(-50%);text-align:right;font-size:10px;color:var(--t3);pointer-events:none">{{ g.label }}</span>
+              </sc-for>
+            </div>
+            <div style="display:flex;margin:4px 1.28% 0 5.45%">
+              <sc-for list="{{ fpBars }}" as="b" hint-placeholder-count="12">
+                <span style="flex:1;text-align:center;font-size:10px;color:{{ b.labelColor }}">{{ b.label }}</span>
+              </sc-for>
+            </div>
+            <sc-if value="{{ tipF }}" hint-placeholder-val="{{ false }}">
+              <div style="position:absolute;top:0;left:{{ tipFLeft }};transform:translateX(-50%);z-index:8;pointer-events:none">
+                <dc-import name="ChartTooltip" tip="{{ tipF }}" hint-size="230px,190px"></dc-import>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+      </div>
+
+      <div style="background:var(--card);border:1px solid var(--line);border-radius:8px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 20px;border-bottom:1px solid var(--line)">
+          <span style="font-size:14px;font-weight:600;color:var(--t1)">Dividends received</span>
+          <button onClick="{{ toggleChart }}" title="Change chart type" style="display:flex;align-items:center;justify-content:center;width:28px;height:28px;border:1px solid var(--line);border-radius:6px;background:transparent;color:var(--t2);cursor:pointer" style-hover="background:var(--hover);color:var(--t1)">
+            <sc-if value="{{ isBars }}" hint-placeholder-val="{{ true }}">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 20V11M12 20V5M19 20v-6"></path></svg>
+            </sc-if>
+            <sc-if value="{{ isLine }}" hint-placeholder-val="{{ false }}">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16l5-6 4 3 7-9"></path></svg>
+            </sc-if>
+          </button>
+        </div>
+        <div style="padding:16px 20px 20px;display:flex;flex-direction:column;gap:18px">
+          <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:14px;flex-wrap:wrap">
+            <div style="display:flex;gap:9px">
+              <span style="width:3px;flex:none;border-radius:1px;background:var(--accent)"></span>
+              <dc-import name="Metric" size="mini" label="Total" help="{{ false }}" primary="{{ drTotal }}" secondary="{{ drNote }}" hint-size="150px,58px"></dc-import>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <div style="position:relative">
+                <button onClick="{{ togPeriod }}" style="display:flex;align-items:center;gap:7px;height:30px;padding:0 10px;border:1px solid var(--line);border-radius:6px;background:transparent;color:var(--t1);font-size:12px;cursor:pointer" style-hover="background:var(--hover)">{{ period }}
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2.2" stroke-linecap="round"><path d="M6 9l6 6 6-6"></path></svg>
+                </button>
+                <sc-if value="{{ mPeriod }}" hint-placeholder-val="{{ false }}">
+                  <div onClick="{{ stop }}" style="position:absolute;top:36px;right:0;z-index:55;width:196px;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:6px;animation:menuIn .12s ease-out">
+                    <sc-for list="{{ periodOptions }}" as="o" hint-placeholder-count="4">
+                      <button onClick="{{ o.onClick }}" style="display:flex;align-items:center;justify-content:space-between;width:100%;height:40px;padding:0 10px;border:none;border-radius:6px;background:transparent;color:var(--t1);font-size:13px;cursor:pointer;text-align:left" style-hover="background:var(--hover)">
+                        <span>{{ o.label }}</span><span style="color:var(--accent);font-size:12px;opacity:{{ o.check }}">✓</span>
+                      </button>
+                    </sc-for>
+                  </div>
+                </sc-if>
+              </div>
+              <div style="position:relative">
+                <button onClick="{{ togGran }}" style="display:flex;align-items:center;gap:7px;height:30px;padding:0 10px;border:1px solid var(--line);border-radius:6px;background:transparent;color:var(--t1);font-size:12px;cursor:pointer" style-hover="background:var(--hover)">{{ gran }}
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2.2" stroke-linecap="round"><path d="M6 9l6 6 6-6"></path></svg>
+                </button>
+                <sc-if value="{{ mGran }}" hint-placeholder-val="{{ false }}">
+                  <div onClick="{{ stop }}" style="position:absolute;top:36px;right:0;z-index:55;width:160px;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:6px;animation:menuIn .12s ease-out">
+                    <sc-for list="{{ granOptions }}" as="o" hint-placeholder-count="3">
+                      <button onClick="{{ o.onClick }}" style="display:flex;align-items:center;justify-content:space-between;width:100%;height:40px;padding:0 10px;border:none;border-radius:6px;background:transparent;color:var(--t1);font-size:13px;cursor:pointer;text-align:left" style-hover="background:var(--hover)">
+                        <span>{{ o.label }}</span><span style="color:var(--accent);font-size:12px;opacity:{{ o.check }}">✓</span>
+                      </button>
+                    </sc-for>
+                  </div>
+                </sc-if>
+              </div>
+            </div>
+          </div>
+          <div style="position:relative">
+            <div style="position:relative">
+              <svg viewBox="0 0 624 154" style="width:100%;height:auto;display:block">
+                <sc-for list="{{ drGrid }}" as="g" hint-placeholder-count="5">
+                  <line x1="34" y1="{{ g.y }}" x2="616" y2="{{ g.y }}" stroke="var(--line)" stroke-width="1" stroke-dasharray="3 4"></line>
+                </sc-for>
+                <sc-if value="{{ isLine }}" hint-placeholder-val="{{ false }}">
+                  <polyline points="{{ drPoints }}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round" pointer-events="none"></polyline>
+                </sc-if>
+                <sc-for list="{{ drBars }}" as="b" hint-placeholder-count="12">
+                  <rect x="{{ b.sx }}" y="12" width="{{ b.sw }}" height="136" fill="var(--hover)" opacity="{{ b.hop }}" onMouseEnter="{{ b.onEnter }}" onMouseLeave="{{ b.onLeave }}"></rect>
+                  <rect x="{{ b.x }}" y="{{ b.y }}" width="{{ b.w }}" height="{{ b.h }}" fill="var(--accent)" opacity="{{ b.barOp }}" pointer-events="none"></rect>
+                  <rect x="{{ b.dx }}" y="{{ b.dy }}" width="{{ b.dw }}" height="{{ b.dw }}" fill="var(--accent)" opacity="{{ b.dotOp }}" pointer-events="none"></rect>
+                </sc-for>
+              </svg>
+              <sc-for list="{{ drGrid }}" as="g" hint-placeholder-count="5">
+                <span style="position:absolute;left:0;top:{{ g.top }};width:4.4%;transform:translateY(-50%);text-align:right;font-size:10px;color:var(--t3);pointer-events:none">{{ g.label }}</span>
+              </sc-for>
+            </div>
+            <div style="display:flex;margin:4px 1.28% 0 5.45%">
+              <sc-for list="{{ drBars }}" as="b" hint-placeholder-count="12">
+                <span style="flex:1;text-align:center;font-size:10px;color:var(--t3);white-space:nowrap;overflow:hidden">{{ b.label }}</span>
+              </sc-for>
+            </div>
+            <sc-if value="{{ tipD }}" hint-placeholder-val="{{ false }}">
+              <div style="position:absolute;top:0;left:{{ tipDLeft }};transform:translateX(-50%);z-index:8;pointer-events:none">
+                <dc-import name="ChartTooltip" tip="{{ tipD }}" hint-size="230px,190px"></dc-import>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div data-r="pair" style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px">
+      <div style="background:var(--card);border:1px solid var(--line);border-radius:8px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 20px;border-bottom:1px solid var(--line)">
+          <span style="font-size:14px;font-weight:600;color:var(--t1)">Dividend growth</span>
+          <span style="font-size:12px;color:var(--t3)">same month, year over year</span>
+        </div>
+        <div style="padding:18px 20px 20px;display:flex;flex-direction:column;gap:14px">
+          <div style="position:relative">
+            <div style="position:relative">
+              <svg viewBox="0 0 624 154" style="width:100%;height:auto;display:block">
+                <sc-for list="{{ gwGrid }}" as="g" hint-placeholder-count="4">
+                  <line x1="34" y1="{{ g.y }}" x2="616" y2="{{ g.y }}" stroke="var(--line)" stroke-width="1" stroke-dasharray="3 4"></line>
+                </sc-for>
+                <sc-for list="{{ gwGroups }}" as="g" hint-placeholder-count="12">
+                  <rect x="{{ g.sx }}" y="12" width="{{ g.sw }}" height="136" fill="var(--hover)" opacity="{{ g.hop }}" onMouseEnter="{{ g.onEnter }}" onMouseLeave="{{ g.onLeave }}"></rect>
+                  <sc-for list="{{ g.bars }}" as="b" hint-placeholder-count="3">
+                    <rect x="{{ b.x }}" y="{{ b.y }}" width="{{ b.w }}" height="{{ b.h }}" fill="{{ b.fill }}" pointer-events="none"></rect>
+                  </sc-for>
+                </sc-for>
+              </svg>
+              <sc-for list="{{ gwGrid }}" as="g" hint-placeholder-count="4">
+                <span style="position:absolute;left:0;top:{{ g.top }};width:4.4%;transform:translateY(-50%);text-align:right;font-size:10px;color:var(--t3);pointer-events:none">{{ g.label }}</span>
+              </sc-for>
+            </div>
+            <div style="display:flex;margin:4px 1.28% 0 5.45%">
+              <sc-for list="{{ gwGroups }}" as="g" hint-placeholder-count="12">
+                <span style="flex:1;text-align:center;font-size:10px;color:var(--t3)">{{ g.label }}</span>
+              </sc-for>
+            </div>
+            <sc-if value="{{ tipG }}" hint-placeholder-val="{{ false }}">
+              <div style="position:absolute;top:0;left:{{ tipGLeft }};transform:translateX(-50%);z-index:8;pointer-events:none">
+                <dc-import name="ChartTooltip" tip="{{ tipG }}" hint-size="230px,190px"></dc-import>
+              </div>
+            </sc-if>
+          </div>
+          <div style="display:flex;align-items:center;gap:18px;padding-left:34px">
+            <sc-for list="{{ gwLegend }}" as="l" hint-placeholder-count="3">
+              <span style="display:flex;align-items:center;gap:7px">
+                <span style="width:9px;height:9px;border-radius:1px;background:{{ l.color }};display:inline-block"></span>
+                <span style="font-size:12px;color:var(--t2)">{{ l.year }}</span>
+                <span style="font-size:12px;color:var(--t3)">{{ l.total }}</span>
+              </span>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+
+      <div style="background:var(--card);border:1px solid var(--line);border-radius:8px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 20px;border-bottom:1px solid var(--line)">
+          <span style="font-size:14px;font-weight:600;color:var(--t1)">My goal</span>
+          <a href="MyGoal.dc.html" style="font-size:12px;font-weight:500">More →</a>
+        </div>
+        <div style="padding:18px 20px 20px;display:flex;flex-direction:column;gap:16px">
+          <div style="display:flex;align-items:center;gap:18px">
+            <div style="position:relative;width:88px;height:88px;flex:none">
+              <svg width="88" height="88" viewBox="0 0 88 88" style="display:block">
+                <circle cx="44" cy="44" r="38" fill="none" stroke="var(--line)" stroke-width="7"></circle>
+                <circle cx="44" cy="44" r="38" fill="none" stroke="var(--accent)" stroke-width="7" stroke-dasharray="{{ goalRing }}" transform="rotate(-90 44 44)"></circle>
+              </svg>
+              <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:600;color:var(--t1)">{{ goalPct }}</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:5px;min-width:0">
+              <div style="display:flex;align-items:baseline;gap:7px">
+                <span style="font-size:24px;font-weight:600;letter-spacing:-0.02em;color:var(--t1)">{{ goalNow }}</span>
+                <span style="font-size:14px;color:var(--t3)">{{ goalTarget }}</span>
+                <span style="font-size:12px;color:var(--t2)">{{ goalModeLabel }}</span>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:2px;border-left:2px solid {{ goalVerdictBorder }};padding-left:11px;margin-top:3px">
+                <span style="font-size:13px;font-weight:500;color:{{ goalVerdictColor }}">{{ goalVerdict }}</span>
+                <span style="font-size:12px;color:var(--t2)">{{ goalVerdictSub }}</span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div style="position:relative">
+            <svg viewBox="0 0 624 148" style="width:100%;height:auto;display:block">
+              <sc-for list="{{ goalGrid }}" as="g" hint-placeholder-count="3">
+                <line x1="40" y1="{{ g.y }}" x2="612" y2="{{ g.y }}" stroke="var(--line)" stroke-width="1" stroke-dasharray="3 4"></line>
+              </sc-for>
+              <line x1="40" y1="{{ goalY }}" x2="612" y2="{{ goalY }}" stroke="var(--t3)" stroke-width="1.2" stroke-dasharray="5 4"></line>
+              <polyline points="{{ safePoints }}" fill="none" stroke="var(--grey-series)" stroke-width="1.6" stroke-dasharray="4 3" stroke-linejoin="round"></polyline>
+              <polyline points="{{ portPoints }}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round"></polyline>
+              <sc-for list="{{ goalMarks }}" as="m" hint-placeholder-count="2">
+                <rect x="{{ m.x }}" y="{{ m.y }}" width="7" height="7" fill="var(--card)" stroke="{{ m.color }}" stroke-width="2"></rect>
+              </sc-for>
+              <text x="608" y="26" text-anchor="end" font-size="10" font-weight="500" fill="var(--accent)">Portfolio</text>
+              <text x="608" y="{{ safeLabelY }}" text-anchor="end" font-size="10" fill="var(--t3)">{{ goalSafeLabel }}</text>
+            </svg>
+            <sc-for list="{{ goalGrid }}" as="g" hint-placeholder-count="3">
+              <span style="position:absolute;left:0;top:{{ g.top }};width:5.2%;transform:translateY(-50%);text-align:right;font-size:10px;color:var(--t3);pointer-events:none">{{ g.label }}</span>
+            </sc-for>
+            <sc-for list="{{ goalMarks }}" as="m" hint-placeholder-count="2">
+              <span style="position:absolute;left:{{ m.lpos }};top:{{ m.ltop }};transform:translateX(-50%);font-size:10px;font-weight:500;color:{{ m.color }};pointer-events:none">{{ m.label }}</span>
+            </sc-for>
+            <span style="position:absolute;left:7%;top:{{ goalLabelTop }};font-size:10px;font-weight:500;color:var(--t2);pointer-events:none">{{ goalLineLabel }}</span>
+            </div>
+            <div style="position:relative;height:14px;margin-top:3px">
+              <sc-for list="{{ goalXLabels }}" as="x" hint-placeholder-count="5">
+                <span style="position:absolute;left:{{ x.lpos }};top:0;transform:translateX(-50%);font-size:10px;color:var(--t3)">{{ x.label }}</span>
+              </sc-for>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;font-size:11px;color:var(--t3);padding-left:40px;margin-top:2px">
+              <span>Log scale</span>
+              <span style="width:1px;height:9px;background:var(--line)"></span>
+              <span>{{ goalContribution }}</span>
+              <span style="width:1px;height:9px;background:var(--line)"></span>
+              <span>{{ goalReinvest }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div data-r="tabbar" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:60;height:60px;background:var(--card);border-top:1px solid var(--line);align-items:stretch;padding:0 4px">
+    <sc-for list="{{ tabRows }}" as="t" hint-placeholder-count="4">
+      <a href="{{ t.href }}" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-decoration:none;color:{{ t.color }}">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="{{ t.d }}"></path></svg>
+        <span style="font-size:10px;font-weight:500">{{ t.label }}</span>
+      </a>
+    </sc-for>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;devTools&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Dev only&quot;},&quot;devTheme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;'light'|'dark'&quot;,&quot;section&quot;:&quot;Dev only&quot;},&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;options&quot;:[&quot;#0F7B57&quot;,&quot;#166534&quot;,&quot;#0E7490&quot;,&quot;#7C3F12&quot;],&quot;default&quot;:&quot;#0F7B57&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Appearance&quot;},&quot;density&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Comfortable&quot;,&quot;Compact&quot;],&quot;default&quot;:&quot;Comfortable&quot;,&quot;tsType&quot;:&quot;'Comfortable'|'Compact'&quot;,&quot;section&quot;:&quot;Appearance&quot;}}">
+class Component extends DCLogic {
+  state = {
+    theme: 'light', mask: false, menu: null,
+    dismissed: [], sortKey: 'value', sortDir: 'desc', seg: null, hdr: null,
+    hoverF: null, hoverD: null, hoverG: null,
+    period: '12 trailing months', gran: 'Monthly', chart: 'bars'
+  };
+
+  get D() { return window.SnowlineData; }
+
+  MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  FULL = { Jan: 'January', Feb: 'February', Mar: 'March', Apr: 'April', May: 'May', Jun: 'June', Jul: 'July', Aug: 'August', Sep: 'September', Oct: 'October', Nov: 'November', Dec: 'December' };
+  DIV = null;
+  RAMP = null;
+  TINTS = ['var(--accent-4)', 'var(--accent-3)', 'var(--accent)'];
+
+  ramp(n) {
+    const out = [];
+    for (let i = 0; i < n; i++) {
+      const p = n === 1 ? 100 : Math.round(100 - i * (94 / (n - 1)));
+      out.push('color-mix(in oklab, var(--accent) ' + p + '%, var(--grey-series))');
+    }
+    return out;
+  }
+
+  componentDidMount() {
+    let t = (this.props.devTools && this.props.devTheme === 'dark') ? 'dark' : 'light';
+    try { const s = localStorage.getItem('snowline.theme'); if (s === 'light' || s === 'dark') t = s; } catch (e) {}
+    this.applyTheme(t, false);
+    this.applyDensity();
+    this.applyAccent();
+    this.doc = () => { if (this.state.menu) this.setState({ menu: null }); };
+    document.addEventListener('click', this.doc);
+  }
+  componentDidUpdate(prev) {
+    if (this.props.devTools && prev.devTheme !== this.props.devTheme && this.props.devTheme) this.applyTheme(this.props.devTheme, true);
+    if (prev.density !== this.props.density) this.applyDensity();
+    if (prev.accent !== this.props.accent) this.applyAccent();
+  }
+  componentWillUnmount() { if (this.doc) document.removeEventListener('click', this.doc); }
+
+  applyTheme(t, persist) {
+    document.documentElement.setAttribute('data-theme', t);
+    if (persist !== false) { try { localStorage.setItem('snowline.theme', t); } catch (e) {} }
+    this.setState({ theme: t });
+  }
+  applyDensity() {
+    const compact = this.props.density === 'Compact';
+    document.documentElement.style.setProperty('--pad', compact ? '14px' : '20px');
+  }
+  applyAccent() {
+    const a = this.props.accent;
+    if (a && a !== '#0F7B57') document.documentElement.style.setProperty('--accent', a);
+    else document.documentElement.style.removeProperty('--accent');
+  }
+
+  f(n, d) { const k = d === undefined ? 2 : d; return n.toLocaleString('en-US', { minimumFractionDigits: k, maximumFractionDigits: k }); }
+  m(n) { return (n < 0 ? '-$' : '$') + this.f(Math.abs(n)); }
+  sm(n) { return (n < 0 ? '-$' : '+$') + this.f(Math.abs(n)); }
+  cp(n, d) { return (n >= 0 ? '▲' : '▼') + this.f(Math.abs(n), d === undefined ? 2 : d) + '%'; }
+  kf(n) { return '$' + this.f(n / 1000) + 'k'; }
+
+  allocation() { return this.D.categories(); }
+
+  schedule(month) { return this.D.scheduleFor(month); }
+
+  future() { return this.D.forwardPayments(); }
+
+  timeline() { return this.D.dividendTimeline(); }
+
+  projection() { return this.D.projection(); }
+
+  divSeries() {
+    let pts = this.timeline();
+    const p = this.state.period;
+    if (p === '12 trailing months') pts = pts.slice(-12);
+    else if (p === '2026' || p === '2025') pts = pts.filter((x) => x.year === p);
+    const g = this.state.gran;
+    if (g === 'Quarterly') {
+      const out = [];
+      for (let i = 0; i < pts.length; i += 3) {
+        const chunk = pts.slice(i, i + 3);
+        out.push({ label: chunk[0].label + '–' + chunk[chunk.length - 1].label, year: chunk[chunk.length - 1].year, v: chunk.reduce((s, c) => s + c.v, 0), parts: chunk });
+      }
+      return out;
+    }
+    if (g === 'Yearly') {
+      const map = {};
+      pts.forEach((x) => { if (!map[x.year]) map[x.year] = { label: x.year, year: x.year, v: 0, parts: [] }; map[x.year].v += x.v; map[x.year].parts.push(x); });
+      return Object.keys(map).sort().map((k) => map[k]);
+    }
+    return pts;
+  }
+
+  bars(vals, count, left, right, top, base, max, bw) {
+    const slot = (right - left) / count;
+    const out = [];
+    for (let i = 0; i < count; i++) {
+      const v = vals[i];
+      const h = Math.max(0, v / max * (base - top));
+      const sx = left + i * slot;
+      out.push({ i: i, sx: sx.toFixed(1), sw: slot.toFixed(1), cx: (sx + slot / 2).toFixed(1), x: (sx + (slot - bw) / 2).toFixed(1), w: bw, y: (base - h).toFixed(1), h: h.toFixed(1), raw: v, base: base, top: top });
+    }
+    return out;
+  }
+
+  gridFor(max, steps, left, base, top, vbH) {
+    const H = vbH === undefined ? 154 : vbH;
+    const out = [];
+    for (let i = 0; i <= steps; i++) {
+      const v = max / steps * i;
+      const y = base - (base - top) * (i / steps);
+      out.push({ y: y.toFixed(1), ty: (y + 3.5).toFixed(1), top: (y / H * 100).toFixed(2) + '%', label: '$' + this.f(v, 0) });
+    }
+    return out;
+  }
+
+  arcPath(cx, cy, r, a0, a1) {
+    const pt = (a) => [cx + r * Math.cos(a), cy + r * Math.sin(a)];
+    const p0 = pt(a0), p1 = pt(a1);
+    const large = (a1 - a0) > Math.PI ? 1 : 0;
+    return 'M ' + p0[0].toFixed(2) + ' ' + p0[1].toFixed(2) + ' A ' + r + ' ' + r + ' 0 ' + large + ' 1 ' + p1[0].toFixed(2) + ' ' + p1[1].toFixed(2);
+  }
+
+  projectionUnused() {
+    return null;
+  }
+
+  renderVals() {
+    const st = this.state;
+    if (!window.SnowlineData) {
+      if (!this._waiting) {
+        this._waiting = true;
+        const check = () => { if (window.SnowlineData) this.forceUpdate(); else setTimeout(check, 30); };
+        setTimeout(check, 20);
+      }
+      return { stop: (e) => e.stopPropagation() };
+    }
+    const D = this.D;
+    const T = D.totals();
+    const K = D.constants;
+    const hist = D.dividendHistory;
+    const tog = (k) => (e) => { e.stopPropagation(); this.setState((s) => ({ menu: s.menu === k ? null : k })); };
+    const stop = (e) => e.stopPropagation();
+
+    const icons = {
+      bars: 'M4 20V10M10 20V4M16 20v-7M22 20H2', pie: 'M12 3a9 9 0 1 0 9 9h-9V3Z',
+      coins: 'M4 8h13l-3-3M20 16H7l3 3', trend: 'M3 17l6-6 4 4 8-8M21 7v6h-6',
+      gauge: 'M4 18a8 8 0 1 1 16 0M12 18l4-6', doc: 'M6 3h8l5 5v13H6V3Zm8 0v5h5',
+      table: 'M3 5h18v14H3V5Zm0 5h18M9 10v9', list: 'M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01',
+      cal: 'M4 6h16v14H4V6Zm3-3v3m10-3v3M4 11h16', target: 'M12 3v18M3 12h18M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10Z',
+      wallet: 'M3 7h15a3 3 0 0 1 3 3v7H3V7Zm0 0V5h12', tag: 'M4 11l7-7 9 9-7 7-9-9Zm4-1h.01',
+      split: 'M4 6h6l10 12h-4M20 6h-4L6 18H4', scale: 'M12 4v16M6 8l-3 6h6l-3-6Zm12 0l-3 6h6l-3-6ZM5 8h14',
+      search: 'M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14Zm5.5 12.5L21 21', dip: 'M3 6l5 8 4-3 3 5 6-10',
+      lab: 'M9 3h6v5l5 13H4L9 8V3Zm-2 12h10', grid: 'M4 4h7v7H4V4Zm9 0h7v7h-7V4ZM4 13h7v7H4v-7Zm9 0h7v7h-7v-7Z',
+      home: 'M4 11l8-7 8 7v9H4v-9Zm5 9v-6h6v6', plus: 'M12 5v14M5 12h14',
+      upload: 'M12 20V6M6 12l6-6 6 6M4 20h16', users: 'M8 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm8 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM2 19c0-3 3-5 6-5s6 2 6 5m2-5c3 0 6 2 6 5',
+      dots: 'M5 12h.01M12 12h.01M19 12h.01', pct: 'M6 6h.01M18 18h.01M19 5L5 19'
+    };
+
+    const rows = this.allocation();
+    const ramp = this.ramp(rows.length);
+    rows.forEach((r, i) => { r.color = ramp[i]; });
+    const dir = st.sortDir === 'asc' ? 1 : -1;
+    const key = st.sortKey;
+    const sorted = rows.slice().sort((a, b) => {
+      if (key === 'name') return a.name.localeCompare(b.name) * dir;
+      if (key === 'gain') return (a.gainAbs - b.gainAbs) * dir;
+      if (key === 'alloc') return (a.allocN - b.allocN) * dir;
+      return (a.value - b.value) * dir;
+    });
+    const arrow = (k) => key === k ? (st.sortDir === 'asc' ? '▲' : '▼') : '';
+    const setSort = (k) => (e) => { e.stopPropagation(); this.setState((s) => ({ sortKey: k, sortDir: s.sortKey === k ? (s.sortDir === 'desc' ? 'asc' : 'desc') : (k === 'name' ? 'asc' : 'desc') })); };
+
+    const bySize = rows.slice().sort((a, b) => b.value - a.value);
+    const C = 2 * Math.PI * 100;
+    let acc = 0;
+    const donutSegs = bySize.map((r, i) => {
+      const len = r.allocN / 100 * C;
+      const seg = { color: r.color, dash: Math.max(0, len - 3).toFixed(2) + ' ' + (C - Math.max(0, len - 3)).toFixed(2), offset: (-acc).toFixed(2), sw: st.seg === r.name ? 28 : 24, op: st.seg === null || st.seg === r.name ? 1 : 0.32, onEnter: () => this.setState({ seg: r.name }), onLeave: () => this.setState({ seg: null }) };
+      acc += len;
+      return seg;
+    });
+    let tacc = -Math.PI / 2;
+    const donutTargets = bySize.map((r) => {
+      const a0 = tacc, a1 = tacc + r.targetN / 100 * 2 * Math.PI - 0.035;
+      tacc += r.targetN / 100 * 2 * Math.PI;
+      return { d: this.arcPath(150, 150, 124, a0, a1), color: r.color, op: st.seg === null || st.seg === r.name ? 0.85 : 0.2 };
+    });
+    const segRow = rows.filter((r) => r.name === st.seg)[0];
+
+    const fp = this.future();
+    const fpMax = 200;
+    const fpB = this.bars(fp.map((x) => x.total), 12, 34, 616, 12, 148, fpMax, 22).map((b, i) => {
+      const rh = fp[i].received / fpMax * 136;
+      return Object.assign(b, {
+        ry: (148 - rh).toFixed(1), rh: rh.toFixed(1), label: fp[i].label,
+        labelColor: i === 0 ? 'var(--t2)' : 'var(--t3)',
+        hop: st.hoverF === i ? 1 : 0,
+        onEnter: () => this.setState({ hoverF: i }), onLeave: () => this.setState({ hoverF: null })
+      });
+    });
+    let tipF = null, tipFLeft = '50%';
+    if (st.hoverF !== null && fp[st.hoverF]) {
+      const mo = fp[st.hoverF];
+      const dot = (s) => s === 'Paid' ? 'var(--accent)' : s === 'Declared' ? 'var(--accent-3)' : 'var(--accent-4)';
+      tipF = {
+        title: mo.full, headline: this.m(mo.total),
+        sub: mo.received > 0 ? this.m(mo.received) + ' received · ' + this.m(mo.total - mo.received) + ' projected' : mo.rows.length + ' payments projected',
+        rows: mo.rows.map((r) => ({ label: r.t, value: this.m(r.amt), color: dot(r.status) }))
+      };
+      tipFLeft = Math.min(86, Math.max(16, parseFloat(fpB[st.hoverF].cx) / 624 * 100)) + '%';
+    }
+
+    const dr = this.divSeries();
+    const drTotalN = dr.reduce((s, x) => s + x.v, 0);
+    const drMaxV = Math.max.apply(null, dr.map((x) => x.v));
+    const step = drMaxV > 900 ? 500 : drMaxV > 400 ? 250 : drMaxV > 220 ? 100 : 50;
+    const drMax = Math.ceil(drMaxV / step) * step;
+    const drW = dr.length > 8 ? 22 : dr.length > 4 ? 40 : 72;
+    const drB = this.bars(dr.map((x) => x.v), dr.length, 34, 616, 12, 148, drMax, drW).map((b, i) => Object.assign(b, {
+      label: dr[i].label, hop: st.hoverD === i ? 1 : 0,
+      barOp: this.state.chart === 'bars' ? 1 : 0,
+      dotOp: this.state.chart === 'line' ? 1 : 0,
+      dx: (parseFloat(b.cx) - 3).toFixed(1), dy: (parseFloat(b.y) - 3).toFixed(1), dw: 6,
+      onEnter: () => this.setState({ hoverD: i }), onLeave: () => this.setState({ hoverD: null })
+    }));
+    const drPoints = drB.map((b) => b.cx + ',' + b.y).join(' ');
+    let tipD = null, tipDLeft = '50%';
+    if (st.hoverD !== null && dr[st.hoverD]) {
+      const pt = dr[st.hoverD];
+      const isMonth = st.gran === 'Monthly';
+      const rws = isMonth
+        ? (() => { const sc = this.schedule(pt.label); const raw = sc.reduce((s, r) => s + r.amt, 0) || 1; return sc.map((r) => ({ label: r.t, value: this.m(r.amt / raw * pt.v), color: 'var(--accent)' })); })()
+        : (pt.parts || []).map((p) => ({ label: p.label + ' ' + p.year, value: this.m(p.v), color: 'var(--accent)' }));
+      tipD = { title: (isMonth ? this.FULL[pt.label] + ' ' + pt.year : pt.label + ' ' + (st.gran === 'Yearly' ? '' : pt.year)).trim(), headline: this.m(pt.v), sub: 'after 15% withholding tax', rows: rws };
+      tipDLeft = Math.min(86, Math.max(16, parseFloat(drB[st.hoverD].cx) / 624 * 100)) + '%';
+    }
+
+    const gwMax = 175;
+    const gwSlot = (616 - 34) / 12;
+    const years = ['2024', '2025', '2026'];
+    const gwGroups = this.MONTHS.map((mo, i) => {
+      const sx = 34 + i * gwSlot;
+      const bars = years.map((y, j) => {
+        const v = (hist[y][i] === undefined ? 0 : hist[y][i]);
+        const h = v / gwMax * 136;
+        return { x: (sx + (gwSlot - 37) / 2 + j * 13).toFixed(1), y: (148 - h).toFixed(1), w: 11, h: h.toFixed(1), fill: this.TINTS[j], v: v };
+      });
+      return {
+        label: mo, sx: sx.toFixed(1), sw: gwSlot.toFixed(1), cx: (sx + gwSlot / 2).toFixed(1), bars: bars,
+        hop: st.hoverG === i ? 1 : 0, onEnter: () => this.setState({ hoverG: i }), onLeave: () => this.setState({ hoverG: null })
+      };
+    });
+    let tipG = null, tipGLeft = '50%';
+    if (st.hoverG !== null) {
+      const i = st.hoverG;
+      const v26 = hist[2026][i], v25 = hist[2025][i];
+      tipG = {
+        title: this.FULL[this.MONTHS[i]], headline: v26 === undefined ? this.m(v25) + ' in 2025' : this.m(v26),
+        rows: years.map((y, j) => ({ label: y, value: hist[y][i] === undefined ? '—' : this.m(hist[y][i]), color: this.TINTS[j] })),
+        footer: v26 === undefined ? 'No 2026 payment yet' : (v25 > 0 ? this.cp((v26 - v25) / v25 * 100, 1) + ' vs 2025' : 'first year of payments'),
+        footerTone: v26 !== undefined && v26 >= v25 ? 'pos' : 'neg'
+      };
+      tipGLeft = Math.min(86, Math.max(16, parseFloat(gwGroups[i].cx) / 624 * 100)) + '%';
+    }
+    const yearTotal = (y) => hist[y].reduce((s, v) => s + v, 0);
+
+    /* the goal card is a read of the same projection the My goal screen runs,
+       so nothing here may be hardcoded to one target, mode or horizon */
+    const pr = this.projection();
+    const gvals = pr.P.concat(pr.S).concat([pr.goal, pr.current]);
+    const lo = Math.log10(Math.max(1, Math.min.apply(null, gvals))) - 0.1;
+    const hi = Math.log10(Math.max.apply(null, gvals)) + 0.06;
+    const span = hi - lo;
+    const gy = (v) => 140 - (Math.log10(Math.max(1, v)) - lo) / span * 126;
+    const gx = (n) => 40 + n / pr.span * 572;
+    const gk = (v) => v >= 1e6 ? '$' + this.f(v / 1e6, (v / 1e6) % 1 === 0 ? 0 : 1) + 'M' : v >= 1000 ? '$' + this.f(v / 1000, 0) + 'k' : '$' + this.f(v, 0);
+    const decades = [];
+    for (let e = Math.ceil(lo); e <= Math.floor(hi); e++) decades.push(Math.pow(10, e));
+    if (decades.length < 3) {
+      for (let e = Math.floor(lo); e <= Math.ceil(hi); e++) {
+        [2, 5].forEach((m) => { const v = m * Math.pow(10, e); if (Math.log10(v) > lo && Math.log10(v) < hi) decades.push(v); });
+      }
+      decades.sort((a, b) => a - b);
+    }
+    const goalGrid = decades.filter((v) => Math.abs(gy(v) - gy(pr.goal)) > 9)
+      .map((v) => ({ y: gy(v).toFixed(1), ty: (gy(v) + 3.5).toFixed(1), top: (gy(v) / 148 * 100).toFixed(2) + '%', label: gk(v) }));
+    const goalMarks = [
+      { n: pr.crossP, color: 'var(--accent)', label: String(pr.crossPYear) },
+      { n: pr.crossS, color: 'var(--t2)', label: String(pr.crossSYear) }
+    ].filter((k) => k.n !== null).map((k) => ({
+      x: (gx(k.n) - 3.5).toFixed(1), y: (gy(pr.goal) - 3.5).toFixed(1),
+      lpos: (gx(k.n) / 624 * 100).toFixed(2) + '%', ltop: ((gy(pr.goal) + 8) / 148 * 100).toFixed(2) + '%',
+      color: k.color, label: k.label
+    }));
+
+    const dm = st.dismissed;
+    const under = rows.slice().sort((a, b) => a.driftN - b.driftN);
+    const biggest = rows[0];
+    const over = under.filter((r) => r.name !== biggest.name).slice(-1)[0];
+    const gldi = D.byTicker('GLDI');
+    const gldiRet = (gldi.value - gldi.costTotal) / gldi.costTotal * 100;
+    const ins1Line = biggest.name + ' hold ' + this.f(biggest.allocN, 1) + '% of the portfolio against a ' + this.f(biggest.targetN, 1) + '% target — one sleeve drives most of your risk.';
+    const ins2Line = under[0].name + ' sits ' + this.f(Math.abs(under[0].driftN), 1) + 'pp under target and ' + under[1].name + ' ' + this.f(Math.abs(under[1].driftN), 1) + 'pp under, while ' + over.name + ' runs ' + this.f(over.driftN, 1) + 'pp over.';
+    const ins3Line = 'GLDI (' + this.f(gldiRet, 1) + '%) and QQQI have trailed ' + K.benchmark + ' by more than 20pp over the last 12 months.';
+    const opt = (list, cur, k) => list.map((o) => ({ label: o, check: o === cur ? 1 : 0, onClick: (e) => { e.stopPropagation(); const p = {}; p[k] = o; p.menu = null; this.setState(p); } }));
+
+    return {
+      stop: stop,
+      togPeriod: tog('period'), mPeriod: st.menu === 'period',
+      togGran: tog('gran'), mGran: st.menu === 'gran',
+
+      tabRows: [
+        { label: 'Dashboard', d: icons.home, href: 'Snowline.dc.html', color: 'var(--accent)' },
+        { label: 'Analytics', d: icons.bars, href: 'Analytics.dc.html', color: 'var(--t3)' },
+        { label: 'Portfolio', d: icons.table, href: 'Holdings.dc.html', color: 'var(--t3)' },
+        { label: 'Tools', d: icons.scale, href: 'Rebalancing.dc.html', color: 'var(--t3)' }
+      ],
+      portfolioName: K.portfolioName,
+      headUpdated: 'As of ' + K.today.label,
+      insightCount: (3 - dm.length) + ' of 3',
+      ins1: dm.indexOf(1) < 0, ins2: dm.indexOf(2) < 0, ins3: dm.indexOf(3) < 0,
+      dismiss1: () => this.setState((s) => ({ dismissed: s.dismissed.concat([1]) })),
+      dismiss2: () => this.setState((s) => ({ dismissed: s.dismissed.concat([2]) })),
+      dismiss3: () => this.setState((s) => ({ dismissed: s.dismissed.concat([3]) })),
+      hasDismissed: dm.length > 0,
+      dismissedLabel: dm.length + ' dismissed',
+      restore: () => this.setState({ dismissed: [] }),
+
+      mask: st.mask, eyeSlash: st.mask ? 1 : 0,
+      toggleMask: () => this.setState((s) => ({ mask: !s.mask })),
+      headHoldings: K.baseCurrency + ' · ' + T.holdings + ' holdings',
+      headTax: this.f(K.withholdingTax * 100, 0) + '% dividend withholding',
+      kValue: this.m(T.value), kInvested: this.m(T.invested),
+      kProfit: this.sm(T.totalProfit), kProfitPct: this.cp(T.totalProfitPct),
+      kDaily: this.sm(T.dayChange) + ' ' + this.cp(T.dayChangePct),
+      kCapitalGain: 'Capital gain ' + this.sm(T.capitalGain),
+      kDividends: 'Dividends ' + this.m(T.dividendsLifetime),
+      kIrr: this.f(K.irrAllTime, 2) + '%', kIrrHoldings: this.f(K.irrCurrentHoldings, 2) + '%',
+      kTwr: 'TWR ' + this.f(K.twr, 2) + '%', kBench: K.benchmark + ' ' + this.f(K.benchmarkTwr, 2) + '%',
+      kNetYield: this.f(T.netYield, 2) + '%', kIncomeGrowth: this.cp(K.incomeGrowthYoY, 1),
+      kYield: this.f(T.grossYield, 2) + '%',
+      kIncomeAnnual: this.m(T.forwardGross),
+      kIncomeMonthly: this.m(T.forwardGross / 12) + ' monthly',
+      kIncomeNet: this.m(T.forwardNet) + ' net of tax',
+      kGrossYield: this.f(T.grossYield, 2) + '% before tax',
+      totValue: this.m(T.value), totInvested: this.m(T.invested),
+      totGain: this.sm(T.capitalGain), totGainPct: this.cp(T.capitalGainPct),
+      ins1Line: ins1Line, ins2Line: ins2Line, ins3Line: ins3Line,
+      whyNVDA: this.cp(D.byTicker('NVDA').dayChangePct), whyGLDI: this.cp(D.byTicker('GLDI').dayChangePct),
+      whyV: this.cp(D.byTicker('V').dayChangePct), whyJEPQ: this.cp(D.byTicker('JEPQ').dayChangePct),
+      gainSum: this.sm(D.movers().gainSum), lossSum: this.sm(D.movers().lossSum),
+      fpNext12: this.m(T.forwardGross), fpCount: D.paymentCountNext12() + ' payments',
+      fpMonthly: this.m(T.forwardGross / 12),
+      goalPct: this.f(pr.progressPct, 0) + '%',
+      goalRing: (pr.progressPct / 100 * 2 * Math.PI * 38).toFixed(2) + ' ' + (2 * Math.PI * 38).toFixed(2),
+      goalNow: this.kf(pr.current), goalTarget: '/ ' + this.kf(pr.target),
+      goalModeLabel: pr.modeLabel,
+      goalVerdict: pr.achievable ? 'Achievable in ' + pr.yearsToGoal + ' years' : 'Not achievable by ' + pr.byYear,
+      goalVerdictBorder: pr.achievable ? 'var(--accent)' : 'var(--amber)',
+      goalVerdictColor: pr.achievable ? 'var(--t1)' : 'var(--amber)',
+      goalVerdictSub: pr.achievable
+        ? 'By ' + pr.crossPYear + (pr.crossPYear < pr.byYear ? ' · ' + (pr.byYear - pr.crossPYear) + ' years ahead of your ' + pr.byYear + ' target' : ' · exactly on your target year')
+        : 'Short by ' + this.m(pr.shortfall) + ' at ' + pr.byYear,
+      goalLineLabel: 'Goal ' + this.kf(pr.target),
+      goalLabelTop: ((gy(pr.goal) - 13) / 148 * 100).toFixed(2) + '%',
+      goalContribution: this.m(pr.cfg.monthlyContribution) + ' monthly',
+      goalReinvest: pr.cfg.reinvestDividends ? 'dividends reinvested' : 'dividends as cash',
+      goalSafeLabel: pr.altLabel,
+      sortName: setSort('name'), sortValue: setSort('value'), sortGain: setSort('gain'), sortAlloc: setSort('alloc'),
+      arrowName: arrow('name'), arrowValue: arrow('value'), arrowGain: arrow('gain'), arrowAlloc: arrow('alloc'),
+      hdrValue: st.hdr === 'value', hdrGain: st.hdr === 'gain', hdrAlloc: st.hdr === 'alloc',
+      hdrOnValue: () => this.setState({ hdr: 'value' }), hdrOnGain: () => this.setState({ hdr: 'gain' }),
+      hdrOnAlloc: () => this.setState({ hdr: 'alloc' }), hdrOff: () => this.setState({ hdr: null }),
+      allocRows: sorted.map((r) => ({
+        name: r.name, items: r.count + (r.count === 1 ? ' item' : ' items'), color: r.color,
+        value: this.m(r.value), invested: this.m(r.invested) + ' invested',
+        gain: this.sm(r.gainAbs), gainPct: this.cp(r.gainPctN),
+        tone: r.gainAbs >= 0 ? 'pos' : 'neg',
+        alloc: this.f(r.allocN, 1) + '%', target: this.f(r.targetN, 1) + '% target',
+        bg: st.seg === r.name ? 'var(--hover)' : 'transparent',
+        onEnter: () => this.setState({ seg: r.name }), onLeave: () => this.setState({ seg: null })
+      })),
+      donutSegs: donutSegs, donutTargets: donutTargets,
+      centerValue: segRow ? this.m(segRow.value) : this.m(T.value),
+      centerLabel: segRow ? segRow.name : 'Portfolio value',
+      centerSub: segRow ? this.f(segRow.allocN, 1) + '% · ' + this.f(segRow.targetN, 1) + '% target' : T.categoryCount + ' categories · ' + T.holdings + ' holdings',
+
+      quotes: [
+        { name: 'EUR / USD', price: '1.0847', chg: '▲0.12%', color: 'var(--accent)' },
+        { name: 'USD / THB', price: '34.2130', chg: '▼0.08%', color: 'var(--neg)' },
+        { name: 'Gold', price: '$2,412.30', chg: '▲0.42%', color: 'var(--accent)' },
+        { name: 'SPY', price: '$615.28', chg: '▲0.31%', color: 'var(--accent)' },
+        { name: 'QQQ', price: '$548.19', chg: '▼0.22%', color: 'var(--neg)' },
+        { name: 'US 10Y', price: '4.128%', chg: '▲0.03%', color: 'var(--accent)' }
+      ],
+
+      gainers: D.movers().gainers.map((h) => ({
+        t: h.ticker, name: h.name, mono: h.mono, val: this.m(h.value), chg: this.cp(h.dayChangePct) + '  ' + this.sm(h.dayChangeAbs)
+      })),
+      losers: D.movers().losers.map((h) => ({
+        t: h.ticker, name: h.name, mono: h.mono, val: this.m(h.value), chg: this.cp(h.dayChangePct) + '  ' + this.sm(h.dayChangeAbs)
+      })),
+
+      fpGrid: this.gridFor(fpMax, 4, 34, 148, 12), fpBars: fpB, tipF: tipF, tipFLeft: tipFLeft,
+      drGrid: this.gridFor(drMax, drMax / step > 4 ? 4 : drMax / step, 34, 148, 12), drBars: drB, drPoints: drPoints,
+      tipD: tipD, tipDLeft: tipDLeft,
+      drTotal: this.m(drTotalN), drNote: dr.length + (st.gran === 'Monthly' ? ' months' : st.gran === 'Quarterly' ? ' quarters' : ' years') + ' · after tax',
+      period: st.period, gran: st.gran,
+      periodOptions: opt(['12 trailing months', '2026', '2025', 'All time'], st.period, 'period'),
+      granOptions: opt(['Monthly', 'Quarterly', 'Yearly'], st.gran, 'gran'),
+      isBars: st.chart === 'bars', isLine: st.chart === 'line',
+      toggleChart: (e) => { e.stopPropagation(); this.setState((s) => ({ chart: s.chart === 'bars' ? 'line' : 'bars' })); },
+
+      gwGrid: this.gridFor(gwMax, 3, 34, 148, 12), gwGroups: gwGroups, tipG: tipG, tipGLeft: tipGLeft,
+      gwLegend: years.map((y, j) => ({ year: y, color: this.TINTS[j], total: this.m(yearTotal(y)) + (y === '2026' ? ' YTD' : '') })),
+
+      goalGrid: goalGrid, goalY: gy(pr.goal).toFixed(1), goalLabelY: (gy(pr.goal) - 6).toFixed(1),
+      portPoints: pr.P.map((v, n) => gx(n).toFixed(1) + ',' + gy(v).toFixed(1)).join(' '),
+      safePoints: pr.S.map((v, n) => gx(n).toFixed(1) + ',' + gy(v).toFixed(1)).join(' '),
+      safeLabelY: (gy(pr.S[pr.span]) - 7).toFixed(1),
+      goalMarks: goalMarks,
+      goalXLabels: [0, 1, 2, 3, 4].map((i) => Math.round(pr.span * i / 4)).map((n) => ({ x: gx(n).toFixed(1), lpos: (gx(n) / 624 * 100).toFixed(2) + '%', label: String(pr.startYear + n) }))
+    };
+  }
+}
+</script>
+</body>
+</html>

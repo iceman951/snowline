@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <script src="snowline-data.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --canvas:#FAFAF9; --card:#FFFFFF; --t1:#171717; --t2:#737373; --t3:#A3A3A3; --line:#E7E5E4;
+      --accent:#0F7B57; --neg:#B91C1C; --amber:#B45309; --hover:#F5F5F4; --on-accent:#FFFFFF;
+      --grey-series:#A8A29E; --shadow:0 10px 28px rgba(23,23,23,.10);
+      --accent-2:color-mix(in oklab, var(--accent) 74%, var(--card));
+      --accent-3:color-mix(in oklab, var(--accent) 48%, var(--card));
+      --accent-4:color-mix(in oklab, var(--accent) 26%, var(--card));
+      --accent-soft:color-mix(in oklab, var(--accent) 9%, var(--card));
+      --accent-tint:color-mix(in oklab, var(--accent) 16%, var(--card));
+      --tag-bg:color-mix(in oklab, var(--amber) 8%, var(--card));
+      --tag-fg:var(--amber);
+      --track:#E4E1DF; --off:#FAFAF9;
+    }
+    html[data-theme="dark"]{
+      --canvas:#0C0C0C; --card:#171717; --t1:#FAFAF9; --t2:#A3A3A3; --t3:#737373; --line:#292524;
+      --accent:#34D399; --neg:#F87171; --amber:#F59E0B; --hover:#201E1D; --on-accent:#0C0C0C;
+      --grey-series:#57534E; --shadow:0 10px 28px rgba(0,0,0,.55);
+      --tag-bg:color-mix(in oklab, var(--amber) 7%, var(--card));
+      --tag-fg:color-mix(in oklab, var(--amber) 58%, var(--t2));
+      --track:#3A3431; --off:#121110;
+    }
+    html,body{margin:0;padding:0;background:var(--canvas)}
+    *{box-sizing:border-box}
+    body{font-family:'Inter',system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif;font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
+    a{color:var(--accent);text-decoration:none}
+    a:hover{color:var(--accent);text-decoration:underline}
+    button,input,select{font-family:inherit;font-variant-numeric:tabular-nums}
+    ::selection{background:var(--accent-tint)}
+    @keyframes menuIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+    @media (max-width:1180px){
+      [data-r="top"]{grid-template-columns:minmax(0,1fr)!important}
+    }
+    @media (max-width:960px){
+      [data-r="navd"]{display:none!important}
+      [data-r="navm"]{display:flex!important}
+      [data-r="tabbar"]{display:flex!important}
+      [data-r="main"]{padding:16px 16px 104px!important}
+      [data-r="grid"]{min-width:980px}
+    }
+  </style>
+</helmet>
+<div style="min-height:100vh;background:var(--canvas);color:var(--t1);font-size:14px;line-height:1.45">
+
+  <dc-import name="TopNav" active="Portfolio" sub-active="Dividend calendar" hint-size="100%,56px"></dc-import>
+
+  <main data-r="main" data-screen-label="Portfolio — Dividend calendar" style="max-width:1392px;margin:0 auto;padding:24px 24px 88px;display:flex;flex-direction:column;gap:18px">
+
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap">
+      <div style="display:flex;flex-direction:column;gap:5px;min-width:0">
+        <div style="display:flex;align-items:center;gap:8px;position:relative">
+          <h1 style="margin:0;font-size:32px;font-weight:600;letter-spacing:-0.028em;line-height:1.1;color:var(--t1)">Dividend calendar</h1>
+          <span onMouseEnter="{{ titleTipOn }}" onMouseLeave="{{ titleTipOff }}" style="width:16px;height:16px;margin-top:6px;flex:none;border:1px solid var(--line);border-radius:50%;font-size:10px;font-weight:500;color:var(--t3);display:flex;align-items:center;justify-content:center;cursor:help" style-hover="border-color:var(--t3);color:var(--t2)">?</span>
+          <sc-if value="{{ titleTip }}" hint-placeholder-val="{{ false }}">
+            <span style="position:absolute;top:44px;left:0;z-index:40;width:300px;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:10px 12px;font-size:11.5px;line-height:1.55;color:var(--t2)">{{ titleTipText }}</span>
+          </sc-if>
+          <span style="font-size:13px;color:var(--t3);padding-top:6px">{{ portfolioName }}</span>
+        </div>
+        <span style="font-size:12px;color:var(--t3)">{{ headNote }}</span>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <div style="display:inline-flex;align-items:center;gap:2px;height:32px;padding:0 2px;border:1px solid var(--line);border-radius:7px;background:var(--card)">
+          <button onClick="{{ yearBack }}" title="Previous year" style="display:flex;align-items:center;justify-content:center;width:26px;height:26px;border:none;border-radius:5px;background:transparent;color:var(--t2);cursor:pointer" style-hover="background:var(--hover)">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"></path></svg>
+          </button>
+          <span style="padding:0 8px;font-size:12px;font-weight:500;color:var(--t1);white-space:nowrap">{{ windowLabel }}</span>
+          <button onClick="{{ yearFwd }}" title="Next year" style="display:flex;align-items:center;justify-content:center;width:26px;height:26px;border:none;border-radius:5px;background:transparent;color:var(--t2);cursor:pointer" style-hover="background:var(--hover)">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"></path></svg>
+          </button>
+        </div>
+
+        <sc-if value="{{ searchOpen }}" hint-placeholder-val="{{ false }}">
+          <input value="{{ query }}" onChange="{{ onQuery }}" placeholder="Filter by ticker…" autofocus="{{ true }}" style="height:32px;width:170px;padding:0 11px;border:1px solid var(--line);border-radius:7px;background:var(--card);font-size:12px;color:var(--t1);outline:none"></input>
+        </sc-if>
+        <button onClick="{{ togSearch }}" title="Search" style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;border:1px solid var(--line);border-radius:7px;background:{{ searchBg }};color:var(--t2);cursor:pointer" style-hover="background:var(--hover)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+        </button>
+
+        <sc-for list="{{ dropdowns }}" as="d" hint-placeholder-count="2">
+          <div style="position:relative">
+            <button onClick="{{ d.onToggle }}" style="display:inline-flex;align-items:center;gap:8px;height:32px;padding:0 12px;border:1px solid {{ d.border }};border-radius:7px;background:{{ d.bg }};font-size:12px;cursor:pointer;white-space:nowrap" style-hover="background:var(--hover)">
+              <span style="color:var(--t3)">{{ d.title }}</span>
+              <span style="color:var(--t1);font-weight:500">{{ d.value }}</span>
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--t3)"><path d="M6 9l6 6 6-6"></path></svg>
+            </button>
+            <sc-if value="{{ d.open }}" hint-placeholder-val="{{ false }}">
+              <div onClick="{{ stop }}" style="position:absolute;top:38px;right:0;z-index:50;min-width:186px;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:6px;animation:menuIn .12s ease-out">
+                <sc-for list="{{ d.options }}" as="o" hint-placeholder-count="4">
+                  <button onClick="{{ o.onClick }}" style="display:flex;align-items:center;gap:9px;width:100%;padding:8px 10px;border:none;border-radius:6px;background:{{ o.bg }};text-align:left;cursor:pointer;font-size:12.5px;color:{{ o.color }};font-weight:{{ o.weight }}" style-hover="background:var(--hover)">
+                    <span style="width:8px;height:8px;flex:none;border-radius:2px;background:{{ o.dot }}"></span>
+                    {{ o.label }}
+                  </button>
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
+        </sc-for>
+
+        <div style="position:relative">
+          <button onClick="{{ togMore }}" title="More" style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;border:1px solid var(--line);border-radius:7px;background:{{ moreBg }};color:var(--t2);cursor:pointer" style-hover="background:var(--hover)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.6"></circle><circle cx="12" cy="12" r="1.6"></circle><circle cx="19" cy="12" r="1.6"></circle></svg>
+          </button>
+          <sc-if value="{{ mMore }}" hint-placeholder-val="{{ false }}">
+            <div onClick="{{ stop }}" style="position:absolute;top:38px;right:0;z-index:50;min-width:206px;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:6px;animation:menuIn .12s ease-out">
+              <sc-for list="{{ moreRows }}" as="m" hint-placeholder-count="3">
+                <button onClick="{{ m.onClick }}" style="display:flex;align-items:center;gap:9px;width:100%;padding:8px 10px;border:none;border-radius:6px;background:transparent;text-align:left;cursor:pointer;font-size:12.5px;color:var(--t1)" style-hover="background:var(--hover)">{{ m.label }}</button>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+    </div>
+
+    <div data-r="top" style="display:grid;grid-template-columns:minmax(258px,318px) minmax(0,1fr);gap:18px">
+
+      <div style="display:flex;flex-direction:column;gap:16px;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:20px">
+        <dc-import name="Metric" label="Annual income" tip="{{ annualTip }}" dotted="{{ true }}" primary="{{ annualGross }}" secondary="{{ annualNet }}" hint-size="100%,86px"></dc-import>
+        <div style="display:flex;flex-direction:column;gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden">
+          <sc-for list="{{ incomeRows }}" as="r" hint-placeholder-count="3">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 13px;background:{{ r.bg }};border-bottom:1px solid var(--line)">
+              <span style="font-size:12.5px;color:var(--t2)">{{ r.label }}</span>
+              <span style="font-size:13px;font-weight:600;color:var(--t1);white-space:nowrap">{{ r.value }}</span>
+            </div>
+          </sc-for>
+        </div>
+        <span style="font-size:11px;line-height:1.5;color:var(--t3)">{{ incomeNote }}</span>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:14px;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:20px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
+          <span style="font-size:12px;font-weight:500;color:var(--t2)">{{ chartTitle }}</span>
+          <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+            <sc-for list="{{ statusLegend }}" as="l" hint-placeholder-count="3">
+              <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--t2);white-space:nowrap">
+                <span style="width:9px;height:9px;border-radius:2px;background:{{ l.color }}"></span>{{ l.label }}
+              </span>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:flex-end;gap:6px;height:186px">
+          <sc-for list="{{ chartBars }}" as="b" hint-placeholder-count="12">
+            <div onClick="{{ b.onClick }}" onMouseEnter="{{ b.onEnter }}" onMouseLeave="{{ b.onLeave }}" style="flex:1;min-width:0;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:6px;cursor:pointer;border-radius:6px;background:{{ b.slotBg }};padding:4px 0">
+              <span style="font-size:10px;font-weight:500;color:{{ b.labelColor }};white-space:nowrap">{{ b.value }}</span>
+              <span style="width:76%;max-width:40px;display:flex;flex-direction:column;justify-content:flex-end;height:{{ b.h }};min-height:2px">
+                <sc-for list="{{ b.segments }}" as="s" hint-placeholder-count="1">
+                  <span style="display:block;height:{{ s.h }};background:{{ s.color }}"></span>
+                </sc-for>
+              </span>
+              <span style="font-size:10px;color:{{ b.tickColor }};white-space:nowrap">{{ b.label }}</span>
+            </div>
+          </sc-for>
+        </div>
+        <span style="font-size:11px;color:var(--t3)">{{ chartNote }}</span>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <div style="display:inline-flex;align-items:center;gap:2px;height:34px;padding:0 2px;border:1px solid var(--line);border-radius:8px;background:var(--card)">
+          <button onClick="{{ monthBack }}" title="Previous month" style="display:flex;align-items:center;justify-content:center;width:28px;height:28px;border:none;border-radius:6px;background:transparent;color:var(--t2);cursor:pointer" style-hover="background:var(--hover)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"></path></svg>
+          </button>
+          <span style="min-width:104px;text-align:center;font-size:13px;font-weight:600;color:var(--t1);white-space:nowrap">{{ monthLabel }}</span>
+          <button onClick="{{ monthFwd }}" title="Next month" style="display:flex;align-items:center;justify-content:center;width:28px;height:28px;border:none;border-radius:6px;background:transparent;color:var(--t2);cursor:pointer" style-hover="background:var(--hover)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"></path></svg>
+          </button>
+        </div>
+        <span style="display:inline-flex;align-items:center;gap:8px;height:30px;padding:0 12px;border-radius:999px;background:var(--accent-soft);color:var(--accent);font-size:12.5px;font-weight:600;white-space:nowrap">{{ monthTotal }}</span>
+        <span style="font-size:12px;color:var(--t3)">{{ monthNote }}</span>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:2px;padding:2px;border:1px solid var(--line);border-radius:8px;background:var(--card)">
+        <sc-for list="{{ views }}" as="v" hint-placeholder-count="2">
+          <button onClick="{{ v.onClick }}" style="height:28px;padding:0 14px;border:none;border-radius:6px;background:{{ v.bg }};color:{{ v.color }};font-size:12px;font-weight:{{ v.weight }};cursor:pointer" style-hover="background:var(--hover)">{{ v.label }}</button>
+        </sc-for>
+      </div>
+    </div>
+
+    <sc-if value="{{ isCalendar }}" hint-placeholder-val="{{ true }}">
+      <div style="max-width:100%;overflow-x:auto;overscroll-behavior-x:contain">
+        <div data-r="grid" style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border:1px solid var(--line);border-top:none;border-radius:8px;overflow:hidden;background:var(--card)">
+          <sc-for list="{{ weekdays }}" as="w" hint-placeholder-count="7">
+            <div style="padding:9px 11px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--card)">
+              <span style="font-size:11px;font-weight:500;letter-spacing:.04em;text-transform:uppercase;color:var(--t3)">{{ w.label }}</span>
+            </div>
+          </sc-for>
+          <sc-for list="{{ cells }}" as="c" hint-placeholder-count="35">
+            <div style="min-height:116px;padding:8px;border-bottom:1px solid var(--line);border-right:1px solid var(--line);background:{{ c.bg }};display:flex;flex-direction:column;gap:6px;min-width:0">
+              <sc-if value="{{ c.inMonth }}" hint-placeholder-val="{{ true }}">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+                  <span style="display:flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 5px;border-radius:5px;background:{{ c.dayBg }};color:{{ c.dayColor }};font-size:11.5px;font-weight:{{ c.dayWeight }}">{{ c.day }}</span>
+                  <sc-if value="{{ c.hasTotal }}" hint-placeholder-val="{{ false }}">
+                    <span style="font-size:11.5px;font-weight:600;color:var(--accent);white-space:nowrap">{{ c.total }}</span>
+                  </sc-if>
+                </div>
+                <sc-for list="{{ c.events }}" as="e" hint-placeholder-count="1">
+                  <div style="display:flex;align-items:flex-start;gap:7px;padding:6px;border:1px solid var(--line);border-radius:6px;background:var(--card);min-width:0">
+                    <span style="width:22px;height:22px;flex:none;border-radius:5px;background:var(--hover);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;color:var(--t2)">{{ e.mono }}</span>
+                    <span style="display:flex;flex-direction:column;gap:2px;min-width:0;flex:1">
+                      <span style="display:flex;align-items:baseline;justify-content:space-between;gap:6px;min-width:0">
+                        <span style="flex:1 1 auto;min-width:0;font-size:11.5px;font-weight:600;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ e.ticker }}</span>
+                        <span style="flex:0 0 auto;font-size:11.5px;font-weight:600;color:var(--t1);white-space:nowrap">{{ e.amount }}</span>
+                      </span>
+                      <span style="display:flex;align-items:center;gap:5px;min-width:0">
+                        <span style="width:6px;height:6px;flex:none;border-radius:50%;background:{{ e.dot }}"></span>
+                        <span style="flex:0 0 auto;font-size:10.5px;color:var(--t3);white-space:nowrap">{{ e.yield }}</span>
+                        <span style="flex:1 1 auto;min-width:0;font-size:10.5px;color:var(--t3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ e.name }}</span>
+                      </span>
+                    </span>
+                  </div>
+                </sc-for>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isList }}" hint-placeholder-val="{{ false }}">
+      <div style="max-width:100%;border:1px solid var(--line);border-radius:8px;background:var(--card);overflow-x:auto;overscroll-behavior-x:contain">
+        <div style="min-width:940px">
+          <div style="display:grid;grid-template-columns:{{ listCols }};border-bottom:1px solid var(--line)">
+            <sc-for list="{{ listHead }}" as="h" hint-placeholder-count="8">
+              <div style="display:flex;align-items:center;justify-content:{{ h.justify }};padding:10px 13px">
+                <span style="font-size:12px;font-weight:500;color:var(--t2);white-space:nowrap">{{ h.label }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <sc-for list="{{ listRows }}" as="r" hint-placeholder-count="8">
+            <div style="display:grid;grid-template-columns:{{ listCols }};border-bottom:1px solid var(--line)">
+              <div style="display:flex;align-items:center;gap:9px;padding:9px 13px;min-width:0">
+                <span style="width:26px;height:26px;flex:none;border-radius:6px;background:var(--hover);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:600;color:var(--t2)">{{ r.mono }}</span>
+                <dc-import name="TwoLineCell" primary="{{ r.ticker }}" secondary="{{ r.name }}" align="left" hint-size="130px,36px"></dc-import>
+              </div>
+              <sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="6">
+                <div style="display:flex;align-items:center;justify-content:{{ c.justify }};padding:9px 13px">
+                  <span style="font-size:13px;color:{{ c.color }};white-space:nowrap">{{ c.text }}</span>
+                </div>
+              </sc-for>
+              <div style="display:flex;align-items:center;justify-content:flex-end;padding:9px 13px">
+                <span style="display:inline-flex;align-items:center;gap:6px;height:22px;padding:0 9px;border-radius:5px;background:{{ r.statusBg }};color:{{ r.statusFg }};font-size:11px;font-weight:500;white-space:nowrap">
+                  <span style="width:5px;height:5px;border-radius:50%;background:currentColor"></span>{{ r.status }}
+                </span>
+              </div>
+            </div>
+          </sc-for>
+          <div style="display:grid;grid-template-columns:{{ listCols }};border-top:1px solid var(--t3)">
+            <div style="display:flex;align-items:center;padding:11px 13px">
+              <span style="font-size:13px;font-weight:600;color:var(--t1)">Total</span>
+            </div>
+            <sc-for list="{{ listTotal }}" as="c" hint-placeholder-count="6">
+              <div style="display:flex;align-items:center;justify-content:{{ c.justify }};padding:11px 13px">
+                <span style="font-size:13px;font-weight:600;color:{{ c.color }};white-space:nowrap">{{ c.text }}</span>
+              </div>
+            </sc-for>
+            <div></div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:7px;padding:44px 20px;border:1px solid var(--line);border-radius:8px;background:var(--card)">
+        <span style="font-size:14px;font-weight:500;color:var(--t1)">No payments in {{ monthLabel }}</span>
+        <span style="font-size:12.5px;color:var(--t3)">{{ emptyHint }}</span>
+      </div>
+    </sc-if>
+
+    <span style="font-size:11px;line-height:1.5;color:var(--t3);max-width:900px">{{ footnote }}</span>
+  </main>
+
+  <div data-r="tabbar" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:60;height:60px;background:var(--card);border-top:1px solid var(--line);align-items:stretch;padding:0 4px">
+    <sc-for list="{{ tabRows }}" as="t" hint-placeholder-count="4">
+      <a href="{{ t.href }}" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-decoration:none;color:{{ t.color }}">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="{{ t.d }}"></path></svg>
+        <span style="font-size:10px;font-weight:500">{{ t.label }}</span>
+      </a>
+    </sc-for>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;defaultView&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Calendar&quot;,&quot;List&quot;],&quot;default&quot;:&quot;Calendar&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Calendar&quot;},&quot;showPerShare&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Calendar&quot;}}">
+class Component extends DCLogic {
+  state = {
+    offset: 0, windowOffset: 0, view: null, menu: null,
+    status: 'All', payout: 'All', query: '', searchOpen: false,
+    titleTip: false, hover: null, toast: ''
+  };
+
+  componentDidMount() {
+    this.doc = () => { if (this.state.menu) this.setState({ menu: null }); };
+    document.addEventListener('click', this.doc);
+    if (!window.SnowlineData) {
+      const check = () => { if (window.SnowlineData) this.forceUpdate(); else setTimeout(check, 30); };
+      setTimeout(check, 20);
+    }
+  }
+  componentWillUnmount() {
+    if (this.doc) document.removeEventListener('click', this.doc);
+    if (this.toastT) clearTimeout(this.toastT);
+  }
+
+  say(msg) {
+    if (this.toastT) clearTimeout(this.toastT);
+    this.setState({ toast: msg });
+    this.toastT = setTimeout(() => this.setState({ toast: '' }), 3200);
+  }
+
+  shift(base, n) {
+    const t = base.year * 12 + base.monthIndex + n;
+    return { year: Math.floor(t / 12), monthIndex: ((t % 12) + 12) % 12 };
+  }
+
+  /* status / payout / ticker filters, applied to a calendarMonth object */
+  applyFilters(m) {
+    const st = this.state;
+    const q = st.query.trim().toLowerCase();
+    const keep = m.events.filter((e) =>
+      (st.status === 'All' || e.status === st.status) &&
+      (st.payout === 'All' || e.frequency === st.payout) &&
+      (!q || (e.ticker + ' ' + e.name).toLowerCase().indexOf(q) >= 0));
+    const by = (s) => keep.filter((e) => e.status === s).reduce((a, e) => a + e.gross, 0);
+    return Object.assign({}, m, {
+      events: keep,
+      days: m.days.map((d) => {
+        const on = keep.filter((e) => e.day === d.day);
+        return Object.assign({}, d, {
+          events: on,
+          gross: on.reduce((a, e) => a + e.gross, 0),
+          net: on.reduce((a, e) => a + e.net, 0)
+        });
+      }),
+      gross: keep.reduce((a, e) => a + e.gross, 0),
+      netTotal: keep.reduce((a, e) => a + e.net, 0),
+      paid: by('Paid'), declared: by('Declared'), estimated: by('Estimated'),
+      count: keep.length
+    });
+  }
+
+  renderVals() {
+    const st = Object.assign({}, this.state);
+    if (st.view === null) st.view = this.props.defaultView || 'Calendar';
+    const I = {
+      bars: 'M4 20V10M10 20V4M16 20v-7M22 20H2', table: 'M3 5h18v14H3V5Zm0 5h18M9 10v9',
+      home: 'M4 11l8-7 8 7v9H4v-9Zm5 9v-6h6v6',
+      scale: 'M12 4v16M6 8l-3 6h6l-3-6Zm12 0l-3 6h6l-3-6ZM5 8h14', dots: 'M5 12h.01M12 12h.01M19 12h.01'
+    };
+    const base = {
+      tabRows: [
+        { label: 'Dashboard', d: I.home, href: 'Snowline.dc.html', color: 'var(--t3)' },
+        { label: 'Analytics', d: I.bars, href: 'Analytics.dc.html', color: 'var(--t3)' },
+        { label: 'Portfolio', d: I.table, href: 'Holdings.dc.html', color: 'var(--accent)' },
+        { label: 'Tools', d: I.scale, href: 'Rebalancing.dc.html', color: 'var(--t3)' }
+      ],
+      stop: (e) => e.stopPropagation()
+    };
+    if (!window.SnowlineData) return base;
+
+    const D = window.SnowlineData, F = D.fmt, K = D.constants, T = D.totals();
+    const today = { year: K.today.year, monthIndex: K.today.monthIndex };
+    const payerCount = D.open().filter((p) => p.yieldPct > 0).length;
+    const showPerShare = this.props.showPerShare !== false;
+
+    const cur = this.shift(today, st.offset);
+    const month = this.applyFilters(D.calendarMonth(cur.year, cur.monthIndex));
+
+    const winStart = this.shift(today, st.windowOffset * 12);
+    const year = D.calendarYear(winStart.year, winStart.monthIndex).map((m) => this.applyFilters(m));
+    const yearGross = year.reduce((a, m) => a + m.gross, 0);
+    const yearCount = year.reduce((a, m) => a + m.count, 0);
+
+    const STATUS = {
+      Paid: { color: 'var(--accent)', bg: 'var(--accent-soft)', fg: 'var(--accent)' },
+      Declared: { color: 'var(--accent-3)', bg: 'var(--hover)', fg: 'var(--t1)' },
+      Estimated: { color: 'var(--grey-series)', bg: 'var(--hover)', fg: 'var(--t2)' }
+    };
+
+    const chartMax = Math.max.apply(null, year.map((m) => m.gross).concat([1]));
+    const chartBars = year.map((m, i) => {
+      const isCur = m.year === cur.year && m.monthIndex === cur.monthIndex;
+      const hovered = st.hover === i;
+      const segs = [
+        { key: 'estimated', v: m.estimated }, { key: 'declared', v: m.declared }, { key: 'paid', v: m.paid }
+      ].filter((s) => s.v > 0);
+      return {
+        label: m.short, value: m.gross > 0 ? F.num(m.gross, 0) : '',
+        h: Math.max(2, m.gross / chartMax * 118).toFixed(1) + 'px',
+        segments: segs.map((s) => ({
+          h: (s.v / (m.gross || 1) * 100).toFixed(2) + '%',
+          color: s.key === 'paid' ? STATUS.Paid.color : s.key === 'declared' ? STATUS.Declared.color : STATUS.Estimated.color
+        })),
+        slotBg: isCur ? 'var(--accent-soft)' : hovered ? 'var(--hover)' : 'transparent',
+        labelColor: isCur ? 'var(--accent)' : 'var(--t2)',
+        tickColor: isCur ? 'var(--accent)' : 'var(--t3)',
+        onEnter: () => this.setState({ hover: i }),
+        onLeave: () => this.setState({ hover: null }),
+        onClick: () => this.setState({ offset: (m.year * 12 + m.monthIndex) - (today.year * 12 + today.monthIndex) })
+      };
+    });
+
+    /* calendar grid, Monday first */
+    const cells = [];
+    for (let i = 0; i < month.leadingBlanks; i++) cells.push({ inMonth: false, bg: 'var(--off)', events: [] });
+    month.days.forEach((d) => {
+      cells.push({
+        inMonth: true, day: String(d.day),
+        hasTotal: d.gross > 0, total: F.money(d.gross),
+        bg: d.isToday ? 'var(--accent-soft)' : 'var(--card)',
+        dayBg: d.isToday ? 'var(--accent)' : 'transparent',
+        dayColor: d.isToday ? 'var(--on-accent)' : 'var(--t2)',
+        dayWeight: d.isToday ? 600 : 500,
+        events: d.events.map((e) => ({
+          mono: e.mono, ticker: e.ticker,
+          name: e.name.length > 16 ? e.name.slice(0, 15) + '…' : e.name,
+          amount: F.money(e.gross), dot: STATUS[e.status].color,
+          yield: F.pct(e.yieldPct, 2)
+        }))
+      });
+    });
+    while (cells.length % 7 !== 0) cells.push({ inMonth: false, bg: 'var(--off)', events: [] });
+
+    const dd = (key, title, value, options) => ({
+      title: title, value: value, open: st.menu === key,
+      bg: value === 'All' ? 'var(--card)' : 'var(--accent-soft)',
+      border: value === 'All' ? 'var(--line)' : 'var(--accent)',
+      onToggle: (e) => { e.stopPropagation(); this.setState({ menu: st.menu === key ? null : key }); },
+      options: options
+    });
+
+    const listRows = month.events.map((e) => ({
+      mono: e.mono, ticker: e.ticker, name: e.name,
+      status: e.status, statusBg: STATUS[e.status].bg, statusFg: STATUS[e.status].fg,
+      cells: [
+        { text: e.exDate, justify: 'flex-start', color: 'var(--t2)' },
+        { text: e.payDate, justify: 'flex-start', color: 'var(--t1)' },
+        { text: F.shares(e.shares), justify: 'flex-end', color: 'var(--t1)' }
+      ].concat(showPerShare ? [{ text: '$' + F.num(e.perShare, 4), justify: 'flex-end', color: 'var(--t1)' }] : []).concat([
+        { text: F.money(e.gross), justify: 'flex-end', color: 'var(--t1)' },
+        { text: F.money(e.net), justify: 'flex-end', color: 'var(--accent)' }
+      ])
+    }));
+
+    return Object.assign(base, {
+      portfolioName: K.portfolioName,
+      headNote: yearCount + ' payments across the next 12 months · ' + F.money(yearGross) + ' gross',
+      titleTip: st.titleTip,
+      titleTipOn: () => this.setState({ titleTip: true }),
+      titleTipOff: () => this.setState({ titleTip: false }),
+      titleTipText: 'Every payment is projected from the holding’s own declared ex-date and pay-date, stepped forward at its payment frequency. Amounts are gross; the net figures apply ' + F.num(K.withholdingTax * 100, 0) + '% withholding.',
+
+      windowLabel: st.windowOffset === 0 ? 'One year ahead' : year[0].short + ' – ' + year[11].short,
+      yearBack: () => this.setState({ windowOffset: st.windowOffset - 1 }),
+      yearFwd: () => this.setState({ windowOffset: st.windowOffset + 1 }),
+
+      searchOpen: st.searchOpen, query: st.query,
+      searchBg: st.searchOpen ? 'var(--hover)' : 'var(--card)',
+      togSearch: (e) => { e.stopPropagation(); this.setState({ searchOpen: !st.searchOpen, query: '' }); },
+      onQuery: (e) => this.setState({ query: e.target.value }),
+
+      dropdowns: [
+        dd('status', 'Status', st.status, ['All', 'Paid', 'Declared', 'Estimated'].map((s) => ({
+          label: s, dot: s === 'All' ? 'var(--line)' : STATUS[s].color,
+          bg: st.status === s ? 'var(--accent-soft)' : 'transparent',
+          color: st.status === s ? 'var(--accent)' : 'var(--t1)',
+          weight: st.status === s ? 600 : 400,
+          onClick: (e) => { e.stopPropagation(); this.setState({ status: s, menu: null }); }
+        }))),
+        dd('payout', 'Payout type', st.payout, ['All', 'Monthly', 'Quarterly'].map((s) => ({
+          label: s, dot: 'var(--line)',
+          bg: st.payout === s ? 'var(--accent-soft)' : 'transparent',
+          color: st.payout === s ? 'var(--accent)' : 'var(--t1)',
+          weight: st.payout === s ? 600 : 400,
+          onClick: (e) => { e.stopPropagation(); this.setState({ payout: s, menu: null }); }
+        })))
+      ],
+      togMore: (e) => { e.stopPropagation(); this.setState({ menu: st.menu === 'more' ? null : 'more' }); },
+      mMore: st.menu === 'more',
+      moreBg: st.menu === 'more' ? 'var(--hover)' : 'var(--card)',
+      moreRows: [
+        { label: 'Jump to this month', onClick: (e) => { e.stopPropagation(); this.setState({ offset: 0, windowOffset: 0, menu: null }); } },
+        { label: 'Clear filters', onClick: (e) => { e.stopPropagation(); this.setState({ status: 'All', payout: 'All', query: '', menu: null }); } },
+        { label: 'Add a dividend', onClick: (e) => { e.stopPropagation(); this.setState({ menu: null }); window.location.href = 'Transactions.dc.html'; } }
+      ],
+
+      annualTip: 'Forward-looking: each holding’s current yield applied to its current position, summed. It is not what was received over the past year.',
+      annualGross: F.money(T.forwardGross),
+      annualNet: F.money(T.forwardNet) + ' net of tax',
+      incomeRows: [
+        { label: 'Monthly average', value: F.money(T.forwardGross / 12), bg: 'var(--card)' },
+        { label: 'Daily average', value: F.money(T.forwardGross / 365), bg: 'var(--card)' },
+        { label: 'Gross yield', value: F.pct(T.grossYield, 2), bg: 'var(--card)' }
+      ],
+      incomeNote: D.paymentCountNext12() + ' payments a year across ' + payerCount + ' income-paying holdings. Net yield ' + F.pct(T.netYield, 2) + ' after ' + F.num(K.withholdingTax * 100, 0) + '% withholding.',
+
+      chartTitle: 'Gross income · ' + year[0].short + ' – ' + year[11].short,
+      statusLegend: ['Paid', 'Declared', 'Estimated'].map((s) => ({ label: s, color: STATUS[s].color })),
+      chartBars: chartBars,
+      chartNote: 'Click a month to open it below.' + (st.toast ? ' · ' + st.toast : ''),
+
+      monthLabel: month.label,
+      monthTotal: F.money(month.gross) + ' gross',
+      monthNote: month.count + ' payments · ' + F.money(month.netTotal) + ' net',
+      monthBack: () => this.setState({ offset: st.offset - 1 }),
+      monthFwd: () => this.setState({ offset: st.offset + 1 }),
+
+      views: ['Calendar', 'List'].map((v) => ({
+        label: v, onClick: () => this.setState({ view: v }),
+        bg: st.view === v ? 'var(--accent-soft)' : 'transparent',
+        color: st.view === v ? 'var(--accent)' : 'var(--t2)',
+        weight: st.view === v ? 600 : 500
+      })),
+      isCalendar: st.view === 'Calendar' && month.count > 0,
+      isList: st.view === 'List' && month.count > 0,
+      isEmpty: month.count === 0,
+      emptyHint: st.status !== 'All' || st.payout !== 'All' || st.query
+        ? 'No payment matches the current filters.'
+        : 'None of the holdings distribute in this month.',
+
+      weekdays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((w) => ({ label: w })),
+      cells: cells,
+
+      listCols: 'minmax(190px,1.4fr) 128px 128px 116px ' + (showPerShare ? '112px ' : '') + '116px 124px 132px',
+      listHead: [
+        { label: 'Ticker', justify: 'flex-start' }, { label: 'Ex-date', justify: 'flex-start' },
+        { label: 'Pay date', justify: 'flex-start' }, { label: 'Shares', justify: 'flex-end' }
+      ].concat(showPerShare ? [{ label: 'Per share', justify: 'flex-end' }] : []).concat([
+        { label: 'Gross', justify: 'flex-end' },
+        { label: 'Net after tax', justify: 'flex-end' }, { label: 'Status', justify: 'flex-end' }
+      ]),
+      listRows: listRows,
+      listTotal: [
+        { text: '', justify: 'flex-start', color: 'var(--t2)' },
+        { text: '', justify: 'flex-start', color: 'var(--t2)' },
+        { text: '', justify: 'flex-end', color: 'var(--t2)' }
+      ].concat(showPerShare ? [{ text: '', justify: 'flex-end', color: 'var(--t2)' }] : []).concat([
+        { text: F.money(month.gross), justify: 'flex-end', color: 'var(--t1)' },
+        { text: F.money(month.netTotal), justify: 'flex-end', color: 'var(--accent)' }
+      ]),
+
+      footnote: 'Projected from each holding’s declared ex-date and pay-date at its own frequency, priced off the current position. The twelve months shown sum to ' + F.money(yearGross) + ', which is the same forward income the dashboard reports.'
+    });
+  }
+}
+</script>
+</body>
+</html>

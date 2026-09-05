@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <script src="snowline-data.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --canvas:#FAFAF9; --card:#FFFFFF; --t1:#171717; --t2:#737373; --t3:#A3A3A3; --line:#E7E5E4;
+      --accent:#0F7B57; --neg:#B91C1C; --amber:#B45309; --hover:#F5F5F4; --on-accent:#FFFFFF;
+      --grey-series:#A8A29E; --shadow:0 10px 28px rgba(23,23,23,.10);
+      --accent-soft:color-mix(in oklab, var(--accent) 9%, var(--card));
+      --accent-tint:color-mix(in oklab, var(--accent) 16%, var(--card));
+      --tag-bg:color-mix(in oklab, var(--amber) 8%, var(--card));
+      --tag-fg:var(--amber); --chip-bg:var(--hover); --track:#E4E1DF;
+    }
+    html[data-theme="dark"]{
+      --canvas:#0C0C0C; --card:#171717; --t1:#FAFAF9; --t2:#A3A3A3; --t3:#737373; --line:#292524;
+      --accent:#34D399; --neg:#F87171; --amber:#F59E0B; --hover:#201E1D; --on-accent:#0C0C0C;
+      --grey-series:#57534E; --shadow:0 10px 28px rgba(0,0,0,.55);
+      --tag-bg:color-mix(in oklab, var(--amber) 7%, var(--card));
+      --tag-fg:color-mix(in oklab, var(--amber) 58%, var(--t2));
+      --chip-bg:var(--hover); --track:#3A3431;
+    }
+    html,body{margin:0;padding:0;background:var(--canvas)}
+    *{box-sizing:border-box}
+    body{font-family:'Inter',system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif;font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
+    a{color:var(--accent);text-decoration:none}
+    a:hover{color:var(--accent);text-decoration:underline}
+    button,input,select{font-family:inherit;font-variant-numeric:tabular-nums}
+    ::selection{background:var(--accent-tint)}
+    @keyframes menuIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+    @media (max-width:1240px){[data-r="uwrap"]{min-width:1140px}}
+    @media (max-width:1080px){[data-r="stats"]{grid-template-columns:1fr 1fr!important}}
+    @media (max-width:960px){
+      [data-r="navd"]{display:none!important}
+      [data-r="navm"]{display:flex!important}
+      [data-r="tabbar"]{display:flex!important}
+      [data-r="main"]{padding:16px 16px 104px!important}
+    }
+  </style>
+</helmet>
+<div style="min-height:100vh;background:var(--canvas);color:var(--t1);font-size:14px;line-height:1.45">
+
+  <dc-import name="TopNav" active="Tools" sub-active="Top dividend stocks" hint-size="100%,56px"></dc-import>
+
+  <main data-r="main" data-screen-label="Tools — Top dividend stocks" style="max-width:1392px;margin:0 auto;padding:24px 24px 88px;display:flex;flex-direction:column;gap:18px">
+
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap">
+      <div style="display:flex;flex-direction:column;gap:5px;min-width:0">
+        <div style="display:flex;align-items:center;gap:8px;position:relative">
+          <h1 style="margin:0;font-size:32px;font-weight:600;letter-spacing:-0.028em;line-height:1.1;color:var(--t1)">Top dividend stocks</h1>
+          <span onMouseEnter="{{ titleTipOn }}" onMouseLeave="{{ titleTipOff }}" style="width:16px;height:16px;margin-top:6px;flex:none;border:1px solid var(--line);border-radius:50%;font-size:10px;font-weight:500;color:var(--t3);display:flex;align-items:center;justify-content:center;cursor:help" style-hover="border-color:var(--t3);color:var(--t2)">?</span>
+          <sc-if value="{{ titleTip }}" hint-placeholder-val="{{ false }}">
+            <span style="position:absolute;top:44px;left:0;z-index:40;width:370px;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:10px 12px;font-size:11.5px;line-height:1.55;color:var(--t2)">{{ titleTipText }}</span>
+          </sc-if>
+          <span style="font-size:13px;color:var(--t3);padding-top:6px">{{ universeLabel }}</span>
+        </div>
+        <span style="font-size:12px;color:var(--t3)">{{ headNote }}</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <button onClick="{{ togWatchOnly }}" style="display:inline-flex;align-items:center;gap:7px;height:32px;padding:0 13px;border:1px solid {{ watchBorder }};border-radius:7px;background:{{ watchBg }};color:{{ watchFg }};font-size:12.5px;font-weight:500;cursor:pointer;white-space:nowrap" style-hover="background:var(--hover)">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="{{ watchFill }}" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M12 3.6l2.6 5.5 6 .9-4.3 4.2 1 6-5.3-2.8-5.3 2.8 1-6L3.4 10l6-.9z"></path></svg>
+          {{ watchLabel }}
+        </button>
+        <a href="Holdings.dc.html" style="display:inline-flex;align-items:center;height:32px;padding:0 13px;border:1px solid var(--line);border-radius:7px;color:var(--t1);font-size:12.5px;font-weight:500;text-decoration:none;white-space:nowrap" style-hover="background:var(--hover);text-decoration:none">My holdings</a>
+      </div>
+    </div>
+
+    <div data-r="stats" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;background:var(--card);border:1px solid var(--line);border-radius:8px;overflow:hidden">
+      <sc-for list="{{ stats }}" as="s" hint-placeholder-count="4">
+        <div style="padding:16px 20px;border-left:{{ s.border }}">
+          <dc-import name="Metric" label="{{ s.label }}" primary="{{ s.primary }}" primary-tone="{{ s.tone }}" secondary="{{ s.secondary }}" secondary-note="{{ s.note }}" tip="{{ s.tip }}" help="{{ true }}" hint-size="100%,74px"></dc-import>
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:14px 16px">
+      <div style="display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap">
+        <sc-for list="{{ numFilters }}" as="f" hint-placeholder-count="3">
+          <span style="display:flex;flex-direction:column;gap:6px">
+            <span style="font-size:11.5px;font-weight:500;color:var(--t2);white-space:nowrap">{{ f.label }}</span>
+            <span style="display:flex;align-items:stretch;width:{{ f.w }};border:1px solid {{ f.border }};border-radius:7px;overflow:hidden">
+              <sc-if value="{{ f.prefix }}" hint-placeholder-val="{{ false }}">
+                <span style="display:flex;align-items:center;padding:0 2px 0 9px;font-size:12.5px;color:var(--t3)">{{ f.prefix }}</span>
+              </sc-if>
+              <input value="{{ f.value }}" onChange="{{ f.onChange }}" inputmode="decimal" placeholder="{{ f.placeholder }}" style="flex:1;min-width:0;height:30px;padding:0 4px 0 9px;border:none;background:transparent;color:var(--t1);font-size:12.5px;outline:none">
+              <sc-if value="{{ f.suffix }}" hint-placeholder-val="{{ false }}">
+                <span style="display:flex;align-items:center;padding:0 9px 0 2px;font-size:12.5px;color:var(--t3)">{{ f.suffix }}</span>
+              </sc-if>
+            </span>
+          </span>
+        </sc-for>
+
+        <span style="display:flex;flex-direction:column;gap:6px">
+          <span style="font-size:11.5px;font-weight:500;color:var(--t2)">Sector</span>
+          <div style="position:relative">
+            <button onClick="{{ togSector }}" style="display:flex;align-items:center;justify-content:space-between;gap:10px;width:184px;height:32px;padding:0 11px;border:1px solid {{ sectorBorder }};border-radius:7px;background:{{ sectorBg }};color:var(--t1);font-size:12.5px;font-weight:500;cursor:pointer" style-hover="background:var(--hover)">
+              <span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ sectorLabel }}</span>
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="color:var(--t3);flex:none"><path d="M6 9l6 6 6-6"></path></svg>
+            </button>
+            <sc-if value="{{ mSector }}" hint-placeholder-val="{{ false }}">
+              <div onClick="{{ stop }}" style="position:absolute;top:36px;left:0;z-index:50;width:236px;max-height:300px;overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:6px;animation:menuIn .12s ease-out">
+                <sc-for list="{{ sectorOptions }}" as="o" hint-placeholder-count="8">
+                  <button onClick="{{ o.onClick }}" style="display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;padding:8px 10px;border:none;border-radius:6px;background:{{ o.bg }};text-align:left;cursor:pointer;font-size:12.5px;color:{{ o.color }};font-weight:{{ o.weight }}" style-hover="background:var(--hover)">
+                    <span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ o.label }}</span>
+                    <span style="font-size:11px;color:var(--t3)">{{ o.meta }}</span>
+                  </button>
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
+        </span>
+
+        <button onClick="{{ togHide }}" style="display:flex;align-items:center;gap:8px;height:32px;padding:0 11px 0 9px;border:1px solid {{ hideBorder }};border-radius:7px;background:{{ hideBg }};color:var(--t1);font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap" style-hover="background:var(--hover)">
+          <span style="width:15px;height:15px;flex:none;border:1px solid {{ hideBoxBorder }};border-radius:4px;background:{{ hideBoxBg }};display:flex;align-items:center;justify-content:center;color:var(--on-accent);font-size:10px;font-weight:700">{{ hideMark }}</span>
+          Hide what I own
+        </button>
+
+        <sc-if value="{{ filtered }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ reset }}" style="height:32px;padding:0 11px;border:none;border-radius:7px;background:transparent;color:var(--t2);font-size:12.5px;font-weight:500;cursor:pointer;white-space:nowrap" style-hover="background:var(--hover);color:var(--t1)">Reset filters</button>
+        </sc-if>
+      </div>
+
+      <span style="display:flex;align-items:center;gap:7px;height:32px;padding:0 11px;border:1px solid var(--line);border-radius:7px">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="M16.6 16.6L21 21"></path></svg>
+        <input value="{{ query }}" onChange="{{ onQuery }}" placeholder="Ticker, name or sector…" style="width:196px;border:none;background:transparent;color:var(--t1);font-size:12.5px;outline:none">
+      </span>
+    </div>
+
+    <div style="display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:8px;overflow:hidden">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid var(--line)">
+        <span style="display:flex;align-items:baseline;gap:9px;flex-wrap:wrap">
+          <span style="font-size:13px;font-weight:600;color:var(--t1)">{{ resultLabel }}</span>
+          <span style="font-size:11.5px;color:var(--t3)">{{ sortLabel }}</span>
+        </span>
+        <span style="display:flex;align-items:center;gap:13px;flex-wrap:wrap">
+          <sc-for list="{{ badgeLegend }}" as="l" hint-placeholder-count="2">
+            <span style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--t3);white-space:nowrap">
+              <span style="display:inline-flex;align-items:center;height:17px;padding:0 6px;border-radius:4px;background:{{ l.bg }};color:{{ l.fg }};font-size:10px;font-weight:600">{{ l.chip }}</span>{{ l.label }}
+            </span>
+          </sc-for>
+        </span>
+      </div>
+
+      <div style="max-width:100%;overflow-x:auto;overscroll-behavior-x:contain">
+        <div data-r="uwrap">
+          <div style="display:grid;grid-template-columns:{{ cols }};border-bottom:1px solid var(--line);background:var(--card)">
+            <sc-for list="{{ head }}" as="h" hint-placeholder-count="10">
+              <div onClick="{{ h.onClick }}" style="display:flex;align-items:center;justify-content:{{ h.justify }};gap:5px;padding:9px 13px;cursor:{{ h.cursor }};position:{{ h.pos }};left:0;z-index:{{ h.z }};background:var(--card)" style-hover="background:var(--hover)">
+                <span style="font-size:12px;font-weight:{{ h.weight }};color:{{ h.color }};white-space:nowrap">{{ h.label }}</span>
+                <sc-if value="{{ h.arrow }}" hint-placeholder-val="{{ false }}">
+                  <span style="font-size:9px;color:var(--accent)">{{ h.arrow }}</span>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+
+          <sc-for list="{{ rows }}" as="r" hint-placeholder-count="14">
+            <div onMouseEnter="{{ r.onEnter }}" onMouseLeave="{{ r.onLeave }}" style="display:grid;grid-template-columns:{{ cols }};border-bottom:1px solid var(--line);background:{{ r.bg }};border-left:{{ r.mark }}">
+              <div style="display:flex;align-items:center;gap:9px;padding:10px 13px;min-width:0;position:sticky;left:0;z-index:1;background:{{ r.bg }}">
+                <span style="width:26px;height:26px;flex:none;border-radius:6px;background:var(--hover);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:600;color:var(--t2)">{{ r.mono }}</span>
+                <span style="display:flex;flex-direction:column;gap:2px;min-width:0;flex:1">
+                  <span style="display:flex;align-items:center;gap:6px;min-width:0">
+                    <span style="font-size:13px;font-weight:500;color:var(--t1);white-space:nowrap">{{ r.ticker }}</span>
+                    <sc-if value="{{ r.badge }}" hint-placeholder-val="{{ false }}">
+                      <span style="display:inline-flex;align-items:center;height:16px;padding:0 6px;border-radius:4px;background:{{ r.badgeBg }};color:{{ r.badgeFg }};font-size:9.5px;font-weight:600;white-space:nowrap">{{ r.badge }}</span>
+                    </sc-if>
+                  </span>
+                  <span style="font-size:12px;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%">{{ r.name }}</span>
+                </span>
+              </div>
+              <sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="7">
+                <div style="display:flex;flex-direction:column;align-items:{{ c.items }};justify-content:center;gap:2px;padding:10px 13px;min-width:0;overflow:hidden">
+                  <span style="font-size:13px;font-weight:{{ c.weight }};color:{{ c.color }};white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis">{{ c.text }}</span>
+                  <sc-if value="{{ c.sub }}" hint-placeholder-val="{{ false }}">
+                    <span style="font-size:11px;color:var(--t3);white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis">{{ c.sub }}</span>
+                  </sc-if>
+                </div>
+              </sc-for>
+              <div style="display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:10px 13px;min-width:0">
+                <span style="min-width:34px;text-align:center;font-size:12px;font-weight:600;color:{{ r.scoreColor }};background:var(--chip-bg);border:1px solid var(--line);border-radius:5px;padding:3px 0">{{ r.score }}</span>
+                <span style="font-size:12px;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.scoreLabel }}</span>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:center;padding:10px 4px">
+                <button onClick="{{ r.onStar }}" title="{{ r.starTitle }}" style="display:flex;align-items:center;justify-content:center;width:28px;height:28px;border:none;border-radius:6px;background:transparent;color:{{ r.starColor }};cursor:pointer" style-hover="background:var(--hover)">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="{{ r.starFill }}" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M12 3.6l2.6 5.5 6 .9-4.3 4.2 1 6-5.3-2.8-5.3 2.8 1-6L3.4 10l6-.9z"></path></svg>
+                </button>
+              </div>
+            </div>
+          </sc-for>
+
+          <sc-if value="{{ noResults }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:7px;padding:56px 20px">
+              <span style="font-size:13.5px;font-weight:500;color:var(--t1)">Nothing clears these filters</span>
+              <span style="font-size:12px;color:var(--t3);text-align:center;max-width:440px;line-height:1.6">{{ noResultsNote }}</span>
+              <button onClick="{{ reset }}" style="margin-top:6px;height:30px;padding:0 12px;border:1px solid var(--line);border-radius:7px;background:transparent;font-size:12px;font-weight:500;color:var(--t1);cursor:pointer" style-hover="background:var(--hover)">Reset filters</button>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+
+      <sc-if value="{{ hasMore }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;align-items:center;justify-content:center;padding:12px 16px;border-top:1px solid var(--line)">
+          <button onClick="{{ showMore }}" style="height:30px;padding:0 14px;border:1px solid var(--line);border-radius:7px;background:transparent;font-size:12px;font-weight:500;color:var(--t1);cursor:pointer" style-hover="background:var(--hover)">{{ moreLabel }}</button>
+        </div>
+      </sc-if>
+    </div>
+
+    <span style="font-size:11px;line-height:1.55;color:var(--t3);max-width:960px;text-wrap:pretty">{{ footnote }}</span>
+  </main>
+
+  <sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:95;display:flex;align-items:center;gap:9px;padding:11px 16px;background:var(--card);border:1px solid var(--line);border-radius:999px;box-shadow:var(--shadow)">
+      <span style="width:7px;height:7px;border-radius:50%;background:var(--accent)"></span>
+      <span style="font-size:12.5px;color:var(--t1)">{{ toast }}</span>
+    </div>
+  </sc-if>
+
+  <div data-r="tabbar" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:60;height:60px;background:var(--card);border-top:1px solid var(--line);align-items:stretch;padding:0 4px">
+    <sc-for list="{{ tabRows }}" as="t" hint-placeholder-count="4">
+      <a href="{{ t.href }}" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-decoration:none;color:{{ t.color }}">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="{{ t.d }}"></path></svg>
+        <span style="font-size:10px;font-weight:500">{{ t.label }}</span>
+      </a>
+    </sc-for>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;minYield&quot;:{&quot;editor&quot;:&quot;float&quot;,&quot;default&quot;:2,&quot;min&quot;:0,&quot;max&quot;:20,&quot;step&quot;:0.5,&quot;unit&quot;:&quot;%&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Screener&quot;},&quot;maxPayout&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:100,&quot;min&quot;:10,&quot;max&quot;:100,&quot;step&quot;:5,&quot;unit&quot;:&quot;%&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Screener&quot;},&quot;minStreak&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:0,&quot;min&quot;:0,&quot;max&quot;:50,&quot;step&quot;:5,&quot;unit&quot;:&quot;yrs&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Screener&quot;},&quot;sortBy&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Yield&quot;,&quot;Safety&quot;,&quot;Growth&quot;,&quot;Streak&quot;,&quot;Payout&quot;,&quot;Size&quot;],&quot;default&quot;:&quot;Yield&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Screener&quot;},&quot;hideOwned&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Screener&quot;}}">
+class Component extends DCLogic {
+  state = {
+    minYield: null, maxPayout: null, minStreak: null, sector: null, hideOwned: null,
+    query: '', sort: null, dir: null, watch: null, watchOnly: false,
+    limit: 25, titleTip: false, hover: null, menu: null, toast: ''
+  };
+
+  componentDidMount() {
+    this.doc = () => { if (this.state.menu) this.setState({ menu: null }); };
+    document.addEventListener('click', this.doc);
+    /* Screener.dc.html#JNJ arrives from Find the Dip: search that name and
+       drop the yield floor, so the linked ticker is actually in the result. */
+    this.openHash = () => {
+      const t = decodeURIComponent(String(window.location.hash || '').replace('#', '')).toUpperCase();
+      if (t) this.setState({ query: t, minYield: '0', maxPayout: '100', minStreak: '0', sector: null, hideOwned: false, watchOnly: false, limit: 25 });
+    };
+    window.addEventListener('hashchange', this.openHash);
+    setTimeout(this.openHash, 40);
+    if (!window.SnowlineData) {
+      const check = () => { if (window.SnowlineData) this.forceUpdate(); else setTimeout(check, 30); };
+      setTimeout(check, 20);
+    }
+  }
+  componentWillUnmount() {
+    if (this.doc) document.removeEventListener('click', this.doc);
+    if (this.openHash) window.removeEventListener('hashchange', this.openHash);
+  }
+
+  num(v) { const n = parseFloat(String(v === null || v === undefined ? '' : v).replace(/[^0-9.]/g, '')); return isFinite(n) ? n : 0; }
+
+  toast(msg) {
+    this.setState({ toast: msg });
+    if (this.tt) clearTimeout(this.tt);
+    this.tt = setTimeout(() => this.setState({ toast: '' }), 2400);
+  }
+
+  /* the watchlist lives in the data module now, so Find the Dip sees the
+     same stars */
+  watch() {
+    return this.state.watch === null ? (window.SnowlineData ? window.SnowlineData.watchlist() : []) : this.state.watch;
+  }
+
+  renderVals() {
+    const st = this.state;
+    const I = {
+      bars: 'M4 20V10M10 20V4M16 20v-7M22 20H2', table: 'M3 5h18v14H3V5Zm0 5h18M9 10v9',
+      home: 'M4 11l8-7 8 7v9H4v-9Zm5 9v-6h6v6',
+      scale: 'M12 4v16M6 8l-3 6h6l-3-6Zm12 0l-3 6h6l-3-6ZM5 8h14', dots: 'M5 12h.01M12 12h.01M19 12h.01'
+    };
+    const base = {
+      tabRows: [
+        { label: 'Dashboard', d: I.home, href: 'Snowline.dc.html', color: 'var(--t3)' },
+        { label: 'Analytics', d: I.bars, href: 'Analytics.dc.html', color: 'var(--t3)' },
+        { label: 'Portfolio', d: I.table, href: 'Holdings.dc.html', color: 'var(--t3)' },
+        { label: 'Tools', d: I.scale, href: 'Screener.dc.html', color: 'var(--accent)' }
+      ],
+      stop: (e) => e.stopPropagation(),
+      cols: '208px 92px 96px 100px 96px 100px 156px 108px 148px 44px'
+    };
+    if (!window.SnowlineData) return base;
+
+    const D = window.SnowlineData, F = D.fmt;
+    const money = (v) => F.money(v);
+    const U = D.marketUniverse(), stats = D.universeStats();
+
+    const minYield = st.minYield === null ? String(this.props.minYield === undefined ? 2 : this.props.minYield) : st.minYield;
+    const maxPayout = st.maxPayout === null ? String(this.props.maxPayout === undefined ? 100 : this.props.maxPayout) : st.maxPayout;
+    const minStreak = st.minStreak === null ? String(this.props.minStreak === undefined ? 0 : this.props.minStreak) : st.minStreak;
+    const sector = st.sector === null ? (this.props.sector && this.props.sector !== 'All sectors' ? this.props.sector : null) : st.sector;
+    const hideOwned = st.hideOwned === null ? this.props.hideOwned === true : st.hideOwned;
+    const sort = st.sort || this.props.sortBy || 'Yield';
+    const dir = st.dir === null ? -1 : st.dir;
+    const q = st.query.trim().toLowerCase();
+
+    const minY = this.num(minYield), maxP = this.num(maxPayout), minS = this.num(minStreak);
+    const capLabel = (r) => (r.capB >= 1 ? '$' + F.num(r.capB, r.capB >= 100 ? 0 : 1) + 'bn' : '$' + F.num(r.capB * 1000, 0) + 'm');
+
+    const matches = U.filter((r) => {
+      if (r.yieldPct < minY) return false;
+      /* an option-income structure has no payout ratio — a payout ceiling
+         cannot exclude it, so it passes unless the ceiling is below 100 */
+      if (r.payoutRatio === null) { if (maxP < 100) return false; }
+      else if (r.payoutRatio > maxP) return false;
+      if (r.streak < minS) return false;
+      if (sector && r.sector !== sector) return false;
+      if (hideOwned && r.held) return false;
+      if (st.watchOnly && this.watch().indexOf(r.ticker) < 0) return false;
+      if (!q) return true;
+      return (r.ticker + ' ' + r.name + ' ' + r.sector).toLowerCase().indexOf(q) >= 0;
+    });
+
+    const key = {
+      Ticker: (r) => r.ticker, Price: (r) => r.price, Yield: (r) => r.yieldPct,
+      Payout: (r) => (r.payoutRatio === null ? -1 : r.payoutRatio),
+      Streak: (r) => r.streak, Growth: (r) => (r.dividendGrowth5Y === null ? -99 : r.dividendGrowth5Y),
+      Sector: (r) => r.sector, Size: (r) => r.capB,
+      Safety: (r) => (r.rating.score === null ? -1 : r.rating.score)
+    };
+    const acc = key[sort] || key.Yield;
+    const sorted = matches.slice().sort((a, b) => {
+      const x = acc(a), y = acc(b);
+      if (typeof x === 'string') return dir * x.localeCompare(y);
+      return dir * (x - y);
+    });
+    const shown = sorted.slice(0, st.limit);
+
+    const ys = matches.map((r) => r.yieldPct).sort((a, b) => a - b);
+    const median = ys.length ? ys[Math.floor(ys.length / 2)] : 0;
+    const scored = matches.filter((r) => r.rating.score !== null);
+    const avgScore = scored.length ? Math.round(scored.reduce((s, r) => s + r.rating.score, 0) / scored.length) : 0;
+    const scoreColor = (s) => s === null ? 'var(--t3)' : s >= 75 ? 'var(--accent)' : s >= 60 ? 'var(--t1)' : s >= 40 ? 'var(--t2)' : 'var(--tag-fg)';
+
+    const filtered = minY !== 2 || maxP !== 100 || minS !== 0 || !!sector || hideOwned || !!q || st.watchOnly;
+    const heldMatches = matches.filter((r) => r.held).length;
+
+    const sortCol = (label, justify, sortable) => ({
+      label: label, justify: justify,
+      cursor: sortable === false ? 'default' : 'pointer',
+      weight: sort === label ? 600 : 500,
+      color: sort === label ? 'var(--t1)' : 'var(--t2)',
+      arrow: sort === label ? (dir === -1 ? '▼' : '▲') : '',
+      pos: 'static', z: 1,
+      onClick: sortable === false ? (() => {}) : (() => this.setState({
+        sort: label, dir: sort === label ? -dir : (label === 'Ticker' || label === 'Sector' ? 1 : -1), limit: 25
+      }))
+    });
+
+    return Object.assign(base, {
+      universeLabel: stats.count + ' names',
+      headNote: stats.payers + ' payers across ' + stats.sectors + ' sectors · ' + stats.monthly
+        + ' pay monthly · ' + stats.held + ' of them are in the portfolio · median yield ' + F.pct(stats.medianYield, 2),
+      titleTip: st.titleTip,
+      titleTipOn: () => this.setState({ titleTip: true }),
+      titleTipOff: () => this.setState({ titleTip: false }),
+      titleTipText: 'A screening universe, not a portfolio view: ' + stats.count + ' well-known payers, of which the '
+        + stats.held + ' you hold carry exactly the numbers the rest of the app shows — same price, yield, payout ratio, growth and dividend rating. Yield is never entered; it is the annual dividend per share over the price, so this screen and the payout calendar cannot disagree.',
+
+      stats: [
+        {
+          label: 'Universe', primary: String(stats.count), tone: 'plain',
+          secondary: stats.sectors + ' sectors', note: stats.payers + ' pay a dividend',
+          tip: 'An illustrative market list. The money-market line is excluded — it is not a market security.',
+          border: 'none'
+        },
+        {
+          label: 'Matches', primary: String(matches.length), tone: 'plain',
+          secondary: 'of ' + stats.count + ' names',
+          note: heldMatches ? heldMatches + ' held' : '',
+          tip: 'How many names clear every filter at once.',
+          border: '1px solid var(--line)'
+        },
+        {
+          label: 'Median yield', primary: F.pct(median, 2), tone: 'plain',
+          secondary: matches.length ? F.pct(ys[0], 2) + ' – ' + F.pct(ys[ys.length - 1], 2) : 'no matches',
+          note: 'across the matches',
+          tip: 'Median rather than mean: one 19% covered-call note would drag an average and tell you nothing about the middle of the list.',
+          border: '1px solid var(--line)'
+        },
+        {
+          label: 'Average safety', primary: avgScore ? String(avgScore) : '—', tone: avgScore >= 60 ? 'pos' : 'plain',
+          secondary: scored.length + ' rated', note: 'same score as Analytics',
+          tip: 'The dividend rating from Analytics ▸ Dividends, unchanged: payout headroom, five-year growth, structure, frequency and yield sustainability.',
+          border: '1px solid var(--line)'
+        }
+      ],
+
+      numFilters: [
+        {
+          label: 'Min yield', w: '104px', value: minYield, suffix: '%', prefix: '', placeholder: '0',
+          border: this.num(minYield) !== 2 ? 'var(--accent)' : 'var(--line)',
+          onChange: (e) => this.setState({ minYield: e.target.value.replace(/[^0-9.]/g, ''), limit: 25 })
+        },
+        {
+          label: 'Max payout', w: '110px', value: maxPayout, suffix: '%', prefix: '', placeholder: '100',
+          border: this.num(maxPayout) !== 100 ? 'var(--accent)' : 'var(--line)',
+          onChange: (e) => this.setState({ maxPayout: e.target.value.replace(/[^0-9.]/g, ''), limit: 25 })
+        },
+        {
+          label: 'Min streak', w: '112px', value: minStreak, suffix: 'yrs', prefix: '', placeholder: '0',
+          border: this.num(minStreak) !== 0 ? 'var(--accent)' : 'var(--line)',
+          onChange: (e) => this.setState({ minStreak: e.target.value.replace(/[^0-9.]/g, ''), limit: 25 })
+        }
+      ],
+
+      sectorLabel: sector || 'All sectors',
+      sectorBg: sector ? 'var(--accent-soft)' : 'transparent',
+      sectorBorder: sector ? 'var(--accent)' : 'var(--line)',
+      togSector: (e) => { e.stopPropagation(); this.setState({ menu: st.menu === 'sector' ? null : 'sector' }); },
+      mSector: st.menu === 'sector',
+      sectorOptions: [{ label: 'All sectors', value: null, count: stats.count }].concat(
+        D.universeSectors().map((s) => ({ label: s.sector, value: s.sector, count: s.count }))
+      ).map((o) => ({
+        label: o.label, meta: String(o.count),
+        bg: (o.value || null) === sector ? 'var(--accent-soft)' : 'transparent',
+        color: (o.value || null) === sector ? 'var(--accent)' : 'var(--t1)',
+        weight: (o.value || null) === sector ? 600 : 400,
+        onClick: (e) => { e.stopPropagation(); this.setState({ sector: o.value, menu: null, limit: 25 }); }
+      })),
+
+      togHide: () => this.setState({ hideOwned: !hideOwned, limit: 25 }),
+      hideMark: hideOwned ? '✓' : '',
+      hideBg: hideOwned ? 'var(--accent-soft)' : 'transparent',
+      hideBorder: hideOwned ? 'var(--accent)' : 'var(--line)',
+      hideBoxBg: hideOwned ? 'var(--accent)' : 'transparent',
+      hideBoxBorder: hideOwned ? 'var(--accent)' : 'var(--t3)',
+
+      filtered: filtered,
+      reset: () => this.setState({
+        minYield: '2', maxPayout: '100', minStreak: '0', sector: null,
+        hideOwned: false, query: '', watchOnly: false, limit: 25, menu: null
+      }),
+      query: st.query,
+      onQuery: (e) => this.setState({ query: e.target.value, limit: 25 }),
+
+      togWatchOnly: () => {
+        if (!this.watch().length) return this.toast('Star a name to start a watchlist');
+        this.setState({ watchOnly: !st.watchOnly, limit: 25 });
+      },
+      watchLabel: this.watch().length ? 'Watchlist · ' + this.watch().length : 'Watchlist',
+      watchBg: st.watchOnly ? 'var(--accent-soft)' : 'transparent',
+      watchBorder: st.watchOnly ? 'var(--accent)' : 'var(--line)',
+      watchFg: st.watchOnly ? 'var(--accent)' : 'var(--t1)',
+      watchFill: st.watchOnly ? 'var(--accent)' : 'none',
+
+      resultLabel: matches.length === stats.count
+        ? 'All ' + stats.count + ' names'
+        : matches.length + (matches.length === 1 ? ' name' : ' names') + ' of ' + stats.count,
+      sortLabel: 'sorted by ' + sort.toLowerCase() + (dir === -1 ? ', highest first' : ', lowest first'),
+      badgeLegend: [
+        { chip: 'HELD', label: 'in the portfolio', bg: 'var(--accent-soft)', fg: 'var(--accent)' },
+        { chip: 'CLOSED', label: 'sold, still tracked', bg: 'var(--hover)', fg: 'var(--t2)' }
+      ],
+
+      head: [
+        Object.assign(sortCol('Ticker', 'flex-start'), { pos: 'sticky', z: 3 }),
+        sortCol('Price', 'flex-end'),
+        sortCol('Yield', 'flex-end'),
+        sortCol('Payout', 'flex-end'),
+        sortCol('Streak', 'flex-end'),
+        sortCol('Growth', 'flex-end'),
+        sortCol('Sector', 'flex-start'),
+        sortCol('Size', 'flex-end'),
+        sortCol('Safety', 'flex-end'),
+        Object.assign(sortCol('', 'center', false), { cursor: 'default' })
+      ],
+
+      rows: shown.map((r) => {
+        const starred = this.watch().indexOf(r.ticker) >= 0;
+        const cell = (text, sub, items, weight, color) => ({
+          text: text, sub: sub || '', items: items || 'flex-end',
+          weight: weight || 500, color: color || 'var(--t1)'
+        });
+        return {
+          mono: r.mono, ticker: r.ticker, name: r.name,
+          badge: r.held ? 'HELD' : r.closed ? 'CLOSED' : '',
+          badgeBg: r.held ? 'var(--accent-soft)' : 'var(--hover)',
+          badgeFg: r.held ? 'var(--accent)' : 'var(--t2)',
+          mark: r.held ? '2px solid var(--accent)' : '2px solid transparent',
+          cells: [
+            cell(money(r.price), r.yieldPct ? money(r.dps) + ' a year' : 'no dividend'),
+            cell(r.yieldPct ? F.pct(r.yieldPct, 2) : '—', r.yieldPct ? money(r.perPayment) + ' × ' + r.paymentsAYear : '', 'flex-end', 600),
+            r.yieldPct === 0
+              ? cell('—', 'no dividend', 'flex-end', 500, 'var(--t3)')
+              : r.payoutRatio === null
+                ? cell('—', 'option income', 'flex-end', 500, 'var(--t3)')
+                : cell(F.pct(r.payoutRatio, 1), r.payoutRatio > 85 ? 'thin cover' : '', 'flex-end', 500, r.payoutRatio > 85 ? 'var(--tag-fg)' : 'var(--t1)'),
+            r.streak > 0
+              ? cell(String(r.streak) + ' yrs', r.streak >= 25 ? 'aristocrat' : '')
+              : cell('—', r.yieldPct === 0 ? 'never paid' : r.isFund ? 'variable' : 'reset', 'flex-end', 500, 'var(--t3)'),
+            r.dividendGrowth5Y === null
+              ? cell('—', 'under 5 yrs', 'flex-end', 500, 'var(--t3)')
+              : cell((r.dividendGrowth5Y >= 0 ? '+' : '−') + F.num(Math.abs(r.dividendGrowth5Y), 1) + '%', '5Y a year', 'flex-end', 500,
+                r.dividendGrowth5Y < 0 ? 'var(--neg)' : 'var(--t1)'),
+            cell(r.sector, r.assetClass === 'Stock' ? '' : r.assetClass, 'flex-start', 500, 'var(--t1)'),
+            cell(capLabel(r), r.isFund ? 'fund AUM' : 'market cap')
+          ],
+          score: r.rating.score === null ? '—' : String(r.rating.score),
+          scoreColor: scoreColor(r.rating.score),
+          scoreLabel: r.rating.label,
+          onStar: (e) => {
+            e.stopPropagation();
+            const next = starred ? this.watch().filter((t) => t !== r.ticker) : this.watch().concat([r.ticker]);
+            window.SnowlineData.saveWatchlist(next);
+            this.setState({ watch: next, watchOnly: next.length ? st.watchOnly : false });
+            this.toast(starred ? r.ticker + ' removed from the watchlist' : r.ticker + ' added to the watchlist');
+          },
+          starred: starred,
+          starFill: starred ? 'var(--amber)' : 'none',
+          starColor: starred ? 'var(--amber)' : 'var(--t3)',
+          starTitle: starred ? 'Remove from watchlist' : 'Add to watchlist',
+          bg: st.hover === r.ticker ? 'var(--hover)' : 'var(--card)',
+          onEnter: () => this.setState({ hover: r.ticker }),
+          onLeave: () => this.setState({ hover: null })
+        };
+      }),
+      noResults: matches.length === 0,
+      noResultsNote: st.watchOnly && !this.watch().length
+        ? 'The watchlist is empty — star a name first.'
+        : 'Nothing in the ' + stats.count + '-name universe clears a ' + F.pct(minY, 2) + ' yield'
+          + (maxP < 100 ? ', a payout under ' + F.pct(maxP, 0) : '')
+          + (minS > 0 ? ' and a ' + F.num(minS, 0) + '-year streak' : '') + '.',
+      hasMore: sorted.length > shown.length,
+      moreLabel: 'Show ' + Math.min(25, sorted.length - shown.length) + ' more of ' + sorted.length,
+      showMore: () => this.setState({ limit: st.limit + 25 }),
+      toast: st.toast,
+
+      footnote: 'The universe is illustrative — ' + stats.count + ' well-known payers, not a live market feed — but it is internally consistent by construction. Yield is never entered: it is the annual dividend per share divided by the price, so this table and the payout calendar cannot disagree. A growth streak of zero always means the dividend was cut or the distribution is variable, which is why the covered-call funds and the mortgage REIT show a dash rather than a number, and a payout ratio is only absent for option-income structures — the one case the rating treats as having no cover to measure. The '
+        + stats.held + ' names you hold are read from the portfolio rather than re-entered, so their price, yield, payout ratio, growth and safety score are the same figures the holdings table and Analytics ▸ Dividends show; the money-market line is excluded because it is not a market security, and '
+        + stats.closed + ' past holdings stay in the list marked closed. Safety is the Analytics dividend rating, unchanged.'
+    });
+  }
+}
+</script>
+</body>
+</html>

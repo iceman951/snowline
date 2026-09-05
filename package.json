@@ -1,0 +1,16 @@
+{
+  "name": "snowline",
+  "private": true,
+  "type": "module",
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "dev": "bun run --filter '*' dev",
+    "dev:api": "bun run --cwd apps/api dev",
+    "dev:web": "bun run --cwd apps/web dev",
+    "seed": "bun run --cwd apps/api seed",
+    "check": "bun run --cwd apps/web check"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  }
+}

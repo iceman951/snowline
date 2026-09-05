@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <script src="snowline-data.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --canvas:#FAFAF9; --card:#FFFFFF; --t1:#171717; --t2:#737373; --t3:#A3A3A3; --line:#E7E5E4;
+      --accent:#0F7B57; --neg:#B91C1C; --amber:#B45309; --hover:#F5F5F4; --on-accent:#FFFFFF;
+      --grey-series:#A8A29E; --shadow:0 10px 28px rgba(23,23,23,.10); --pad:20px;
+      --accent-2:color-mix(in oklab, var(--accent) 74%, var(--card));
+      --accent-3:color-mix(in oklab, var(--accent) 48%, var(--card));
+      --accent-4:color-mix(in oklab, var(--accent) 26%, var(--card));
+      --accent-soft:color-mix(in oklab, var(--accent) 9%, var(--card));
+      --accent-tint:color-mix(in oklab, var(--accent) 16%, var(--card));
+      --neg-soft:color-mix(in oklab, var(--neg) 9%, var(--card));
+      --amber-soft:color-mix(in oklab, var(--amber) 9%, var(--card));
+      --tag-bg:color-mix(in oklab, var(--amber) 8%, var(--card));
+      --tag-fg:var(--amber);
+      --chip-bg:var(--hover);
+    }
+    html[data-theme="dark"]{
+      --canvas:#0C0C0C; --card:#171717; --t1:#FAFAF9; --t2:#A3A3A3; --t3:#737373; --line:#292524;
+      --accent:#34D399; --neg:#F87171; --amber:#F59E0B; --hover:#201E1D; --on-accent:#0C0C0C;
+      --grey-series:#57534E; --shadow:0 10px 28px rgba(0,0,0,.55);
+      --tag-bg:color-mix(in oklab, var(--amber) 7%, var(--card));
+      --tag-fg:color-mix(in oklab, var(--amber) 58%, var(--t2));
+    }
+    html,body{margin:0;padding:0;background:var(--canvas)}
+    *{box-sizing:border-box}
+    body{font-family:'Inter',system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif;font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
+    a{color:var(--accent);text-decoration:none}
+    a:hover{color:var(--accent);text-decoration:underline}
+    button,input,textarea{font-family:inherit;font-variant-numeric:tabular-nums}
+    ::selection{background:var(--accent-tint)}
+    @keyframes menuIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+    @media (max-width:1180px){
+      [data-r="mrow"]{grid-template-columns:minmax(0,1fr)!important}
+      [data-r="charts"]{grid-template-columns:minmax(0,1fr)!important}
+      [data-r="charts"] > div{grid-column:span 1!important}
+      [data-r="rating"]{grid-template-columns:minmax(0,1fr)!important}
+      [data-r="split"]{grid-template-columns:minmax(0,1fr)!important}
+    }
+    @media (max-width:960px){
+      [data-r="navd"]{display:none!important}
+      [data-r="navm"]{display:flex!important}
+      [data-r="tabbar"]{display:flex!important}
+      [data-r="main"]{padding:16px 16px 104px!important}
+      [data-r="navwrap"]{padding:0 16px!important}
+      [data-r="rtable"]{overflow-x:auto!important}
+    }
+  </style>
+</helmet>
+<div style="min-height:100vh;background:var(--canvas);color:var(--t1);font-size:14px;line-height:1.45">
+
+  <dc-import name="TopNav" active="Analytics" sub-active="Dividends" hint-size="100%,56px"></dc-import>
+
+  <main data-r="main" data-screen-label="Analytics — Dividends" style="max-width:1392px;margin:0 auto;padding:24px 24px 88px;display:flex;flex-direction:column;gap:22px">
+
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap">
+      <div style="display:flex;flex-direction:column;gap:5px;min-width:0">
+        <div style="display:flex;align-items:center;gap:9px">
+          <h1 style="margin:0;font-size:32px;font-weight:600;letter-spacing:-0.028em;line-height:1.1;color:var(--t1)">Dividends</h1>
+          <span style="font-size:13px;color:var(--t3);padding-top:6px">{{ portfolioName }}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:9px;font-size:12px;color:var(--t3)">
+          <span>{{ headPayers }}</span>
+          <span style="width:1px;height:10px;background:var(--line)"></span>
+          <span>{{ headTax }}</span>
+          <span style="width:1px;height:10px;background:var(--line)"></span>
+          <span>{{ headNext }}</span>
+        </div>
+      </div>
+    </div>
+
+    <dc-import name="AnalyticsSubnav" active="Dividends" hint-size="100%,48px"></dc-import>
+
+    <div data-r="mrow" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px">
+      <div style="background:var(--card);border:1px solid var(--line);border-radius:8px;padding:20px;display:flex;flex-direction:column;gap:14px">
+        <dc-import name="Metric" label="Yield" tip="Forward 12-month income at today's prices, before withholding tax." primary="{{ yieldPrimary }}" secondary="{{ yieldSecondary }}" secondary-note="after tax" hint-size="100%,84px"></dc-import>
+        <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--t3)">
+          <span>{{ yieldOnCost }}</span>
+          <span style="width:1px;height:10px;background:var(--line)"></span>
+          <span>{{ yieldSpread }}</span>
+        </div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--line);border-radius:8px;padding:20px;display:flex;flex-direction:column;gap:14px">
+        <dc-import name="Metric" label="Dividends" tip="Forward gross income over the next twelve months." primary="{{ divPrimary }}" primary-delta="{{ divDelta }}" delta-tone="pos" secondary="{{ divSecondary }}" secondary-note="monthly average" hint-size="100%,84px"></dc-import>
+        <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--t3)">
+          <span>{{ divNet }}</span>
+          <span style="width:1px;height:10px;background:var(--line)"></span>
+          <span>{{ divCount }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div data-r="charts" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px">
+      <sc-for list="{{ charts }}" as="c" hint-placeholder-count="6">
+        <div style="grid-column:{{ c.span }};background:var(--card);border:1px solid var(--line);border-radius:8px;display:flex;flex-direction:column">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 20px;border-bottom:1px solid var(--line);flex-wrap:wrap">
+            <div style="display:flex;align-items:baseline;gap:10px;min-width:0">
+              <span style="font-size:14px;font-weight:600;color:var(--t1)">{{ c.title }}</span>
+              <span style="font-size:12px;color:var(--t3)">{{ c.subtitle }}</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <sc-for list="{{ c.legend }}" as="l" hint-placeholder-count="2">
+                <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--t3)">
+                  <span style="width:8px;height:8px;border-radius:1px;background:{{ l.color }};display:inline-block"></span>{{ l.label }}
+                </span>
+              </sc-for>
+              <sc-for list="{{ c.controls }}" as="ctl" hint-placeholder-count="2">
+                <div style="position:relative">
+                  <button onClick="{{ ctl.onToggle }}" style="display:flex;align-items:center;gap:7px;height:30px;padding:0 10px;border:1px solid var(--line);border-radius:6px;background:transparent;color:var(--t1);font-size:12px;cursor:pointer;white-space:nowrap" style-hover="background:var(--hover)">{{ ctl.value }}
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2.2" stroke-linecap="round"><path d="M6 9l6 6 6-6"></path></svg>
+                  </button>
+                  <sc-if value="{{ ctl.open }}" hint-placeholder-val="{{ false }}">
+                    <div onClick="{{ stop }}" style="position:absolute;top:36px;right:0;z-index:50;width:194px;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:6px;animation:menuIn .12s ease-out">
+                      <sc-for list="{{ ctl.options }}" as="o" hint-placeholder-count="3">
+                        <button onClick="{{ o.onClick }}" style="display:flex;align-items:center;justify-content:space-between;width:100%;height:38px;padding:0 10px;border:none;border-radius:6px;background:transparent;color:var(--t1);font-size:13px;cursor:pointer;text-align:left" style-hover="background:var(--hover)">
+                          <span>{{ o.label }}</span><span style="color:var(--accent);font-size:12px;opacity:{{ o.check }}">✓</span>
+                        </button>
+                      </sc-for>
+                    </div>
+                  </sc-if>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="padding:18px 20px 20px;display:flex;flex-direction:column;gap:4px">
+            <div style="position:relative">
+              <div style="position:relative">
+                <svg viewBox="0 0 624 154" style="width:100%;height:auto;display:block">
+                  <sc-for list="{{ c.grid }}" as="g" hint-placeholder-count="5">
+                    <line x1="46" y1="{{ g.y }}" x2="616" y2="{{ g.y }}" stroke="var(--line)" stroke-width="1" stroke-dasharray="3 4"></line>
+                  </sc-for>
+                  <sc-if value="{{ c.zeroY }}" hint-placeholder-val="{{ false }}">
+                    <line x1="46" y1="{{ c.zeroY }}" x2="616" y2="{{ c.zeroY }}" stroke="var(--t3)" stroke-width="1"></line>
+                  </sc-if>
+                  <sc-for list="{{ c.bars }}" as="b" hint-placeholder-count="12">
+                    <rect x="{{ b.sx }}" y="10" width="{{ b.sw }}" height="138" fill="var(--hover)" opacity="{{ b.hop }}" onMouseEnter="{{ b.onEnter }}" onMouseLeave="{{ b.onLeave }}"></rect>
+                    <sc-for list="{{ b.parts }}" as="p" hint-placeholder-count="1">
+                      <rect x="{{ p.x }}" y="{{ p.y }}" width="{{ p.w }}" height="{{ p.h }}" fill="{{ p.fill }}" pointer-events="none"></rect>
+                    </sc-for>
+                    <sc-if value="{{ b.marker }}" hint-placeholder-val="{{ false }}">
+                      <line x1="{{ b.markerX1 }}" y1="{{ b.markerY }}" x2="{{ b.markerX2 }}" y2="{{ b.markerY }}" stroke="var(--t1)" stroke-width="1.6" pointer-events="none"></line>
+                    </sc-if>
+                  </sc-for>
+                </svg>
+                <sc-for list="{{ c.grid }}" as="g" hint-placeholder-count="5">
+                  <span style="position:absolute;left:0;top:{{ g.top }};width:6.2%;transform:translateY(-50%);text-align:right;font-size:10px;color:var(--t3);pointer-events:none">{{ g.label }}</span>
+                </sc-for>
+              </div>
+              <div style="display:flex;margin:5px 1.28% 0 7.37%">
+                <sc-for list="{{ c.bars }}" as="b" hint-placeholder-count="12">
+                  <span style="flex:1;min-width:0;padding:0 1px;text-align:center;font-size:10px;color:{{ b.labelColor }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ b.label }}</span>
+                </sc-for>
+              </div>
+              <sc-if value="{{ c.tip }}" hint-placeholder-val="{{ false }}">
+                <div style="position:absolute;top:0;left:{{ c.tipLeft }};transform:translateX(-50%);z-index:9;pointer-events:none">
+                  <dc-import name="ChartTooltip" tip="{{ c.tip }}" hint-size="230px,190px"></dc-import>
+                </div>
+              </sc-if>
+            </div>
+            <sc-if value="{{ c.footer }}" hint-placeholder-val="{{ false }}">
+              <span style="font-size:11px;color:var(--t3);padding-left:7.37%">{{ c.footer }}</span>
+            </sc-if>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+
+    <dc-import name="DonutBreakdown" title="Passive income diversification" subtitle="{{ incomeSubtitle }}" rows="{{ incomeRows }}" center-label="Forward income" unit="payers" name-header="Asset" value-header="Share / gross a year" list-height="330px" footer="{{ incomeFooter }}" hint-size="100%,450px"></dc-import>
+
+    <div style="background:var(--card);border:1px solid var(--line);border-radius:8px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 20px;border-bottom:1px solid var(--line)">
+        <div style="display:flex;align-items:baseline;gap:10px">
+          <span style="font-size:14px;font-weight:600;color:var(--t1)">Dividend rating</span>
+          <span style="font-size:12px;color:var(--t3)">{{ ratingSubtitle }}</span>
+        </div>
+        <span style="font-size:11px;color:var(--t3)">Derived from payout headroom, growth, structure and yield</span>
+      </div>
+      <div data-r="rating" style="display:grid;grid-template-columns:274px minmax(0,1fr);gap:24px;padding:20px">
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div style="position:relative;width:100%;max-width:240px;align-self:center">
+            <svg viewBox="0 0 240 240" style="width:100%;height:auto;display:block">
+              <circle cx="120" cy="120" r="76" fill="none" stroke="var(--line)" stroke-width="20"></circle>
+              <sc-for list="{{ ratingSegs }}" as="s" hint-placeholder-count="4">
+                <circle cx="120" cy="120" r="76" fill="none" stroke="{{ s.color }}" stroke-width="{{ s.sw }}" stroke-dasharray="{{ s.dash }}" stroke-dashoffset="{{ s.offset }}" opacity="{{ s.op }}" transform="rotate(-90 120 120)" onMouseEnter="{{ s.onEnter }}" onMouseLeave="{{ s.onLeave }}" style="transition:opacity .15s ease,stroke-width .15s ease"></circle>
+              </sc-for>
+            </svg>
+            <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;pointer-events:none">
+              <span style="font-size:20px;font-weight:600;letter-spacing:-0.02em;color:var(--t1)">{{ ratingCenterValue }}</span>
+              <span style="font-size:11px;color:var(--t2)">{{ ratingCenterLabel }}</span>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:7px">
+            <sc-for list="{{ ratingLegend }}" as="l" hint-placeholder-count="4">
+              <div onMouseEnter="{{ l.onEnter }}" onMouseLeave="{{ l.onLeave }}" style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:4px 6px;border-radius:5px;background:{{ l.bg }}">
+                <span style="display:flex;align-items:center;gap:8px;min-width:0">
+                  <span style="width:9px;height:9px;flex:none;border-radius:1px;background:{{ l.color }}"></span>
+                  <span style="font-size:12px;color:var(--t1);white-space:nowrap">{{ l.label }}</span>
+                  <span style="font-size:11px;color:var(--t3);white-space:nowrap">{{ l.count }}</span>
+                </span>
+                <span style="font-size:12px;color:var(--t2);white-space:nowrap">{{ l.pct }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div data-r="rtable" style="display:flex;flex-direction:column;min-width:0">
+          <div style="display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1.1fr) minmax(0,1.1fr) 168px;gap:12px;padding-bottom:9px;border-bottom:1px solid var(--line)">
+            <span style="font-size:12px;font-weight:500;color:var(--t2)">Asset</span>
+            <span style="font-size:12px;font-weight:500;color:var(--t2);text-align:right">Value / Invested</span>
+            <span style="font-size:12px;font-weight:500;color:var(--t2);text-align:right">Annual dividends</span>
+            <span style="font-size:12px;font-weight:500;color:var(--t2);text-align:right">Dividend rating</span>
+          </div>
+          <sc-for list="{{ ratingRows }}" as="r" hint-placeholder-count="12">
+            <div style="display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1.1fr) minmax(0,1.1fr) 168px;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)">
+              <span style="display:flex;align-items:center;gap:10px;min-width:0">
+                <span style="width:28px;height:28px;flex:none;border-radius:6px;background:var(--hover);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:var(--t2)">{{ r.mono }}</span>
+                <span style="display:flex;flex-direction:column;gap:1px;min-width:0">
+                  <span style="font-size:13px;font-weight:500;color:var(--t1);white-space:nowrap">{{ r.ticker }}</span>
+                  <span style="font-size:12px;color:var(--t3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</span>
+                </span>
+              </span>
+              <dc-import name="TwoLineCell" align="right" primary="{{ r.value }}" secondary="{{ r.invested }}" hint-size="100%,36px"></dc-import>
+              <dc-import name="TwoLineCell" align="right" primary="{{ r.annual }}" secondary="{{ r.annualNet }}" hint-size="100%,36px"></dc-import>
+              <span style="display:flex;align-items:center;justify-content:flex-end;gap:8px">
+                <sc-if value="{{ r.warn }}" hint-placeholder-val="{{ false }}">
+                  <span title="{{ r.warnText }}" style="display:flex;align-items:center;color:var(--tag-fg)">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4l9 16H3z"></path><path d="M12 10v4M12 17h.01"></path></svg>
+                  </span>
+                </sc-if>
+                <span style="font-size:12px;color:var(--t2);white-space:nowrap">{{ r.label }}</span>
+                <span style="min-width:34px;text-align:center;font-size:12px;font-weight:600;color:{{ r.scoreColor }};background:var(--chip-bg);border:1px solid var(--line);border-radius:5px;padding:3px 7px">{{ r.score }}</span>
+              </span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div data-r="tabbar" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:60;height:60px;background:var(--card);border-top:1px solid var(--line);align-items:stretch;padding:0 4px">
+    <sc-for list="{{ tabRows }}" as="t" hint-placeholder-count="4">
+      <a href="{{ t.href }}" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-decoration:none;color:{{ t.color }}">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="{{ t.d }}"></path></svg>
+        <span style="font-size:10px;font-weight:500">{{ t.label }}</span>
+      </a>
+    </sc-for>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{}">
+class Component extends DCLogic {
+  state = {
+    menu: null, hover: null, ratingHover: null,
+    ypMetric: 'Yield (%)', ypGroup: 'Holdings', growthGroup: 'Holdings'
+  };
+
+  /* Roll-up of the paying holdings by sector.
+       value  — market value of the category
+       avg    — value-weighted average of `rateOf` (a rate: %, CAGR), which is
+                what makes a category rate comparable to a holding rate
+       sum    — plain total of `amountOf` (an amount: $), never weighted */
+  byCategory(list, rateOf, amountOf) {
+    const map = {}, order = [];
+    list.forEach((p) => {
+      if (!map[p.sector]) { map[p.sector] = { name: p.sector, value: 0, weighted: 0, sum: 0, members: [] }; order.push(p.sector); }
+      const g = map[p.sector];
+      g.value += p.value;
+      g.weighted += rateOf(p) * p.value;
+      g.sum += amountOf ? amountOf(p) : 0;
+      g.members.push(p);
+    });
+    return order.map((k) => {
+      const g = map[k];
+      return { name: g.name, value: g.value, avg: g.value ? g.weighted / g.value : 0, sum: g.sum, members: g.members };
+    });
+  }
+
+  componentDidMount() {
+    this.doc = () => { if (this.state.menu) this.setState({ menu: null }); };
+    document.addEventListener('click', this.doc);
+    if (!window.SnowlineData) {
+      const check = () => { if (window.SnowlineData) this.forceUpdate(); else setTimeout(check, 30); };
+      setTimeout(check, 20);
+    }
+  }
+  componentWillUnmount() { if (this.doc) document.removeEventListener('click', this.doc); }
+
+  /* geometry for one bar row; vals may be negative (zero line handled by caller) */
+  geom(count, left, right, top, base, bw) {
+    const slot = (right - left) / count;
+    const out = [];
+    for (let i = 0; i < count; i++) {
+      const sx = left + i * slot;
+      out.push({
+        i: i, sx: sx.toFixed(1), sw: slot.toFixed(1), cx: (sx + slot / 2).toFixed(1),
+        x: (sx + (slot - bw) / 2).toFixed(1), w: bw, slot: slot
+      });
+    }
+    return out;
+  }
+  /* axis max that divides evenly by the tick count, so labels read round */
+  niceMax(raw, steps) {
+    const units = [1, 2, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000];
+    for (let i = 0; i < units.length; i++) {
+      if (units[i] * steps >= raw) return units[i] * steps;
+    }
+    return Math.ceil(raw / steps) * steps;
+  }
+  /* Smallest round ceiling above `raw` that divides into `steps` round ticks. */
+  niceMax(raw, steps) {
+    if (!(raw > 0)) return steps;
+    const mag = Math.pow(10, Math.floor(Math.log10(raw / steps)));
+    const cands = [1, 2, 2.5, 5, 10, 20, 25];
+    for (let m = mag; m <= mag * 1000; m *= 10) {
+      for (let i = 0; i < cands.length; i++) {
+        const step = cands[i] * m;
+        if (step * steps >= raw) return step * steps;
+      }
+    }
+    return Math.ceil(raw / steps) * steps;
+  }
+  grid(min, max, steps, base, top, fmt) {
+    const out = [];
+    for (let i = 0; i <= steps; i++) {
+      const v = min + (max - min) * (i / steps);
+      const y = base - (base - top) * (i / steps);
+      out.push({ y: y.toFixed(1), top: (y / 154 * 100).toFixed(2) + '%', label: fmt(v) });
+    }
+    return out;
+  }
+
+  chartTog(id) {
+    return (e) => { e.stopPropagation(); this.setState((s) => ({ menu: s.menu === id ? null : id })); };
+  }
+  opts(id, list, cur, key) {
+    return list.map((o) => ({
+      label: o, check: o === cur ? 1 : 0,
+      onClick: (e) => { e.stopPropagation(); const p = { menu: null }; p[key] = o; this.setState(p); }
+    }));
+  }
+  hoverOf(id, i) {
+    return {
+      hop: this.state.hover && this.state.hover.id === id && this.state.hover.i === i ? 1 : 0,
+      onEnter: () => this.setState({ hover: { id: id, i: i } }),
+      onLeave: () => this.setState({ hover: null })
+    };
+  }
+  isHover(id, i) { return this.state.hover && this.state.hover.id === id && this.state.hover.i === i; }
+  tipLeft(cx) { return Math.min(84, Math.max(18, cx / 624 * 100)) + '%'; }
+
+  renderVals() {
+    const st = this.state;
+    const I = {
+      bars: 'M4 20V10M10 20V4M16 20v-7M22 20H2', table: 'M3 5h18v14H3V5Zm0 5h18M9 10v9',
+      home: 'M4 11l8-7 8 7v9H4v-9Zm5 9v-6h6v6',
+      scale: 'M12 4v16M6 8l-3 6h6l-3-6Zm12 0l-3 6h6l-3-6ZM5 8h14', dots: 'M5 12h.01M12 12h.01M19 12h.01'
+    };
+    const base = {
+      stop: (e) => e.stopPropagation(),
+      tabRows: [
+        { label: 'Dashboard', d: I.home, href: 'Snowline.dc.html', color: 'var(--t3)' },
+        { label: 'Analytics', d: I.bars, href: 'Analytics.dc.html', color: 'var(--accent)' },
+        { label: 'Portfolio', d: I.table, href: 'Holdings.dc.html', color: 'var(--t3)' },
+        { label: 'Tools', d: I.scale, href: 'Rebalancing.dc.html', color: 'var(--t3)' }
+      ]
+    };
+    if (!window.SnowlineData) return base;
+
+    const D = window.SnowlineData, F = D.fmt, K = D.constants, T = D.totals();
+    const payers = D.open().filter((p) => p.yieldPct > 0);
+    const charts = [];
+
+    /* ---- 1 · Yield / Payout, per holding, sorted descending -------------- */
+    const ypIsYield = st.ypMetric === 'Yield (%)';
+    const ypByCat = st.ypGroup === 'Categories';
+    let ypSorted, ypVals, ypPayouts;
+    if (ypByCat) {
+      const cats = this.byCategory(payers, (p) => p.yieldPct, (p) => D.holding(p).annualGross);
+      ypSorted = cats.map((c) => ({
+        ticker: c.name, name: c.members.length + (c.members.length === 1 ? ' holding' : ' holdings') + ' · ' + c.members.map((m) => m.ticker).join(', '),
+        yieldPct: c.value ? c.sum / c.value * 100 : 0, value: c.value, members: c.members,
+        payoutRatio: (() => {
+          const withPayout = c.members.filter((m) => m.payoutRatio !== null);
+          if (!withPayout.length) return null;
+          const v = withPayout.reduce((s, m) => s + m.value, 0);
+          return v ? withPayout.reduce((s, m) => s + m.payoutRatio * m.value, 0) / v : null;
+        })(),
+        frequency: c.members.every((m) => m.frequency === c.members[0].frequency) ? c.members[0].frequency : 'Mixed',
+        cat: c
+      })).sort((a, b) => (ypIsYield ? b.yieldPct - a.yieldPct : b.cat.sum - a.cat.sum));
+      ypVals = ypSorted.map((c) => ypIsYield ? c.yieldPct : c.cat.sum);
+      ypPayouts = ypSorted.map((c) => ypIsYield && c.payoutRatio !== null ? c.payoutRatio : 0);
+    } else {
+      ypSorted = payers.slice().sort((a, b) => {
+        const av = ypIsYield ? a.yieldPct : D.holding(a).annualGross;
+        const bv = ypIsYield ? b.yieldPct : D.holding(b).annualGross;
+        return bv - av;
+      });
+      ypVals = ypSorted.map((p) => ypIsYield ? p.yieldPct : D.holding(p).annualGross);
+      ypPayouts = ypSorted.map((p) => ypIsYield && p.payoutRatio !== null ? p.payoutRatio : 0);
+    }
+    const ypMaxRaw = Math.max.apply(null, ypVals.concat(ypPayouts));
+    const ypMax = this.niceMax(ypMaxRaw, 4);
+    const ypG = this.geom(ypSorted.length, 46, 616, 10, 138, ypByCat ? 46 : 30);
+    charts.push({
+      id: 'yp', span: 'span 2', title: 'Yield / Payout',
+      subtitle: ypByCat
+        ? ypSorted.length + ' categories · ' + (ypIsYield ? 'value-weighted yield' : 'total income')
+        : ypSorted.length + ' paying holdings · sorted by ' + (ypIsYield ? 'yield' : 'income'),
+      legend: ypIsYield ? [{ label: 'Yield', color: 'var(--accent)' }, { label: 'Payout ratio marker', color: 'var(--t1)' }] : [{ label: 'Gross income', color: 'var(--accent)' }],
+      controls: [
+        { value: st.ypMetric, open: st.menu === 'ypm', onToggle: this.chartTog('ypm'), options: this.opts('ypm', ['Yield (%)', 'Annual income ($)'], st.ypMetric, 'ypMetric') },
+        { value: st.ypGroup, open: st.menu === 'ypg', onToggle: this.chartTog('ypg'), options: this.opts('ypg', ['Holdings', 'Categories'], st.ypGroup, 'ypGroup') }
+      ],
+      grid: this.grid(0, ypMax, 4, 138, 10, (v) => ypIsYield ? F.num(v, 0) + '%' : '$' + F.num(v, 0)),
+      bars: ypSorted.map((p, i) => {
+        const v = ypVals[i];
+        const h = v / ypMax * 128;
+        const payoutY = ypIsYield && p.payoutRatio !== null ? 138 - (p.payoutRatio / ypMax * 128) : null;
+        const g = ypG[i];
+        const label = ypByCat ? (p.ticker.length > 13 ? p.ticker.slice(0, 12) + '…' : p.ticker) : p.ticker;
+        return Object.assign({
+          label: label, labelColor: 'var(--t3)',
+          parts: [{ x: g.x, y: (138 - h).toFixed(1), w: g.w, h: h.toFixed(1), fill: 'var(--accent)' }],
+          marker: payoutY !== null,
+          markerX1: (parseFloat(g.x) - 4).toFixed(1), markerX2: (parseFloat(g.x) + g.w + 4).toFixed(1),
+          markerY: payoutY === null ? 0 : payoutY.toFixed(1),
+          sx: g.sx, sw: g.sw
+        }, this.hoverOf('yp', i));
+      }),
+      tip: (() => {
+        const i = st.hover && st.hover.id === 'yp' ? st.hover.i : null;
+        if (i === null || !ypSorted[i]) return null;
+        const p = ypSorted[i];
+        if (ypByCat) {
+          const income = p.cat.sum;
+          const catYield = p.value ? income / p.value * 100 : 0;
+          return {
+            title: p.ticker, headline: ypIsYield ? F.pct(catYield) : F.money(income),
+            sub: ypIsYield ? F.money(income) + ' gross a year' : F.pct(catYield) + ' yield on ' + F.money(p.value),
+            rows: p.cat.members.slice().sort((a, b) => b.yieldPct - a.yieldPct).map((m) => ({
+              label: m.ticker, value: ypIsYield ? F.pct(m.yieldPct) : F.money(D.holding(m).annualGross), color: 'var(--accent)'
+            })),
+            footer: F.money(p.value) + ' across ' + p.cat.members.length + (p.cat.members.length === 1 ? ' holding' : ' holdings'),
+            footerTone: 'pos'
+          };
+        }
+        const h = D.holding(p);
+        return {
+          title: p.ticker + ' · ' + p.name,
+          headline: ypIsYield ? F.pct(p.yieldPct) : F.money(h.annualGross),
+          sub: ypIsYield ? F.money(h.annualGross) + ' gross a year' : F.pct(p.yieldPct) + ' forward yield',
+          rows: [
+            { label: 'Yield on cost', value: F.pct(h.yieldOnCost), color: 'var(--accent-3)' },
+            { label: 'Payout ratio', value: p.payoutRatio === null ? 'option income' : F.pct(p.payoutRatio, 1), color: 'var(--t1)' },
+            { label: 'Frequency', value: p.frequency, color: 'var(--grey-series)' }
+          ],
+          footer: p.payoutRatio === null ? 'Distribution comes from option premium, not earnings' : (p.payoutRatio > 75 ? 'Little headroom left in earnings' : 'Covered by earnings'),
+          footerTone: p.payoutRatio !== null && p.payoutRatio > 75 ? 'neg' : 'pos'
+        };
+      })(),
+      tipLeft: st.hover && st.hover.id === 'yp' && ypG[st.hover.i] ? this.tipLeft(parseFloat(ypG[st.hover.i].cx)) : '50%',
+      footer: ypIsYield ? 'The dark tick marks each holding’s payout ratio on the same axis — where it sits far above the bar, the dividend leans on something other than earnings.' : ''
+    });
+
+    /* ---- 2 · Average annual growth -------------------------------------- */
+    const grWithHistory = payers.filter((p) => p.dividendGrowth5Y !== null);
+    const grByCat = st.growthGroup === 'Categories';
+    let grSorted;
+    if (grByCat) {
+      grSorted = this.byCategory(grWithHistory, (p) => p.dividendGrowth5Y).map((c) => ({
+        ticker: c.name, dividendGrowth5Y: c.avg, value: c.value, cat: c
+      })).sort((a, b) => b.dividendGrowth5Y - a.dividendGrowth5Y);
+    } else {
+      grSorted = grWithHistory.slice().sort((a, b) => b.dividendGrowth5Y - a.dividendGrowth5Y);
+    }
+    const grMax = 20, grMin = -20;
+    const grZero = 138 - (0 - grMin) / (grMax - grMin) * 128;
+    const grG = this.geom(grSorted.length, 46, 616, 10, 138, grByCat ? 48 : 34);
+    charts.push({
+      id: 'gr', span: 'span 2', title: 'Average annual growth',
+      subtitle: 'five-year dividend CAGR · ' + (grByCat
+        ? grSorted.length + ' categories, value-weighted'
+        : grSorted.length + ' holdings with history'),
+      legend: [],
+      controls: [{ value: st.growthGroup, open: st.menu === 'grg', onToggle: this.chartTog('grg'), options: this.opts('grg', ['Holdings', 'Categories'], st.growthGroup, 'growthGroup') }],
+      grid: this.grid(grMin, grMax, 3, 138, 10, (v) => F.num(v, 0) + '%'),
+      zeroY: grZero.toFixed(1),
+      bars: grSorted.map((p, i) => {
+        const v = p.dividendGrowth5Y;
+        const y = 138 - (v - grMin) / (grMax - grMin) * 128;
+        const g = grG[i];
+        const top = Math.min(y, grZero), h = Math.abs(grZero - y);
+        return Object.assign({
+          label: grByCat && p.ticker.length > 14 ? p.ticker.slice(0, 13) + '…' : p.ticker, labelColor: 'var(--t3)',
+          parts: [{ x: g.x, y: top.toFixed(1), w: g.w, h: Math.max(1, h).toFixed(1), fill: v >= 0 ? 'var(--accent)' : 'var(--neg)' }],
+          marker: false, markerX1: 0, markerX2: 0, markerY: 0,
+          sx: g.sx, sw: g.sw
+        }, this.hoverOf('gr', i));
+      }),
+      tip: (() => {
+        const i = st.hover && st.hover.id === 'gr' ? st.hover.i : null;
+        if (i === null || !grSorted[i]) return null;
+        const p = grSorted[i];
+        if (grByCat) {
+          return {
+            title: p.ticker, headline: F.caret(p.dividendGrowth5Y, 1) + ' a year',
+            sub: 'value-weighted five-year CAGR',
+            rows: p.cat.members.slice().sort((a, b) => b.dividendGrowth5Y - a.dividendGrowth5Y).map((m) => ({
+              label: m.ticker, value: F.caret(m.dividendGrowth5Y, 1),
+              color: m.dividendGrowth5Y >= 0 ? 'var(--accent)' : 'var(--neg)',
+              tone: m.dividendGrowth5Y >= 0 ? 'pos' : 'neg'
+            })),
+            footer: F.money(p.value) + ' across ' + p.cat.members.length + (p.cat.members.length === 1 ? ' holding' : ' holdings'),
+            footerTone: p.dividendGrowth5Y < 0 ? 'neg' : 'pos'
+          };
+        }
+        const h = D.holding(p);
+        return {
+          title: p.ticker + ' · ' + p.name,
+          headline: F.caret(p.dividendGrowth5Y, 1) + ' a year',
+          sub: 'five-year dividend CAGR',
+          rows: [
+            { label: 'Current yield', value: F.pct(p.yieldPct), color: 'var(--accent)' },
+            { label: 'Gross income', value: F.money(h.annualGross), color: 'var(--accent-3)' },
+            { label: 'Received to date', value: F.money(p.dividendsReceived), color: 'var(--grey-series)' }
+          ],
+          footer: p.dividendGrowth5Y < 0 ? 'Dividend has been cut over this period' : 'Dividend has grown every year',
+          footerTone: p.dividendGrowth5Y < 0 ? 'neg' : 'pos'
+        };
+      })(),
+      tipLeft: st.hover && st.hover.id === 'gr' && grG[st.hover.i] ? this.tipLeft(parseFloat(grG[st.hover.i].cx)) : '50%',
+      footer: grByCat
+        ? 'Categories are weighted by market value; holdings with less than five years of payments are left out of the average.'
+        : payers.length - grWithHistory.length + ' paying holdings have less than five years of history and are not shown.'
+    });
+
+    /* ---- 3 · Future payments -------------------------------------------- */
+    const fp = D.forwardPayments();
+    const fpMax = 200;
+    const fpG = this.geom(12, 46, 616, 10, 138, 22);
+    charts.push({
+      id: 'fp', span: 'span 1', title: 'Future payments',
+      subtitle: 'next 12 months · ' + F.money(T.forwardGross),
+      legend: [{ label: 'Received', color: 'var(--accent)' }, { label: 'Projected', color: 'var(--accent-3)' }],
+      controls: [],
+      grid: this.grid(0, fpMax, 4, 138, 10, (v) => '$' + F.num(v, 0)),
+      bars: fp.map((mo, i) => {
+        const g = fpG[i];
+        const h = mo.total / fpMax * 128;
+        const rh = mo.received / fpMax * 128;
+        return Object.assign({
+          label: mo.label, labelColor: i === 0 ? 'var(--t2)' : 'var(--t3)',
+          parts: [
+            { x: g.x, y: (138 - h).toFixed(1), w: g.w, h: h.toFixed(1), fill: 'var(--accent-3)' },
+            { x: g.x, y: (138 - rh).toFixed(1), w: g.w, h: rh.toFixed(1), fill: 'var(--accent)' }
+          ],
+          marker: false, markerX1: 0, markerX2: 0, markerY: 0,
+          sx: g.sx, sw: g.sw
+        }, this.hoverOf('fp', i));
+      }),
+      tip: (() => {
+        const i = st.hover && st.hover.id === 'fp' ? st.hover.i : null;
+        if (i === null || !fp[i]) return null;
+        const mo = fp[i];
+        const dot = (s) => s === 'Paid' ? 'var(--accent)' : s === 'Declared' ? 'var(--accent-3)' : 'var(--accent-4)';
+        return {
+          title: mo.full, headline: F.money(mo.total),
+          sub: mo.received > 0 ? F.money(mo.received) + ' received · ' + F.money(mo.total - mo.received) + ' projected' : mo.rows.length + ' payments projected',
+          rows: mo.rows.map((r) => ({ label: r.t, value: F.money(r.amt), color: dot(r.status) }))
+        };
+      })(),
+      tipLeft: st.hover && st.hover.id === 'fp' && fpG[st.hover.i] ? this.tipLeft(parseFloat(fpG[st.hover.i].cx)) : '50%',
+      footer: ''
+    });
+
+    /* ---- 4 · Dividends received, by month ------------------------------- */
+    const tl = D.dividendTimeline().slice(-12);
+    const rmMax = this.niceMax(Math.max.apply(null, tl.map((x) => x.v)), 4);
+    const rmG = this.geom(tl.length, 46, 616, 10, 138, 22);
+    charts.push({
+      id: 'rm', span: 'span 1', title: 'Dividends received',
+      subtitle: 'by month · ' + F.money(tl.reduce((s, x) => s + x.v, 0)) + ' over 12 months',
+      legend: [{ label: 'After tax', color: 'var(--accent)' }],
+      controls: [],
+      grid: this.grid(0, rmMax, 4, 138, 10, (v) => '$' + F.num(v, 0)),
+      bars: tl.map((x, i) => {
+        const g = rmG[i];
+        const h = x.v / rmMax * 128;
+        return Object.assign({
+          label: x.label, labelColor: 'var(--t3)',
+          parts: [{ x: g.x, y: (138 - h).toFixed(1), w: g.w, h: h.toFixed(1), fill: 'var(--accent)' }],
+          marker: false, markerX1: 0, markerX2: 0, markerY: 0,
+          sx: g.sx, sw: g.sw
+        }, this.hoverOf('rm', i));
+      }),
+      tip: (() => {
+        const i = st.hover && st.hover.id === 'rm' ? st.hover.i : null;
+        if (i === null || !tl[i]) return null;
+        const pt = tl[i];
+        const sc = D.scheduleFor(pt.label);
+        const raw = sc.reduce((s, r) => s + r.amt, 0) || 1;
+        return {
+          title: pt.label + ' ' + pt.year, headline: F.money(pt.v), sub: 'after ' + F.pct(K.withholdingTax * 100, 0) + ' withholding tax',
+          rows: sc.map((r) => ({ label: r.t, value: F.money(r.amt / raw * pt.v), color: 'var(--accent)' }))
+        };
+      })(),
+      tipLeft: st.hover && st.hover.id === 'rm' && rmG[st.hover.i] ? this.tipLeft(parseFloat(rmG[st.hover.i].cx)) : '50%',
+      footer: ''
+    });
+
+    /* ---- 5 · Dividends received, by holding ----------------------------- */
+    const rhSorted = D.open().filter((p) => p.dividendsReceived > 0).sort((a, b) => b.dividendsReceived - a.dividendsReceived);
+    const rhMax = this.niceMax(Math.max.apply(null, rhSorted.map((p) => p.dividendsReceived)), 4);
+    const rhG = this.geom(rhSorted.length, 46, 616, 10, 138, 30);
+    charts.push({
+      id: 'rh', span: 'span 1', title: 'Dividends received',
+      subtitle: 'by holding · ' + F.money(T.dividendsReceived) + ' lifetime',
+      legend: [{ label: 'After tax', color: 'var(--accent)' }],
+      controls: [],
+      grid: this.grid(0, rhMax, 4, 138, 10, (v) => '$' + F.num(v, 0)),
+      bars: rhSorted.map((p, i) => {
+        const g = rhG[i];
+        const h = p.dividendsReceived / rhMax * 128;
+        return Object.assign({
+          label: p.ticker, labelColor: 'var(--t3)',
+          parts: [{ x: g.x, y: (138 - h).toFixed(1), w: g.w, h: h.toFixed(1), fill: 'var(--accent)' }],
+          marker: false, markerX1: 0, markerX2: 0, markerY: 0,
+          sx: g.sx, sw: g.sw
+        }, this.hoverOf('rh', i));
+      }),
+      tip: (() => {
+        const i = st.hover && st.hover.id === 'rh' ? st.hover.i : null;
+        if (i === null || !rhSorted[i]) return null;
+        const p = rhSorted[i], h = D.holding(p);
+        return {
+          title: p.ticker + ' · ' + p.name, headline: F.money(p.dividendsReceived), sub: 'received to date, after tax',
+          rows: [
+            { label: 'Per share', value: F.money(h.dividendsPerShare), color: 'var(--accent-3)' },
+            { label: 'Forward gross', value: F.money(h.annualGross), color: 'var(--accent)' },
+            { label: 'Share of income', value: F.pct(T.forwardGross ? h.annualGross / T.forwardGross * 100 : 0, 1), color: 'var(--grey-series)' }
+          ]
+        };
+      })(),
+      tipLeft: st.hover && st.hover.id === 'rh' && rhG[st.hover.i] ? this.tipLeft(parseFloat(rhG[st.hover.i].cx)) : '50%',
+      footer: ''
+    });
+
+    /* ---- 6 · Dividend growth, grouped by month across years ------------- */
+    const years = ['2024', '2025', '2026'];
+    const tints = ['var(--accent-4)', 'var(--accent-3)', 'var(--accent)'];
+    const dgMax = 175;
+    const dgG = this.geom(12, 46, 616, 10, 138, 37);
+    charts.push({
+      id: 'dg', span: 'span 1', title: 'Dividend growth',
+      subtitle: 'same month, year over year',
+      legend: years.map((y, j) => ({ label: y, color: tints[j] })),
+      controls: [],
+      grid: this.grid(0, dgMax, 3, 138, 10, (v) => '$' + F.num(v, 0)),
+      bars: D.MONTHS.map((mo, i) => {
+        const g = dgG[i];
+        const parts = years.map((y, j) => {
+          const v = D.dividendHistory[y][i] === undefined ? 0 : D.dividendHistory[y][i];
+          const h = v / dgMax * 128;
+          return { x: (parseFloat(g.x) + j * 13).toFixed(1), y: (138 - h).toFixed(1), w: 11, h: h.toFixed(1), fill: tints[j] };
+        });
+        return Object.assign({ label: mo, labelColor: 'var(--t3)', parts: parts, marker: false, markerX1: 0, markerX2: 0, markerY: 0, sx: g.sx, sw: g.sw }, this.hoverOf('dg', i));
+      }),
+      tip: (() => {
+        const i = st.hover && st.hover.id === 'dg' ? st.hover.i : null;
+        if (i === null) return null;
+        const v26 = D.dividendHistory[2026][i], v25 = D.dividendHistory[2025][i];
+        return {
+          title: D.MONTHS[i], headline: v26 === undefined ? F.money(v25) + ' in 2025' : F.money(v26),
+          rows: years.map((y, j) => ({ label: y, value: D.dividendHistory[y][i] === undefined ? '—' : F.money(D.dividendHistory[y][i]), color: tints[j] })),
+          footer: v26 === undefined ? 'No 2026 payment yet' : (v25 > 0 ? F.caret((v26 - v25) / v25 * 100, 1) + ' vs 2025' : 'first year of payments'),
+          footerTone: v26 !== undefined && v26 >= v25 ? 'pos' : 'neg'
+        };
+      })(),
+      tipLeft: st.hover && st.hover.id === 'dg' && dgG[st.hover.i] ? this.tipLeft(parseFloat(dgG[st.hover.i].cx)) : '50%',
+      footer: ''
+    });
+
+    /* ---- dividend rating ------------------------------------------------ */
+    const rated = D.open().map((p) => ({ p: p, r: D.dividendRating(p), h: D.holding(p) }));
+    const buckets = ['Reliable', 'Safe', 'OK', 'At risk', 'Not available'];
+    /* Monochrome ramp only — amber is reserved for the row warning glyph. */
+    const bucketColors = {
+      Reliable: 'var(--accent)', Safe: 'var(--accent-2)', OK: 'var(--accent-3)',
+      'At risk': 'var(--accent-4)', 'Not available': 'var(--grey-series)'
+    };
+    const groups = buckets.map((b) => {
+      const items = rated.filter((x) => x.r.label === b);
+      return { name: b, count: items.length, value: items.reduce((s, x) => s + x.p.value, 0), color: bucketColors[b] };
+    }).filter((g) => g.count > 0);
+    const gTotal = groups.reduce((s, g) => s + g.value, 0);
+    const RC = 2 * Math.PI * 76;
+    let racc = 0;
+    const ratingSegs = groups.map((g) => {
+      const len = g.value / gTotal * RC;
+      const seg = {
+        color: g.color, dash: Math.max(0.6, len - 2.5).toFixed(2) + ' ' + (RC - Math.max(0.6, len - 2.5)).toFixed(2),
+        offset: (-racc).toFixed(2), sw: st.ratingHover === g.name ? 24 : 20,
+        op: st.ratingHover === null || st.ratingHover === g.name ? 1 : 0.3,
+        onEnter: () => this.setState({ ratingHover: g.name }),
+        onLeave: () => this.setState({ ratingHover: null })
+      };
+      racc += len;
+      return seg;
+    });
+    const hovG = groups.filter((g) => g.name === st.ratingHover)[0];
+    const scoreColor = (s) => s === null ? 'var(--t3)' : s >= 75 ? 'var(--accent)' : s >= 60 ? 'var(--t1)' : s >= 40 ? 'var(--t2)' : 'var(--tag-fg)';
+
+    const income = D.incomeBreakdown();
+
+    return Object.assign(base, {
+      portfolioName: K.portfolioName,
+      headPayers: payers.length + ' of ' + T.holdings + ' holdings pay a dividend',
+      headTax: F.pct(K.withholdingTax * 100, 0) + ' withholding',
+      headNext: 'Next ex-date ' + (payers.slice().sort((a, b) => (a.nextExDate || '').localeCompare(b.nextExDate || ''))[0].nextExDate || '—'),
+
+      yieldPrimary: F.pct(T.grossYield), yieldSecondary: F.pct(T.netYield),
+      yieldOnCost: F.pct(T.yieldOnCost) + ' yield on cost',
+      yieldSpread: F.num(T.yieldOnCost - T.grossYield, 2) + 'pp above current yield',
+      divPrimary: F.money(T.forwardGross), divDelta: F.caret(K.incomeGrowthYoY, 1),
+      divSecondary: F.money(T.forwardGross / 12),
+      divNet: F.money(T.forwardNet) + ' after tax',
+      divCount: D.paymentCountNext12() + ' payments a year',
+
+      charts: charts,
+
+      incomeSubtitle: income.length + ' payers · ' + F.money(T.forwardGross) + ' a year',
+      incomeRows: income.map((r) => ({ name: r.name, subLabel: r.subLabel, value: r.value })),
+      incomeFooter: 'Top two holdings produce ' + F.pct(income.slice(0, 2).reduce((s, r) => s + r.pct, 0), 1) + ' of forward income — both are covered-call products.',
+
+      ratingSubtitle: rated.length + ' holdings · weighted by market value',
+      ratingSegs: ratingSegs,
+      ratingCenterValue: hovG ? F.pct(hovG.value / gTotal * 100, 1) : F.pct(groups.filter((g) => g.name === 'Reliable' || g.name === 'Safe').reduce((s, g) => s + g.value, 0) / gTotal * 100, 1),
+      ratingCenterLabel: hovG ? hovG.name + ' · ' + hovG.count + ' holdings' : 'Reliable or Safe',
+      ratingLegend: groups.map((g) => ({
+        label: g.name, count: g.count + (g.count === 1 ? ' holding' : ' holdings'),
+        pct: F.pct(g.value / gTotal * 100, 1), color: g.color,
+        bg: st.ratingHover === g.name ? 'var(--hover)' : 'transparent',
+        onEnter: () => this.setState({ ratingHover: g.name }),
+        onLeave: () => this.setState({ ratingHover: null })
+      })),
+      ratingRows: rated.slice().sort((a, b) => (b.r.score === null ? -1 : b.r.score) - (a.r.score === null ? -1 : a.r.score)).map((x) => ({
+        ticker: x.p.ticker, name: x.p.name, mono: x.p.mono,
+        value: F.money(x.p.value), invested: F.money(x.p.costTotal) + ' invested',
+        annual: x.h.annualGross ? F.money(x.h.annualGross) : '—',
+        annualNet: x.h.annualGross ? F.money(x.h.annualNet) + ' net' : 'no dividend',
+        score: x.r.score === null ? '—' : String(x.r.score),
+        scoreColor: scoreColor(x.r.score),
+        label: x.r.label, warn: x.r.warn,
+        warnText: x.r.reasons.join(' · ')
+      }))
+    });
+  }
+}
+</script>
+</body>
+</html>

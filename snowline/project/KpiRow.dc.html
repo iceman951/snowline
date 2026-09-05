@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div data-r="kpi" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px">
+  <div style="position:relative;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:var(--pad,20px)">
+    <dc-import name="Metric" label="Value" tip="Market value of all holdings plus cash, in your base currency." primary="{{ kValue }}" secondary="{{ kInvested }}" secondary-note="invested" masked="{{ mask }}" hint-size="100%,84px"></dc-import>
+    <button onClick="{{ toggleMask }}" title="Hide amounts" style="position:absolute;top:14px;right:14px;display:flex;align-items:center;justify-content:center;width:28px;height:28px;border:none;border-radius:6px;background:transparent;color:var(--t3);cursor:pointer" style-hover="background:var(--hover);color:var(--t1)">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2.5 12S6.2 6.2 12 6.2 21.5 12 21.5 12 17.8 17.8 12 17.8 2.5 12 2.5 12z"></path><circle cx="12" cy="12" r="2.6"></circle><path d="M4 4l16 16" opacity="{{ eyeSlash }}"></path></svg>
+    </button>
+    <div style="margin-top:14px;display:flex;align-items:center;gap:8px;font-size:11px;color:var(--t3)">
+      <span>{{ kShares }}</span>
+      <span style="width:1px;height:10px;background:var(--line)"></span>
+      <span>{{ kHoldings }}</span>
+    </div>
+  </div>
+
+  <div style="background:var(--card);border:1px solid var(--line);border-radius:8px;padding:var(--pad,20px)">
+    <dc-import name="Metric" label="Total profit" tip="Capital gain plus dividends received and realised P&amp;L, net of fees and taxes." primary="{{ kProfit }}" primary-tone="pos" primary-delta="{{ kProfitPct }}" secondary="{{ kDaily }}" secondary-tone="neg" secondary-note="daily" masked="{{ mask }}" hint-size="100%,84px"></dc-import>
+    <div style="margin-top:14px;display:flex;align-items:center;gap:8px;font-size:11px;color:var(--t3)">
+      <span>{{ kCapitalGain }}</span>
+      <span style="width:1px;height:10px;background:var(--line)"></span>
+      <span>{{ kDividends }}</span>
+    </div>
+  </div>
+
+  <div style="background:var(--card);border:1px solid var(--line);border-radius:8px;padding:var(--pad,20px)">
+    <dc-import name="Metric" label="IRR" tip="Money-weighted annualised return. Accounts for the timing and size of every deposit." dotted="{{ true }}" primary="{{ kIrr }}" primary-tone="pos" secondary="{{ kIrrHoldings }}" secondary-note="current holdings" hint-size="100%,84px"></dc-import>
+    <div style="margin-top:14px;display:flex;align-items:center;gap:8px;font-size:11px;color:var(--t3)">
+      <span>{{ kTwr }}</span>
+      <span style="width:1px;height:10px;background:var(--line)"></span>
+      <span>{{ kBench }}</span>
+    </div>
+  </div>
+
+  <div style="background:var(--card);border:1px solid var(--line);border-radius:8px;padding:var(--pad,20px)">
+    <dc-import name="Metric" label="Passive income" tip="Forward 12-month dividend income at current yields, before withholding tax." primary="{{ kYield }}" primary-delta="{{ kIncomeGrowth }}" delta-tone="pos" secondary="{{ kIncomeAnnual }}" secondary-note="annually, gross" masked="{{ mask }}" hint-size="100%,84px"></dc-import>
+    <div style="margin-top:14px;display:flex;align-items:center;gap:8px;font-size:11px;color:var(--t3)">
+      <span>{{ kIncomeMonthly }}</span>
+      <span style="width:1px;height:10px;background:var(--line)"></span>
+      <span>{{ kIncomeNet }}</span>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1344,&quot;height&quot;:150}}">
+class Component extends DCLogic {
+  state = { mask: false };
+  componentDidMount() {
+    if (!window.SnowlineData) {
+      const check = () => { if (window.SnowlineData) this.forceUpdate(); else setTimeout(check, 30); };
+      setTimeout(check, 20);
+    }
+  }
+  renderVals() {
+    if (!window.SnowlineData) return {};
+    const D = window.SnowlineData, F = D.fmt, K = D.constants, T = D.totals();
+    return {
+      mask: this.state.mask, eyeSlash: this.state.mask ? 1 : 0,
+      toggleMask: () => this.setState((s) => ({ mask: !s.mask })),
+      kValue: F.money(T.value), kInvested: F.money(T.invested),
+      kShares: F.shares(T.shares) + ' shares', kHoldings: T.holdings + ' holdings',
+      kProfit: F.signed(T.totalProfit), kProfitPct: F.caret(T.totalProfitPct),
+      kDaily: F.signed(T.dayChange) + ' ' + F.caret(T.dayChangePct),
+      kCapitalGain: 'Capital gain ' + F.signed(T.capitalGain),
+      kDividends: 'Dividends ' + F.money(T.dividendsReceived),
+      kIrr: F.pct(K.irrAllTime), kIrrHoldings: F.pct(K.irrCurrentHoldings),
+      kTwr: 'TWR ' + F.pct(K.twr), kBench: K.benchmark + ' ' + F.pct(K.benchmarkTwr),
+      kYield: F.pct(T.grossYield), kIncomeGrowth: F.caret(K.incomeGrowthYoY, 1),
+      kIncomeAnnual: F.money(T.forwardGross),
+      kIncomeMonthly: F.money(T.forwardGross / 12) + ' monthly',
+      kIncomeNet: F.money(T.forwardNet) + ' net of tax'
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="background:var(--card);border:1px solid var(--line);border-radius:8px;display:flex;flex-direction:column">
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 20px;border-bottom:1px solid var(--line);flex-wrap:wrap">
+    <div style="display:flex;align-items:baseline;gap:10px;min-width:0">
+      <span style="font-size:14px;font-weight:600;color:var(--t1)">{{ title }}</span>
+      <span style="font-size:12px;color:var(--t3)">{{ subtitle }}</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:14px">
+      <sc-for list="{{ toggles }}" as="t" hint-placeholder-count="2">
+        <button onClick="{{ t.onClick }}" style="display:flex;align-items:center;gap:7px;height:26px;padding:0 8px 0 6px;border:none;border-radius:6px;background:transparent;color:{{ t.color }};font-size:12px;cursor:pointer" style-hover="background:var(--hover)">
+          <span style="width:15px;height:15px;flex:none;border:1px solid {{ t.border }};border-radius:4px;background:{{ t.bg }};color:var(--on-accent);display:flex;align-items:center;justify-content:center;font-size:10px">{{ t.mark }}</span>
+          {{ t.label }}
+        </button>
+      </sc-for>
+    </div>
+  </div>
+
+  <div data-r="split" style="display:grid;grid-template-columns:296px minmax(0,1fr);gap:24px;padding:20px">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:12px">
+      <div style="position:relative;width:100%;max-width:280px">
+        <svg viewBox="0 0 280 280" style="width:100%;height:auto;display:block">
+          <circle cx="140" cy="140" r="86" fill="none" stroke="var(--line)" stroke-width="22"></circle>
+          <sc-for list="{{ segs }}" as="s" hint-placeholder-count="6">
+            <circle cx="140" cy="140" r="86" fill="none" stroke="{{ s.color }}" stroke-width="{{ s.sw }}" stroke-dasharray="{{ s.dash }}" stroke-dashoffset="{{ s.offset }}" opacity="{{ s.op }}" transform="rotate(-90 140 140)" onMouseEnter="{{ s.onEnter }}" onMouseLeave="{{ s.onLeave }}" style="transition:opacity .15s ease,stroke-width .15s ease"></circle>
+          </sc-for>
+        </svg>
+        <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;pointer-events:none;padding:0 64px;text-align:center">
+          <span style="font-size:18px;font-weight:600;letter-spacing:-0.02em;color:var(--t1)">{{ centerValue }}</span>
+          <span style="font-size:11px;color:var(--t2);line-height:1.3">{{ centerLabel }}</span>
+          <span style="font-size:11px;color:var(--t3)">{{ centerSub }}</span>
+        </div>
+        <sc-for list="{{ labels }}" as="l" hint-placeholder-count="5">
+          <span style="position:absolute;left:{{ l.x }};top:{{ l.y }};transform:translate(-50%,-50%);font-size:10px;font-weight:500;color:{{ l.color }};white-space:nowrap;pointer-events:none">{{ l.text }}</span>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;min-width:0">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 10px 8px 0;border-bottom:1px solid var(--line)">
+        <span style="font-size:12px;font-weight:500;color:var(--t2)">{{ nameHeader }}</span>
+        <span style="font-size:12px;font-weight:500;color:var(--t2)">{{ valueHeader }}</span>
+      </div>
+      <div data-r="list" style="max-height:{{ listHeight }};overflow-y:auto;overflow-x:hidden;padding-right:10px">
+        <sc-for list="{{ rows }}" as="r" hint-placeholder-count="8">
+          <div onMouseEnter="{{ r.onEnter }}" onMouseLeave="{{ r.onLeave }}" style="display:flex;flex-direction:column;gap:6px;padding:10px 8px 9px 0;border-bottom:1px solid var(--line);background:{{ r.bg }};transition:background .12s ease">
+            <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;min-width:0">
+              <span style="display:flex;align-items:baseline;gap:8px;min-width:0">
+                <span style="width:3px;height:11px;flex:none;border-radius:1px;background:{{ r.color }};transform:translateY(1px)"></span>
+                <span style="font-size:13px;font-weight:500;color:var(--t1);white-space:nowrap">{{ r.name }}</span>
+                <span style="font-size:12px;color:var(--t3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0">{{ r.subLabel }}</span>
+              </span>
+              <span style="display:flex;align-items:baseline;gap:8px;flex:none">
+                <span style="font-size:13px;font-weight:500;color:var(--t1);white-space:nowrap">{{ r.pct }}</span>
+                <span style="font-size:12px;color:var(--t3);white-space:nowrap">{{ r.value }}</span>
+              </span>
+            </div>
+            <div style="height:3px;background:var(--line);border-radius:1px;overflow:hidden">
+              <div style="width:{{ r.barWidth }};height:3px;background:{{ r.color }}"></div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+      <sc-if value="{{ footer }}" hint-placeholder-val="{{ false }}">
+        <span style="font-size:11px;color:var(--t3);padding-top:10px">{{ footer }}</span>
+      </sc-if>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:700,&quot;height&quot;:420},&quot;title&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;All holdings&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;subtitle&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;rows&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;{name:string,subLabel?:string,value:number}[]&quot;},&quot;toggles&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;{label:string,on:boolean,onClick:Function}[]&quot;},&quot;centerLabel&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Total&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;nameHeader&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Name&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;valueHeader&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Share / value&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;unit&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;lines&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;listHeight&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;318px&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;footer&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = { hover: null };
+
+  renderVals() {
+    const p = this.props;
+    const rows = (p.rows || []).filter((r) => r.value > 0);
+    const total = rows.reduce((s, r) => s + r.value, 0);
+    const F = window.SnowlineData ? window.SnowlineData.fmt : null;
+    const money = (n) => F ? F.money(n) : '$' + n.toFixed(2);
+    const pct = (n) => F ? F.pct(n, n < 1 ? 2 : 1) : n.toFixed(1) + '%';
+
+    const ramp = (n) => {
+      const out = [];
+      for (let i = 0; i < n; i++) {
+        const w = n === 1 ? 100 : Math.round(100 - i * (92 / (n - 1)));
+        out.push('color-mix(in oklab, var(--accent) ' + w + '%, var(--grey-series))');
+      }
+      return out;
+    };
+    const colors = ramp(Math.max(1, rows.length));
+    const hov = this.state.hover;
+
+    const C = 2 * Math.PI * 86;
+    let acc = 0;
+    const segs = [];
+    const labels = [];
+    rows.forEach((r, i) => {
+      const share = total ? r.value / total : 0;
+      const len = share * C;
+      const gap = rows.length > 14 ? 1.2 : 2.5;
+      segs.push({
+        color: colors[i], dash: Math.max(0.6, len - gap).toFixed(2) + ' ' + (C - Math.max(0.6, len - gap)).toFixed(2),
+        offset: (-acc).toFixed(2), sw: hov === r.name ? 26 : 22,
+        op: hov === null || hov === r.name ? 1 : 0.3,
+        onEnter: () => this.setState({ hover: r.name }),
+        onLeave: () => this.setState({ hover: null })
+      });
+      if (share >= 0.045) {
+        const mid = (acc + len / 2) / C * 2 * Math.PI - Math.PI / 2;
+        const rr = 118;
+        labels.push({
+          text: pct(share * 100),
+          x: (50 + Math.cos(mid) * rr / 280 * 100).toFixed(2) + '%',
+          y: (50 + Math.sin(mid) * rr / 280 * 100).toFixed(2) + '%',
+          color: hov === null || hov === r.name ? 'var(--t2)' : 'var(--t3)'
+        });
+      }
+      acc += len;
+    });
+
+    const hovRow = rows.filter((r) => r.name === hov)[0];
+    const max = rows.reduce((m, r) => Math.max(m, r.value), 0) || 1;
+
+    const toggles = (p.toggles || []).map((t) => ({
+      label: t.label, mark: t.on ? '✓' : '',
+      bg: t.on ? 'var(--accent)' : 'transparent',
+      border: t.on ? 'var(--accent)' : 'var(--line)',
+      color: t.on ? 'var(--t1)' : 'var(--t2)',
+      onClick: t.onClick
+    }));
+
+    return {
+      title: p.title || '',
+      subtitle: p.subtitle || '',
+      toggles: toggles,
+      segs: segs, labels: labels,
+      centerValue: hovRow ? money(hovRow.value) : money(total),
+      centerLabel: hovRow ? hovRow.name : (p.centerLabel || 'Total'),
+      centerSub: hovRow ? pct(total ? hovRow.value / total * 100 : 0) : rows.length + ' ' + (p.unit || 'lines'),
+      nameHeader: p.nameHeader || 'Name',
+      valueHeader: p.valueHeader || 'Share / value',
+      listHeight: p.listHeight || '318px',
+      footer: p.footer || '',
+      rows: rows.map((r, i) => ({
+        name: r.name, subLabel: r.subLabel || '',
+        pct: pct(total ? r.value / total * 100 : 0), value: money(r.value),
+        color: colors[i], barWidth: (r.value / max * 100).toFixed(1) + '%',
+        bg: hov === r.name ? 'var(--hover)' : 'transparent',
+        onEnter: () => this.setState({ hover: r.name }),
+        onLeave: () => this.setState({ hover: null })
+      }))
+    };
+  }
+}
+</script>
+</body>
+</html>

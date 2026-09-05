@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <script src="snowline-data.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --canvas:#FAFAF9; --card:#FFFFFF; --t1:#171717; --t2:#737373; --t3:#A3A3A3; --line:#E7E5E4;
+      --accent:#0F7B57; --neg:#B91C1C; --amber:#B45309; --hover:#F5F5F4; --on-accent:#FFFFFF;
+      --grey-series:#A8A29E; --shadow:0 10px 28px rgba(23,23,23,.10); --pad:20px;
+      --accent-2:color-mix(in oklab, var(--accent) 74%, var(--card));
+      --accent-3:color-mix(in oklab, var(--accent) 48%, var(--card));
+      --accent-4:color-mix(in oklab, var(--accent) 26%, var(--card));
+      --accent-soft:color-mix(in oklab, var(--accent) 9%, var(--card));
+      --accent-tint:color-mix(in oklab, var(--accent) 16%, var(--card));
+      --neg-soft:color-mix(in oklab, var(--neg) 9%, var(--card));
+      --amber-soft:color-mix(in oklab, var(--amber) 9%, var(--card));
+      --tag-bg:color-mix(in oklab, var(--amber) 8%, var(--card));
+      --tag-fg:var(--amber);
+    }
+    html[data-theme="dark"]{
+      --canvas:#0C0C0C; --card:#171717; --t1:#FAFAF9; --t2:#A3A3A3; --t3:#737373; --line:#292524;
+      --accent:#34D399; --neg:#F87171; --amber:#F59E0B; --hover:#201E1D; --on-accent:#0C0C0C;
+      --grey-series:#57534E; --shadow:0 10px 28px rgba(0,0,0,.55);
+      --tag-bg:color-mix(in oklab, var(--amber) 7%, var(--card));
+      --tag-fg:color-mix(in oklab, var(--amber) 58%, var(--t2));
+    }
+    html,body{margin:0;padding:0;background:var(--canvas)}
+    *{box-sizing:border-box}
+    body{font-family:'Inter',system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif;font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
+    a{color:var(--accent);text-decoration:none}
+    a:hover{color:var(--accent);text-decoration:underline}
+    button,input,textarea{font-family:inherit;font-variant-numeric:tabular-nums}
+    ::selection{background:var(--accent-tint)}
+    @keyframes menuIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+    @media (max-width:1180px){
+      [data-r="kpi"]{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+    }
+    @media (max-width:960px){
+      [data-r="kpi"]{grid-template-columns:minmax(0,1fr)!important}
+      [data-r="navd"]{display:none!important}
+      [data-r="navm"]{display:flex!important}
+      [data-r="tabbar"]{display:flex!important}
+      [data-r="main"]{padding:16px 16px 104px!important}
+      [data-r="navwrap"]{padding:0 16px!important}
+    }
+  </style>
+</helmet>
+<div style="min-height:100vh;background:var(--canvas);color:var(--t1);font-size:14px;line-height:1.45">
+
+  <dc-import name="TopNav" active="Analytics" sub-active="Common" hint-size="100%,56px"></dc-import>
+
+  <main data-r="main" data-screen-label="Analytics — Common" style="max-width:1392px;margin:0 auto;padding:24px 24px 88px;display:flex;flex-direction:column;gap:22px">
+
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px">
+      <div style="display:flex;flex-direction:column;gap:5px;min-width:0">
+        <div style="display:flex;align-items:center;gap:9px">
+          <h1 style="margin:0;font-size:32px;font-weight:600;letter-spacing:-0.028em;line-height:1.1;color:var(--t1)">Analytics</h1>
+          <span style="font-size:13px;color:var(--t3);padding-top:6px">{{ portfolioName }}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:9px;font-size:12px;color:var(--t3)">
+          <span>{{ headHoldings }}</span>
+          <span style="width:1px;height:10px;background:var(--line)"></span>
+          <span>{{ headTax }}</span>
+          <span style="width:1px;height:10px;background:var(--line)"></span>
+          <span>{{ headUpdated }}</span>
+        </div>
+      </div>
+      <a href="Report.dc.html" style="display:flex;align-items:center;height:32px;padding:0 12px;flex:none;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--t2);font-size:12px;font-weight:500;text-decoration:none;white-space:nowrap" style-hover="background:var(--hover);color:var(--t1);text-decoration:none">Full report</a>
+    </div>
+
+    <dc-import name="AnalyticsSubnav" active="Common" hint-size="100%,48px"></dc-import>
+
+    <dc-import name="KpiRow" hint-size="100%,150px"></dc-import>
+
+    <dc-import name="HoldingsTable" title="All holdings" view="My holdings" hint-size="100%,760px"></dc-import>
+  </main>
+
+  <div data-r="tabbar" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:60;height:60px;background:var(--card);border-top:1px solid var(--line);align-items:stretch;padding:0 4px">
+    <sc-for list="{{ tabRows }}" as="t" hint-placeholder-count="4">
+      <a href="{{ t.href }}" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-decoration:none;color:{{ t.color }}">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="{{ t.d }}"></path></svg>
+        <span style="font-size:10px;font-weight:500">{{ t.label }}</span>
+      </a>
+    </sc-for>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{}">
+class Component extends DCLogic {
+  state = { menu: null };
+
+  componentDidMount() {
+    this.doc = () => { if (this.state.menu) this.setState({ menu: null }); };
+    document.addEventListener('click', this.doc);
+    if (!window.SnowlineData) {
+      const check = () => { if (window.SnowlineData) this.forceUpdate(); else setTimeout(check, 30); };
+      setTimeout(check, 20);
+    }
+  }
+  componentWillUnmount() { if (this.doc) document.removeEventListener('click', this.doc); }
+
+  renderVals() {
+    const I = {
+      bars: 'M4 20V10M10 20V4M16 20v-7M22 20H2', pie: 'M12 3a9 9 0 1 0 9 9h-9V3Z',
+      coins: 'M4 8h13l-3-3M20 16H7l3 3', trend: 'M3 17l6-6 4 4 8-8M21 7v6h-6',
+      gauge: 'M4 18a8 8 0 1 1 16 0M12 18l4-6', doc: 'M6 3h8l5 5v13H6V3Zm8 0v5h5',
+      table: 'M3 5h18v14H3V5Zm0 5h18M9 10v9', home: 'M4 11l8-7 8 7v9H4v-9Zm5 9v-6h6v6',
+      scale: 'M12 4v16M6 8l-3 6h6l-3-6Zm12 0l-3 6h6l-3-6ZM5 8h14', dots: 'M5 12h.01M12 12h.01M19 12h.01'
+    };
+    const D = window.SnowlineData;
+    const vals = {
+      stop: (e) => e.stopPropagation(),
+      tabRows: [
+        { label: 'Dashboard', d: I.home, href: 'Snowline.dc.html', color: 'var(--t3)' },
+        { label: 'Analytics', d: I.bars, href: 'Analytics.dc.html', color: 'var(--accent)' },
+        { label: 'Portfolio', d: I.table, href: 'Holdings.dc.html', color: 'var(--t3)' },
+        { label: 'Tools', d: I.scale, href: 'Rebalancing.dc.html', color: 'var(--t3)' }
+      ]
+    };
+    if (!D) return vals;
+    const F = D.fmt, K = D.constants, T = D.totals();
+    return Object.assign(vals, {
+      portfolioName: K.portfolioName,
+      headHoldings: K.baseCurrency + ' · ' + T.holdings + ' holdings · ' + F.money(T.value),
+      headTax: F.pct(K.withholdingTax * 100, 0) + ' dividend withholding',
+      headUpdated: 'As of ' + K.today.label
+    });
+  }
+}
+</script>
+</body>
+</html>

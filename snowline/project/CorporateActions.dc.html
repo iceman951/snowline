@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <script src="snowline-data.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --canvas:#FAFAF9; --card:#FFFFFF; --t1:#171717; --t2:#737373; --t3:#A3A3A3; --line:#E7E5E4;
+      --accent:#0F7B57; --neg:#B91C1C; --amber:#B45309; --hover:#F5F5F4; --on-accent:#FFFFFF;
+      --grey-series:#A8A29E; --shadow:0 10px 28px rgba(23,23,23,.10); --scrim:rgba(12,12,12,.42);
+      --accent-soft:color-mix(in oklab, var(--accent) 9%, var(--card));
+      --accent-tint:color-mix(in oklab, var(--accent) 16%, var(--card));
+      --tag-bg:color-mix(in oklab, var(--amber) 8%, var(--card));
+      --tag-fg:var(--amber); --track:#E4E1DF;
+    }
+    html[data-theme="dark"]{
+      --canvas:#0C0C0C; --card:#171717; --t1:#FAFAF9; --t2:#A3A3A3; --t3:#737373; --line:#292524;
+      --accent:#34D399; --neg:#F87171; --amber:#F59E0B; --hover:#201E1D; --on-accent:#0C0C0C;
+      --grey-series:#57534E; --shadow:0 10px 28px rgba(0,0,0,.55); --scrim:rgba(0,0,0,.6);
+      --tag-bg:color-mix(in oklab, var(--amber) 7%, var(--card));
+      --tag-fg:color-mix(in oklab, var(--amber) 58%, var(--t2));
+      --track:#3A3431;
+    }
+    html,body{margin:0;padding:0;background:var(--canvas)}
+    *{box-sizing:border-box}
+    body{font-family:'Inter',system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif;font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
+    a{color:var(--accent);text-decoration:none}
+    a:hover{color:var(--accent);text-decoration:underline}
+    button,input,select,textarea{font-family:inherit;font-variant-numeric:tabular-nums}
+    ::selection{background:var(--accent-tint)}
+    @keyframes menuIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes sheetIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+    @media (max-width:1180px){[data-r="cawrap"]{min-width:1064px}}
+    @media (max-width:1080px){[data-r="stats"]{grid-template-columns:1fr 1fr!important}}
+    @media (max-width:960px){
+      [data-r="navd"]{display:none!important}
+      [data-r="navm"]{display:flex!important}
+      [data-r="tabbar"]{display:flex!important}
+      [data-r="main"]{padding:16px 16px 104px!important}
+    }
+  </style>
+</helmet>
+<div style="min-height:100vh;background:var(--canvas);color:var(--t1);font-size:14px;line-height:1.45">
+
+  <dc-import name="TopNav" active="Portfolio" sub-active="Corporate actions" hint-size="100%,56px"></dc-import>
+
+  <main data-r="main" data-screen-label="Portfolio — Corporate actions" style="max-width:1392px;margin:0 auto;padding:24px 24px 88px;display:flex;flex-direction:column;gap:18px">
+
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap">
+      <div style="display:flex;flex-direction:column;gap:5px;min-width:0">
+        <div style="display:flex;align-items:center;gap:8px;position:relative">
+          <h1 style="margin:0;font-size:32px;font-weight:600;letter-spacing:-0.028em;line-height:1.1;color:var(--t1)">Corporate actions</h1>
+          <span onMouseEnter="{{ titleTipOn }}" onMouseLeave="{{ titleTipOff }}" style="width:16px;height:16px;margin-top:6px;flex:none;border:1px solid var(--line);border-radius:50%;font-size:10px;font-weight:500;color:var(--t3);display:flex;align-items:center;justify-content:center;cursor:help" style-hover="border-color:var(--t3);color:var(--t2)">?</span>
+          <sc-if value="{{ titleTip }}" hint-placeholder-val="{{ false }}">
+            <span style="position:absolute;top:44px;left:0;z-index:40;width:360px;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:10px 12px;font-size:11.5px;line-height:1.55;color:var(--t2)">{{ titleTipText }}</span>
+          </sc-if>
+          <span style="font-size:13px;color:var(--t3);padding-top:6px">{{ portfolioName }}</span>
+        </div>
+        <span style="font-size:12px;color:var(--t3)">{{ headNote }}</span>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <button onClick="{{ openAdd }}" style="display:inline-flex;align-items:center;gap:7px;height:32px;padding:0 14px;border:none;border-radius:999px;background:var(--accent);color:var(--on-accent);font-size:12.5px;font-weight:500;cursor:pointer;white-space:nowrap" style-hover="opacity:.9">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
+          Add corporate action
+        </button>
+        <a href="Transactions.dc.html" style="display:inline-flex;align-items:center;height:32px;padding:0 13px;border:1px solid var(--line);border-radius:7px;color:var(--t1);font-size:12.5px;font-weight:500;text-decoration:none;white-space:nowrap" style-hover="background:var(--hover);text-decoration:none">Transactions</a>
+      </div>
+    </div>
+
+    <sc-if value="{{ showStats }}" hint-placeholder-val="{{ true }}">
+      <div data-r="stats" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;background:var(--card);border:1px solid var(--line);border-radius:8px;overflow:hidden">
+        <sc-for list="{{ stats }}" as="s" hint-placeholder-count="4">
+          <div style="padding:16px 20px;border-left:{{ s.border }}">
+            <dc-import name="Metric" label="{{ s.label }}" primary="{{ s.primary }}" primary-tone="{{ s.tone }}" secondary="{{ s.secondary }}" secondary-note="{{ s.note }}" tip="{{ s.tip }}" help="{{ true }}" hint-size="100%,74px"></dc-import>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:64px 24px">
+        <span style="display:flex;align-items:center;justify-content:center;width:44px;height:44px;border:1px solid var(--line);border-radius:10px;color:var(--t3)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h6l-3-3M4 7l3 3M20 17h-6l3-3M20 17l-3 3M4 7c8 0 8 10 16 10"></path></svg>
+        </span>
+        <span style="font-size:16px;font-weight:600;letter-spacing:-0.015em;color:var(--t1)">No corporate actions recorded</span>
+        <span style="font-size:12.5px;line-height:1.6;color:var(--t2);text-align:center;max-width:430px">Splits, reverse splits, mergers, spin-offs, ticker changes and returns of capital all land here. Nothing has been booked against {{ portfolioName }} yet, so every position’s share count and cost basis is exactly as traded.</span>
+        <button onClick="{{ openAdd }}" style="margin-top:6px;height:32px;padding:0 14px;border:1px solid var(--line);border-radius:7px;background:transparent;color:var(--t1);font-size:12.5px;font-weight:500;cursor:pointer" style-hover="background:var(--hover)">Add corporate action</button>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ hasLog }}" hint-placeholder-val="{{ true }}">
+    <div style="display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:8px;overflow:hidden">
+
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:13px 16px;border-bottom:1px solid var(--line)">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <div style="position:relative">
+            <button onClick="{{ togType }}" style="display:flex;align-items:center;gap:8px;height:32px;padding:0 11px;border:1px solid {{ typeBorder }};border-radius:7px;background:{{ typeBg }};color:var(--t1);font-size:12.5px;font-weight:500;cursor:pointer;white-space:nowrap" style-hover="background:var(--hover)">
+              {{ typeLabel }}
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="color:var(--t3)"><path d="M6 9l6 6 6-6"></path></svg>
+            </button>
+            <sc-if value="{{ mType }}" hint-placeholder-val="{{ false }}">
+              <div onClick="{{ stop }}" style="position:absolute;top:36px;left:0;z-index:50;width:236px;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:6px;animation:menuIn .12s ease-out">
+                <sc-for list="{{ typeOptions }}" as="o" hint-placeholder-count="8">
+                  <button onClick="{{ o.onClick }}" style="display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;padding:8px 10px;border:none;border-radius:6px;background:{{ o.bg }};text-align:left;cursor:pointer;font-size:12.5px;color:{{ o.color }};font-weight:{{ o.weight }}" style-hover="background:var(--hover)">
+                    <span>{{ o.label }}</span>
+                    <span style="font-size:11px;color:var(--t3)">{{ o.meta }}</span>
+                  </button>
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
+
+          <div style="position:relative">
+            <button onClick="{{ togHold }}" style="display:flex;align-items:center;gap:8px;height:32px;padding:0 11px;border:1px solid {{ holdBorder }};border-radius:7px;background:{{ holdBg }};color:var(--t1);font-size:12.5px;font-weight:500;cursor:pointer;white-space:nowrap" style-hover="background:var(--hover)">
+              {{ holdLabel }}
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="color:var(--t3)"><path d="M6 9l6 6 6-6"></path></svg>
+            </button>
+            <sc-if value="{{ mHold }}" hint-placeholder-val="{{ false }}">
+              <div onClick="{{ stop }}" style="position:absolute;top:36px;left:0;z-index:50;width:250px;max-height:280px;overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:6px;animation:menuIn .12s ease-out">
+                <sc-for list="{{ holdOptions }}" as="o" hint-placeholder-count="7">
+                  <button onClick="{{ o.onClick }}" style="display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;padding:8px 10px;border:none;border-radius:6px;background:{{ o.bg }};text-align:left;cursor:pointer;font-size:12.5px;color:{{ o.color }};font-weight:{{ o.weight }}" style-hover="background:var(--hover)">
+                    <span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ o.label }}</span>
+                    <span style="font-size:11px;color:var(--t3);white-space:nowrap">{{ o.meta }}</span>
+                  </button>
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
+
+          <sc-if value="{{ filtered }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ clearFilters }}" style="height:32px;padding:0 11px;border:none;border-radius:7px;background:transparent;color:var(--t2);font-size:12.5px;font-weight:500;cursor:pointer;white-space:nowrap" style-hover="background:var(--hover);color:var(--t1)">Clear</button>
+          </sc-if>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <span style="font-size:12px;color:var(--t3);white-space:nowrap">{{ countLabel }}</span>
+          <span style="display:flex;align-items:center;gap:7px;height:32px;padding:0 11px;border:1px solid var(--line);border-radius:7px">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="M16.6 16.6L21 21"></path></svg>
+            <input value="{{ query }}" onChange="{{ onQuery }}" placeholder="Search events…" style="width:180px;border:none;background:transparent;color:var(--t1);font-size:12.5px;outline:none">
+          </span>
+        </div>
+      </div>
+
+      <div style="max-width:100%;overflow-x:auto;overscroll-behavior-x:contain">
+        <div data-r="cawrap">
+          <div style="display:grid;grid-template-columns:{{ cols }};border-bottom:1px solid var(--line);background:var(--card)">
+            <sc-for list="{{ head }}" as="h" hint-placeholder-count="7">
+              <div style="display:flex;align-items:center;justify-content:{{ h.justify }};padding:9px 13px;position:{{ h.pos }};left:0;z-index:{{ h.z }};background:var(--card)">
+                <span style="font-size:12px;font-weight:500;color:var(--t2);white-space:nowrap">{{ h.label }}</span>
+              </div>
+            </sc-for>
+          </div>
+
+          <sc-for list="{{ rows }}" as="r" hint-placeholder-count="8">
+            <div style="border-bottom:1px solid var(--line)">
+              <div onClick="{{ r.onToggle }}" onMouseEnter="{{ r.onEnter }}" onMouseLeave="{{ r.onLeave }}" style="display:grid;grid-template-columns:{{ cols }};background:{{ r.bg }};cursor:pointer">
+                <div style="display:flex;flex-direction:column;justify-content:center;gap:2px;padding:11px 13px;position:sticky;left:0;z-index:1;background:{{ r.bg }};box-shadow:{{ r.stickyShadow }}">
+                  <span style="font-size:13px;font-weight:500;color:var(--t1);white-space:nowrap">{{ r.date }}</span>
+                  <span style="font-size:11.5px;color:var(--t3);white-space:nowrap">{{ r.ago }}</span>
+                </div>
+                <div style="display:flex;align-items:center;padding:11px 13px;min-width:0">
+                  <dc-import name="TwoLineCell" primary="{{ r.type }}" secondary="{{ r.typeSub }}" align="left" hint-size="112px,36px"></dc-import>
+                </div>
+                <div style="display:flex;align-items:center;gap:9px;padding:11px 13px;min-width:0">
+                  <span style="width:26px;height:26px;flex:none;border-radius:6px;background:var(--hover);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:600;color:var(--t2)">{{ r.mono }}</span>
+                  <span style="min-width:0;overflow:hidden">
+                    <dc-import name="TwoLineCell" primary="{{ r.name }}" secondary="{{ r.tickerLine }}" align="left" hint-size="130px,36px"></dc-import>
+                  </span>
+                </div>
+                <div style="display:flex;align-items:center;padding:11px 13px;min-width:0;overflow:hidden">
+                  <span style="display:block;min-width:0;flex:1;overflow:hidden">
+                    <dc-import name="TwoLineCell" primary="{{ r.headline }}" secondary="{{ r.detailShort }}" align="left" hint-size="200px,36px"></dc-import>
+                  </span>
+                </div>
+                <div style="display:flex;align-items:center;justify-content:flex-end;padding:11px 13px;min-width:0;overflow:hidden;border-left:{{ r.effectBorder }}">
+                  <span style="display:block;min-width:0;flex:1;overflow:hidden">
+                    <dc-import name="TwoLineCell" primary="{{ r.sharesLine }}" secondary="{{ r.basisLine }}" tone="{{ r.effectTone }}" align="right" hint-size="200px,36px"></dc-import>
+                  </span>
+                </div>
+                <div style="display:flex;align-items:center;padding:11px 13px">
+                  <span style="display:inline-flex;align-items:center;height:22px;padding:0 9px;border-radius:999px;background:{{ r.statusBg }};color:{{ r.statusFg }};font-size:11px;font-weight:500;white-space:nowrap">{{ r.status }}</span>
+                </div>
+                <div style="display:flex;align-items:center;justify-content:center;padding:11px 6px">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--t3);transform:{{ r.chev }};transition:transform .14s ease"><path d="M6 9l6 6 6-6"></path></svg>
+                </div>
+              </div>
+
+              <sc-if value="{{ r.open }}" hint-placeholder-val="{{ false }}">
+                <div style="display:grid;grid-template-columns:minmax(0,1.5fr) minmax(280px,1fr);gap:22px;padding:2px 16px 18px 126px;background:{{ r.bg }}">
+                  <div style="display:flex;flex-direction:column;gap:8px;min-width:0">
+                    <span style="font-size:11px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;color:var(--t3)">What happened</span>
+                    <span style="font-size:12.5px;line-height:1.6;color:var(--t2);text-wrap:pretty">{{ r.detail }}</span>
+                    <span style="display:flex;align-items:center;gap:12px;margin-top:2px">
+                      <a href="Holdings.dc.html" style="font-size:12px;font-weight:500">Open the holding</a>
+                      <a href="Transactions.dc.html" style="font-size:12px;font-weight:500">See its transactions</a>
+                    </span>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden">
+                    <sc-for list="{{ r.facts }}" as="f" hint-placeholder-count="4">
+                      <span style="display:flex;align-items:baseline;justify-content:space-between;gap:14px;padding:8px 12px;border-bottom:1px solid var(--line)">
+                        <span style="font-size:11.5px;color:var(--t3);white-space:nowrap">{{ f.k }}</span>
+                        <span style="font-size:12.5px;font-weight:500;color:{{ f.color }};text-align:right">{{ f.v }}</span>
+                      </span>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-if>
+            </div>
+          </sc-for>
+
+          <sc-if value="{{ noResults }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:7px;padding:52px 20px">
+              <span style="font-size:13.5px;font-weight:500;color:var(--t1)">No events match these filters</span>
+              <span style="font-size:12px;color:var(--t3);text-align:center">{{ noResultsNote }}</span>
+              <button onClick="{{ clearFilters }}" style="margin-top:6px;height:30px;padding:0 12px;border:1px solid var(--line);border-radius:7px;background:transparent;font-size:12px;font-weight:500;color:var(--t1);cursor:pointer" style-hover="background:var(--hover)">Clear filters</button>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+    </div>
+    </sc-if>
+
+    <span style="font-size:11px;line-height:1.55;color:var(--t3);max-width:960px;text-wrap:pretty">{{ footnote }}</span>
+  </main>
+
+  <sc-if value="{{ modalOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeModal }}" style="position:fixed;inset:0;z-index:80;background:var(--scrim);display:flex;align-items:flex-start;justify-content:center;padding:40px 20px;overflow-y:auto">
+      <div onClick="{{ stop }}" style="width:100%;max-width:560px;background:var(--card);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);animation:sheetIn .16s ease-out;display:flex;flex-direction:column">
+
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:18px 20px 14px">
+          <div style="display:flex;flex-direction:column;gap:2px">
+            <span style="font-size:17px;font-weight:600;letter-spacing:-0.015em;color:var(--t1)">New corporate action</span>
+            <span style="font-size:12px;color:var(--t3)">{{ modalSub }}</span>
+          </div>
+          <button onClick="{{ closeModal }}" title="Close" style="display:flex;align-items:center;justify-content:center;width:28px;height:28px;border:none;border-radius:6px;background:transparent;color:var(--t3);cursor:pointer" style-hover="background:var(--hover);color:var(--t1)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+          </button>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:14px;padding:0 20px 18px">
+          <div style="display:flex;flex-direction:column;gap:7px">
+            <span style="font-size:12px;font-weight:500;color:var(--t2)">Event type</span>
+            <div style="display:flex;flex-wrap:wrap;gap:6px">
+              <sc-for list="{{ formTypes }}" as="t" hint-placeholder-count="7">
+                <button onClick="{{ t.onClick }}" style="height:30px;padding:0 11px;border:1px solid {{ t.border }};border-radius:999px;background:{{ t.bg }};color:{{ t.color }};font-size:12px;font-weight:{{ t.weight }};cursor:pointer;white-space:nowrap" style-hover="background:var(--hover)">{{ t.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div style="display:flex;flex-direction:column;gap:7px;min-width:0">
+              <span style="font-size:12px;font-weight:500;color:var(--t2)">{{ holdingFieldLabel }}</span>
+              <div style="position:relative">
+                <button onClick="{{ togFormHold }}" style="display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;height:34px;padding:0 11px;border:1px solid {{ formHoldBorder }};border-radius:7px;background:transparent;color:{{ formHoldColor }};font-size:13px;cursor:pointer" style-hover="background:var(--hover)">
+                  <span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ formHoldLabel }}</span>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="color:var(--t3);flex:none"><path d="M6 9l6 6 6-6"></path></svg>
+                </button>
+                <sc-if value="{{ mFormHold }}" hint-placeholder-val="{{ false }}">
+                  <div onClick="{{ stop }}" style="position:absolute;top:38px;left:0;right:0;z-index:90;max-height:230px;overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:6px;animation:menuIn .12s ease-out">
+                    <sc-for list="{{ formHoldOptions }}" as="o" hint-placeholder-count="8">
+                      <button onClick="{{ o.onClick }}" style="display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;padding:8px 10px;border:none;border-radius:6px;background:{{ o.bg }};text-align:left;cursor:pointer;font-size:12.5px;color:var(--t1)" style-hover="background:var(--hover)">
+                        <span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ o.label }}</span>
+                        <span style="font-size:11px;color:var(--t3);white-space:nowrap">{{ o.meta }}</span>
+                      </button>
+                    </sc-for>
+                  </div>
+                </sc-if>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:7px;min-width:0">
+              <span style="font-size:12px;font-weight:500;color:var(--t2)">Effective date</span>
+              <input value="{{ formDate }}" onChange="{{ onFormDate }}" placeholder="02 Sep 2026" style="height:34px;padding:0 11px;border:1px solid {{ formDateBorder }};border-radius:7px;background:transparent;color:var(--t1);font-size:13px;outline:none" style-focus="border-color:var(--accent)">
+            </div>
+          </div>
+
+          <sc-if value="{{ hasValueField }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;flex-direction:column;gap:7px">
+              <span style="font-size:12px;font-weight:500;color:var(--t2)">{{ valueFieldLabel }}</span>
+              <input value="{{ formValue }}" onChange="{{ onFormValue }}" placeholder="{{ valueFieldHint }}" style="height:34px;width:200px;padding:0 11px;border:1px solid {{ formValueBorder }};border-radius:7px;background:transparent;color:var(--t1);font-size:13px;outline:none" style-focus="border-color:var(--accent)">
+              <span style="font-size:11.5px;line-height:1.5;color:var(--t3)">{{ valueFieldNote }}</span>
+            </div>
+          </sc-if>
+
+          <div style="display:flex;flex-direction:column;gap:7px">
+            <span style="font-size:12px;font-weight:500;color:var(--t2)">Description</span>
+            <input value="{{ formNote }}" onChange="{{ onFormNote }}" placeholder="{{ notePlaceholder }}" style="height:34px;padding:0 11px;border:1px solid var(--line);border-radius:7px;background:transparent;color:var(--t1);font-size:13px;outline:none" style-focus="border-color:var(--accent)">
+          </div>
+
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap">
+            <span style="font-size:12px;font-weight:500;color:var(--t2)">Status</span>
+            <div style="display:flex;align-items:center;gap:2px;padding:2px;border:1px solid var(--line);border-radius:8px">
+              <sc-for list="{{ formStatuses }}" as="s" hint-placeholder-count="2">
+                <button onClick="{{ s.onClick }}" style="height:28px;padding:0 14px;border:none;border-radius:6px;background:{{ s.bg }};color:{{ s.color }};font-size:12px;font-weight:{{ s.weight }};cursor:pointer" style-hover="background:var(--hover)">{{ s.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:14px 20px;border-top:1px solid var(--line);background:var(--canvas);border-radius:0 0 10px 10px">
+          <span style="font-size:11.5px;line-height:1.5;color:{{ modalHintColor }};max-width:290px">{{ modalHint }}</span>
+          <div style="display:flex;align-items:center;gap:8px">
+            <button onClick="{{ closeModal }}" style="height:34px;padding:0 14px;border:1px solid var(--line);border-radius:7px;background:var(--card);color:var(--t1);font-size:12.5px;font-weight:500;cursor:pointer" style-hover="background:var(--hover)">Cancel</button>
+            <button onClick="{{ saveAction }}" style="height:34px;padding:0 18px;border:1px solid var(--accent);border-radius:7px;background:var(--accent);color:var(--on-accent);font-size:12.5px;font-weight:600;cursor:pointer" style-hover="opacity:.9">Add event</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:95;display:flex;align-items:center;gap:9px;padding:11px 16px;background:var(--card);border:1px solid var(--line);border-radius:999px;box-shadow:var(--shadow)">
+      <span style="width:7px;height:7px;border-radius:50%;background:var(--accent)"></span>
+      <span style="font-size:12.5px;color:var(--t1)">{{ toast }}</span>
+    </div>
+  </sc-if>
+
+  <div data-r="tabbar" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:60;height:60px;background:var(--card);border-top:1px solid var(--line);align-items:stretch;padding:0 4px">
+    <sc-for list="{{ tabRows }}" as="t" hint-placeholder-count="4">
+      <a href="{{ t.href }}" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-decoration:none;color:{{ t.color }}">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="{{ t.d }}"></path></svg>
+        <span style="font-size:10px;font-weight:500">{{ t.label }}</span>
+      </a>
+    </sc-for>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;emptyLog&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Corporate actions&quot;},&quot;showSummary&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Corporate actions&quot;},&quot;defaultTypeFilter&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;All types&quot;,&quot;Split&quot;,&quot;Reverse split&quot;,&quot;Return of capital&quot;,&quot;Special dividend&quot;,&quot;Ticker change&quot;,&quot;Merger&quot;,&quot;Spin-off&quot;],&quot;default&quot;:&quot;All types&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Corporate actions&quot;}}">
+class Component extends DCLogic {
+  state = {
+    menu: null, titleTip: false, open: null, hover: null, query: '',
+    type: null, holding: null, added: [], modal: false, touched: false, toast: '',
+    form: null
+  };
+
+  componentDidMount() {
+    this.doc = () => { if (this.state.menu) this.setState({ menu: null }); };
+    document.addEventListener('click', this.doc);
+    if (String(window.location.hash || '').toLowerCase() === '#add') this.setState({ modal: true, form: this.blank() });
+    if (!window.SnowlineData) {
+      const check = () => { if (window.SnowlineData) this.forceUpdate(); else setTimeout(check, 30); };
+      setTimeout(check, 20);
+    }
+  }
+  componentWillUnmount() { if (this.doc) document.removeEventListener('click', this.doc); }
+
+  TYPES = ['Split', 'Reverse split', 'Return of capital', 'Special dividend', 'Ticker change', 'Merger', 'Spin-off'];
+
+  blank() {
+    const D = window.SnowlineData;
+    return {
+      type: 'Split', ticker: '', status: 'Completed', note: '', value: '',
+      date: D ? D.constants.today.label : ''
+    };
+  }
+
+  /* what the type-specific field means for each event type */
+  valueField(type) {
+    if (type === 'Split') return { label: 'New shares for each share held', hint: '4', note: 'Shares multiply by this figure; the cost basis per share is divided by it, so the total basis does not move.' };
+    if (type === 'Reverse split') return { label: 'Old shares consolidated into one', hint: '4', note: 'Shares divide by this figure and the basis per share multiplies by it. The total basis does not move.' };
+    if (type === 'Return of capital') return { label: 'Amount per share ($)', hint: '5.57', note: 'Not taxed as income — it reduces the cost basis, so the eventual capital gain is larger.' };
+    if (type === 'Special dividend') return { label: 'Amount per share ($)', hint: '0.62', note: 'Paid in cash. Shares and cost basis are untouched; record it as income instead if you want it in the yield.' };
+    if (type === 'Ticker change') return { label: 'New ticker', hint: 'SLVO', note: 'Listing symbol only. Shares, cost basis and the distribution schedule carry over.' };
+    if (type === 'Merger') return { label: 'Shares received per share held', hint: '1', note: 'A 1-for-1 exchange carries the original basis over untouched. Any other ratio restates shares and basis per share.' };
+    return { label: 'Distribution ratio (optional)', hint: '0.25', note: 'Leave blank until the issuer publishes the ratio and the basis allocation between parent and spin-off.' };
+  }
+
+  validate(f) {
+    const bad = {};
+    if (!f.ticker) bad.ticker = 1;
+    if (!/\S/.test(f.date || '')) bad.date = 1;
+    const needs = f.type === 'Split' || f.type === 'Reverse split' || f.type === 'Return of capital' || f.type === 'Special dividend' || f.type === 'Ticker change';
+    if (needs && !/\S/.test(f.value || '')) bad.value = 1;
+    return bad;
+  }
+
+  monthsAgo(dateStr, today, MONTHS) {
+    const p = String(dateStr).split(' ');
+    const m = MONTHS.indexOf(p[1]);
+    if (m < 0) return '';
+    const diff = (today.year - (+p[2])) * 12 + (today.monthIndex - m);
+    if (diff < 0) {
+      const n = -diff;
+      return n === 1 ? 'next month' : 'in ' + n + ' months';
+    }
+    if (diff === 0) return 'this month';
+    if (diff === 1) return 'last month';
+    if (diff < 12) return diff + ' months ago';
+    const y = Math.floor(diff / 12), r = diff % 12;
+    return y + (y === 1 ? ' yr' : ' yrs') + (r ? ' ' + r + ' mo' : '') + ' ago';
+  }
+
+  sortKey(dateStr, MONTHS) {
+    const p = String(dateStr).split(' ');
+    return (+p[2] || 0) * 10000 + (MONTHS.indexOf(p[1]) + 1) * 100 + (+p[0] || 0);
+  }
+
+  renderVals() {
+    const st = this.state;
+    const I = {
+      bars: 'M4 20V10M10 20V4M16 20v-7M22 20H2', table: 'M3 5h18v14H3V5Zm0 5h18M9 10v9',
+      home: 'M4 11l8-7 8 7v9H4v-9Zm5 9v-6h6v6',
+      scale: 'M12 4v16M6 8l-3 6h6l-3-6Zm12 0l-3 6h6l-3-6ZM5 8h14', dots: 'M5 12h.01M12 12h.01M19 12h.01'
+    };
+    const base = {
+      tabRows: [
+        { label: 'Dashboard', d: I.home, href: 'Snowline.dc.html', color: 'var(--t3)' },
+        { label: 'Analytics', d: I.bars, href: 'Analytics.dc.html', color: 'var(--t3)' },
+        { label: 'Portfolio', d: I.table, href: 'Holdings.dc.html', color: 'var(--accent)' },
+        { label: 'Tools', d: I.scale, href: 'Rebalancing.dc.html', color: 'var(--t3)' }
+      ],
+      stop: (e) => e.stopPropagation(),
+      cols: '112px 130px minmax(170px,1.05fr) minmax(210px,1.55fr) minmax(214px,1.15fr) 112px 34px'
+    };
+    if (!window.SnowlineData) return base;
+
+    const D = window.SnowlineData, F = D.fmt, K = D.constants, MONTHS = D.MONTHS;
+    const money = (v) => F.money(v);
+    const emptyDemo = this.props.emptyLog === true;
+
+    /* ---- the log: the data module's events plus anything added here ------- */
+    const logged = emptyDemo ? [] : D.corporateActionLog().map((e) => ({
+      id: e.id, date: e.date, type: e.type, status: e.status, pending: e.pending,
+      ticker: e.ticker, tickerLine: e.displayTicker, name: e.name, mono: e.mono,
+      headline: e.headline, detail: e.detail, ratioLabel: e.ratioLabel,
+      sharesBefore: e.sharesBefore, sharesAfter: e.sharesAfter, sharesChanged: e.sharesChanged,
+      basisBefore: e.basisBefore, basisAfter: e.basisAfter, basisChanged: e.basisChanged,
+      basisAdjust: e.basisAdjust, perShareBefore: e.perShareBefore, perShareAfter: e.perShareAfter,
+      cash: e.cash, manual: false
+    }));
+    const all = st.added.concat(logged)
+      .slice().sort((a, b) => this.sortKey(b.date, MONTHS) - this.sortKey(a.date, MONTHS));
+
+    const typeCounts = {};
+    all.forEach((e) => { typeCounts[e.type] = (typeCounts[e.type] || 0) + 1; });
+    const holdCounts = {};
+    all.forEach((e) => { holdCounts[e.ticker] = (holdCounts[e.ticker] || 0) + 1; });
+
+    const propType = this.props.defaultTypeFilter;
+    const type = st.type !== null ? st.type : (propType && propType !== 'All types' ? propType : null);
+    const holding = st.holding;
+    const q = st.query.trim().toLowerCase();
+    const shown = all.filter((e) => {
+      if (type && e.type !== type) return false;
+      if (holding && e.ticker !== holding) return false;
+      if (!q) return true;
+      return (e.ticker + ' ' + e.name + ' ' + e.type + ' ' + e.headline + ' ' + e.detail + ' ' + e.date).toLowerCase().indexOf(q) >= 0;
+    });
+    const filtered = !!(type || holding || q);
+
+    /* ---- reconciliation proof --------------------------------------------- */
+    const rec = D.ledgerReconciliation();
+    const breaks = rec.filter((r) => Math.abs(r.sharesDelta) > 0.00002 || Math.abs(r.costDelta) > 0.01);
+    const stats = D.corporateActionStats();
+    const basisReduced = emptyDemo ? 0 : stats.basisReduced;
+    const cashPaid = emptyDemo ? 0 : stats.cash;
+    const restating = emptyDemo ? [] : logged.filter((e) => e.sharesChanged || e.basisChanged);
+
+    const statusChip = (s) => s === 'Completed'
+      ? { bg: 'var(--accent-soft)', fg: 'var(--accent)' }
+      : { bg: 'var(--tag-bg)', fg: 'var(--tag-fg)' };
+
+    const rows = shown.map((e) => {
+      const chip = statusChip(e.status);
+      const moves = e.sharesChanged || e.basisChanged;
+      const facts = [];
+      if (e.manual) {
+        facts.push({ k: 'Recorded', v: 'manually on this screen', color: 'var(--t1)' });
+        if (e.valueLabel) facts.push({ k: e.valueLabel, v: e.valueShown, color: 'var(--t1)' });
+        facts.push({ k: 'Applied to the position', v: 'no', color: 'var(--amber)' });
+        facts.push({ k: 'Shares held today', v: F.shares(e.sharesAfter) + ' shares', color: 'var(--t1)' });
+        facts.push({ k: 'Cost basis today', v: money(e.basisAfter), color: 'var(--t1)' });
+      } else if (e.pending) {
+        facts.push({ k: 'Distribution ratio', v: 'not published', color: 'var(--amber)' });
+        facts.push({ k: 'Shares held today', v: F.shares(e.sharesAfter) + ' shares', color: 'var(--t1)' });
+        facts.push({ k: 'Cost basis today', v: money(e.basisAfter), color: 'var(--t1)' });
+        facts.push({ k: 'Applied to the position', v: 'not until the distribution date', color: 'var(--t2)' });
+      } else {
+        facts.push({
+          k: 'Shares', v: e.sharesChanged ? F.shares(e.sharesBefore) + ' → ' + F.shares(e.sharesAfter) : 'unchanged',
+          color: e.sharesChanged ? 'var(--t1)' : 'var(--t2)'
+        });
+        facts.push({
+          k: 'Cost basis', v: e.basisChanged ? money(e.basisBefore) + ' → ' + money(e.basisAfter) : money(e.basisAfter) + ', unchanged',
+          color: e.basisChanged ? 'var(--t1)' : 'var(--t2)'
+        });
+        facts.push({
+          k: 'Basis per share',
+          v: money(e.perShareBefore) + ' → ' + money(e.perShareAfter),
+          color: Math.abs(e.perShareBefore - e.perShareAfter) > 0.005 ? 'var(--t1)' : 'var(--t2)'
+        });
+        facts.push({
+          k: 'Cash to the account', v: e.cash ? money(e.cash) : 'none',
+          color: e.cash ? 'var(--accent)' : 'var(--t2)'
+        });
+      }
+
+      let sharesLine, basisLine, effectTone = 'plain';
+      if (e.manual) {
+        sharesLine = 'Logged, not applied';
+        basisLine = 'shares and basis unchanged';
+      } else if (e.pending) {
+        sharesLine = 'Nothing applied yet';
+        basisLine = 'awaiting the distribution ratio';
+      } else {
+        sharesLine = e.sharesChanged
+          ? F.shares(e.sharesBefore) + ' → ' + F.shares(e.sharesAfter) + ' sh'
+          : F.shares(e.sharesAfter) + ' sh unchanged';
+        basisLine = e.basisChanged
+          ? money(e.basisBefore) + ' → ' + money(e.basisAfter)
+          : money(e.basisAfter) + ' basis unchanged';
+        if (e.basisChanged) effectTone = 'neg';
+      }
+
+      const isOpen = st.open === e.id;
+      const bg = isOpen ? 'var(--accent-soft)' : st.hover === e.id ? 'var(--hover)' : 'var(--card)';
+      return {
+        id: e.id, date: e.date, ago: this.monthsAgo(e.date, K.today, MONTHS),
+        type: e.type,
+        typeSub: e.manual ? 'added here' : e.ratioLabel ? e.ratioLabel : e.basisAdjust ? money(e.basisAdjust) + ' booked' : e.cash ? money(e.cash) + ' cash' : 'no restatement',
+        mono: e.mono, name: e.name, tickerLine: e.tickerLine,
+        headline: e.headline,
+        detailShort: e.detail.length > 96 ? e.detail.slice(0, 95).replace(/[ ,.]$/, '') + '…' : e.detail,
+        detail: e.detail,
+        sharesLine: sharesLine, basisLine: basisLine, effectTone: effectTone,
+        effectBorder: moves && !e.manual ? '2px solid var(--amber)' : '1px solid var(--line)',
+        status: e.status, statusBg: chip.bg, statusFg: chip.fg,
+        bg: bg, stickyShadow: st.hover === e.id || isOpen ? 'none' : 'none',
+        chev: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+        open: isOpen, facts: facts,
+        onToggle: () => this.setState({ open: isOpen ? null : e.id, menu: null }),
+        onEnter: () => this.setState({ hover: e.id }),
+        onLeave: () => this.setState({ hover: null })
+      };
+    });
+
+    /* ---- add form -------------------------------------------------------- */
+    const f = st.form || this.blank();
+    const bad = st.touched ? this.validate(f) : {};
+    const vf = this.valueField(f.type);
+    const hasValueField = f.type !== 'Merger' ? true : true;
+    const pick = f.ticker ? D.byTicker(f.ticker) : null;
+    const setForm = (k, v) => this.setState({ form: Object.assign({}, f, { [k]: v }) });
+
+    return Object.assign(base, {
+      portfolioName: K.portfolioName,
+      headNote: emptyDemo
+        ? 'Nothing recorded yet · every position reads exactly as traded'
+        : all.length + ' events · ' + Object.keys(typeCounts).length + ' types · ' + Object.keys(holdCounts).length
+          + ' holdings affected · ' + restating.length + ' restated a position · reconciliation passes on all ' + rec.length + ' instruments',
+      titleTip: st.titleTip,
+      titleTipOn: () => this.setState({ titleTip: true }),
+      titleTipOff: () => this.setState({ titleTip: false }),
+      titleTipText: 'Everything that changed a position without being a trade: splits, reverse splits, mergers, spin-offs, ticker changes, special dividends and returns of capital. Events that restate shares or cost basis are already reflected in the holdings table — this screen is the audit trail that explains why a share count or a basis per share moved.',
+
+      showStats: this.props.showSummary !== false,
+      stats: [
+        {
+          label: 'Events recorded', primary: String(all.length), tone: 'plain',
+          secondary: emptyDemo ? 'nothing booked' : (all.length - all.filter((e) => e.pending).length) + ' completed', note: emptyDemo ? '' : all.filter((e) => e.pending).length + ' announced',
+          tip: 'Every corporate action booked against this portfolio, newest first. Announced events are recorded but not applied.',
+          border: 'none'
+        },
+        {
+          label: 'Restatements', primary: String(restating.length), tone: 'plain',
+          secondary: restating.length ? restating.map((e) => e.ticker).filter((t, i, a) => a.indexOf(t) === i).join(', ') : 'none',
+          note: restating.length ? 'shares or basis moved' : '',
+          tip: 'Only these events changed a share count or a cost basis. The rest are numerically neutral: a ticker change, a 1-for-1 reorganisation, a cash special dividend and an announced spin-off.',
+          border: '1px solid var(--line)'
+        },
+        {
+          label: 'Cost basis reduced', primary: money(basisReduced), tone: basisReduced ? 'neg' : 'plain',
+          secondary: basisReduced ? 'across 2 returns of capital' : 'no returns of capital',
+          note: basisReduced ? 'untaxed this year' : '',
+          tip: 'A return of capital is not taxed as income. It comes off the cost basis instead, which raises the eventual capital gain by the same amount.',
+          border: '1px solid var(--line)'
+        },
+        {
+          label: 'Reconciliation', primary: breaks.length ? breaks.length + ' breaks' : 'Clean',
+          tone: breaks.length ? 'neg' : 'pos',
+          secondary: rec.length + ' instruments checked', note: 'shares, basis, income',
+          tip: 'Every buy lot is re-adjusted through its ticker’s split chain and each return of capital is subtracted before comparing against the stored position. Zero breaks means no corporate action has silently moved a number.',
+          border: '1px solid var(--line)'
+        }
+      ],
+
+      isEmpty: emptyDemo,
+      hasLog: !emptyDemo,
+
+      typeLabel: type || 'All types',
+      typeBg: type ? 'var(--accent-soft)' : 'transparent',
+      typeBorder: type ? 'var(--accent)' : 'var(--line)',
+      togType: (e) => { e.stopPropagation(); this.setState({ menu: st.menu === 'type' ? null : 'type' }); },
+      mType: st.menu === 'type',
+      typeOptions: [{ label: 'All types', value: null, count: all.length }].concat(
+        this.TYPES.filter((t) => typeCounts[t]).map((t) => ({ label: t, value: t, count: typeCounts[t] }))
+      ).map((o) => ({
+        label: o.label, meta: o.count + (o.count === 1 ? ' event' : ' events'),
+        bg: (o.value || null) === type ? 'var(--accent-soft)' : 'transparent',
+        color: (o.value || null) === type ? 'var(--accent)' : 'var(--t1)',
+        weight: (o.value || null) === type ? 600 : 400,
+        onClick: (e) => { e.stopPropagation(); this.setState({ type: o.value, menu: null, open: null }); }
+      })),
+
+      holdLabel: holding ? holding : 'All holdings',
+      holdBg: holding ? 'var(--accent-soft)' : 'transparent',
+      holdBorder: holding ? 'var(--accent)' : 'var(--line)',
+      togHold: (e) => { e.stopPropagation(); this.setState({ menu: st.menu === 'hold' ? null : 'hold' }); },
+      mHold: st.menu === 'hold',
+      holdOptions: [{ label: 'All holdings', value: null, meta: Object.keys(holdCounts).length + ' affected' }].concat(
+        Object.keys(holdCounts).sort().map((t) => ({
+          label: t + ' · ' + D.byTicker(t).name, value: t,
+          meta: holdCounts[t] + (holdCounts[t] === 1 ? ' event' : ' events')
+        }))
+      ).map((o) => ({
+        label: o.label, meta: o.meta,
+        bg: (o.value || null) === holding ? 'var(--accent-soft)' : 'transparent',
+        color: (o.value || null) === holding ? 'var(--accent)' : 'var(--t1)',
+        weight: (o.value || null) === holding ? 600 : 400,
+        onClick: (e) => { e.stopPropagation(); this.setState({ holding: o.value, menu: null, open: null }); }
+      })),
+
+      filtered: filtered,
+      clearFilters: (e) => { if (e) e.stopPropagation(); this.setState({ type: null, holding: null, query: '', menu: null }); },
+      query: st.query,
+      onQuery: (e) => this.setState({ query: e.target.value, open: null }),
+      countLabel: shown.length === all.length
+        ? all.length + (all.length === 1 ? ' event' : ' events')
+        : shown.length + ' of ' + all.length + ' events',
+
+      head: [
+        { label: 'Date', justify: 'flex-start', pos: 'sticky', z: 3 },
+        { label: 'Type', justify: 'flex-start', pos: 'static', z: 1 },
+        { label: 'Holding', justify: 'flex-start', pos: 'static', z: 1 },
+        { label: 'Description', justify: 'flex-start', pos: 'static', z: 1 },
+        { label: 'Effect on the position', justify: 'flex-end', pos: 'static', z: 1 },
+        { label: 'Status', justify: 'flex-start', pos: 'static', z: 1 },
+        { label: '', justify: 'center', pos: 'static', z: 1 }
+      ],
+      rows: rows,
+      noResults: shown.length === 0,
+      noResultsNote: q
+        ? 'Nothing matches “' + st.query.trim() + '” in ' + all.length + ' recorded events.'
+        : 'No ' + (type ? type.toLowerCase() : 'event') + (holding ? ' on ' + holding : '') + ' has been recorded.',
+
+      /* ---- add modal ----------------------------------------------------- */
+      openAdd: (e) => { if (e) e.stopPropagation(); this.setState({ modal: true, touched: false, menu: null, form: this.blank() }); },
+      modalOpen: st.modal,
+      modalSub: K.portfolioName + ' · ' + K.baseCurrency,
+      closeModal: () => this.setState({ modal: false, touched: false, menu: null }),
+      formTypes: this.TYPES.map((t) => ({
+        label: t,
+        bg: f.type === t ? 'var(--accent-soft)' : 'transparent',
+        border: f.type === t ? 'var(--accent)' : 'var(--line)',
+        color: f.type === t ? 'var(--accent)' : 'var(--t1)',
+        weight: f.type === t ? 600 : 400,
+        onClick: (e) => { e.stopPropagation(); this.setState({ form: Object.assign({}, f, { type: t, value: '' }), menu: null }); }
+      })),
+      holdingFieldLabel: f.type === 'Ticker change' ? 'Holding (current ticker)' : 'Holding',
+      formHoldLabel: pick ? pick.ticker + ' · ' + pick.name : 'Choose a holding',
+      formHoldColor: pick ? 'var(--t1)' : 'var(--t3)',
+      formHoldBorder: bad.ticker ? 'var(--neg)' : 'var(--line)',
+      togFormHold: (e) => { e.stopPropagation(); this.setState({ menu: st.menu === 'fhold' ? null : 'fhold' }); },
+      mFormHold: st.menu === 'fhold',
+      formHoldOptions: D.open().map((p) => ({
+        label: p.ticker + ' · ' + p.name, meta: F.shares(p.shares) + ' sh',
+        bg: f.ticker === p.ticker ? 'var(--accent-soft)' : 'transparent',
+        onClick: (e) => { e.stopPropagation(); this.setState({ form: Object.assign({}, f, { ticker: p.ticker }), menu: null }); }
+      })),
+      formDate: f.date,
+      formDateBorder: bad.date ? 'var(--neg)' : 'var(--line)',
+      onFormDate: (e) => setForm('date', e.target.value),
+      hasValueField: hasValueField,
+      valueFieldLabel: vf.label,
+      valueFieldHint: vf.hint,
+      valueFieldNote: vf.note,
+      formValue: f.value,
+      formValueBorder: bad.value ? 'var(--neg)' : 'var(--line)',
+      onFormValue: (e) => setForm('value', e.target.value),
+      formNote: f.note,
+      notePlaceholder: f.type === 'Split' ? 'e.g. 2-for-1 forward stock split' : 'What the issuer announced',
+      onFormNote: (e) => setForm('note', e.target.value),
+      formStatuses: ['Completed', 'Announced'].map((s) => ({
+        label: s,
+        bg: f.status === s ? 'var(--accent-soft)' : 'transparent',
+        color: f.status === s ? 'var(--accent)' : 'var(--t2)',
+        weight: f.status === s ? 600 : 500,
+        onClick: (e) => { e.stopPropagation(); setForm('status', s); }
+      })),
+      modalHint: Object.keys(bad).length
+        ? 'Fill the highlighted fields.'
+        : 'Adds a row to this log. The position’s shares and cost basis are not restated, so the reconciliation stays clean.',
+      modalHintColor: Object.keys(bad).length ? 'var(--neg)' : 'var(--t3)',
+      saveAction: () => {
+        const errs = this.validate(f);
+        if (Object.keys(errs).length) return this.setState({ touched: true });
+        const p = D.byTicker(f.ticker);
+        const label = this.valueField(f.type).label;
+        const row = {
+          id: 'man' + (st.added.length + 1), date: f.date.trim(), type: f.type,
+          status: f.status, pending: f.status !== 'Completed', manual: true,
+          ticker: p.ticker, tickerLine: p.ticker, name: p.name, mono: p.mono,
+          headline: f.note.trim() || f.type + ' recorded on ' + p.ticker,
+          detail: (f.note.trim() || f.type + ' recorded manually on ' + p.ticker + '.')
+            + ' Logged for the audit trail only — the holding still shows ' + F.shares(p.shares)
+            + ' shares on a ' + money(p.costTotal) + ' cost basis, so nothing downstream moved.',
+          ratioLabel: null, sharesChanged: false, basisChanged: false, basisAdjust: 0, cash: 0,
+          sharesBefore: p.shares, sharesAfter: p.shares,
+          basisBefore: p.costTotal, basisAfter: p.costTotal,
+          perShareBefore: p.costPerShare, perShareAfter: p.costPerShare,
+          valueLabel: /\S/.test(f.value || '') ? label : null, valueShown: f.value
+        };
+        this.setState({
+          added: [row].concat(st.added), modal: false, touched: false, menu: null,
+          open: row.id, type: null, holding: null, query: '',
+          toast: f.type + ' on ' + p.ticker + ' added to the log'
+        });
+        if (this.tt) clearTimeout(this.tt);
+        this.tt = setTimeout(() => this.setState({ toast: '' }), 2600);
+      },
+      toast: st.toast,
+
+      footnote: emptyDemo
+        ? 'Corporate actions are the events that change a position without a trade. Splits and reverse splits restate the share count and the basis per share but never the total cost basis; a return of capital reduces the cost basis without touching shares, so it is untaxed now and shows up as a larger capital gain later; ticker changes, 1-for-1 reorganisations and cash special dividends are numerically neutral. Nothing is recorded here, so all '
+          + rec.length + ' instruments reconcile against the ledger with ' + (breaks.length ? breaks.length + ' breaks' : 'zero breaks') + '.'
+        : 'Splits and reverse splits restate the share count and the basis per share, never the total cost basis — the ' + restating.filter((e) => e.sharesChanged).length
+          + ' split events here are stored post-split, and each buy lot before the event is shown on its pre-split basis. A return of capital works the other way: '
+          + money(basisReduced) + ' came off the cost basis of GLDI and SLVO without touching a single share, so none of it was taxed as income this year and the eventual capital gain is larger by the same amount. The remaining events are neutral by construction — a ticker change, a 1-for-1 fund reorganisation, a '
+          + money(cashPaid) + ' cash special dividend already inside PEP’s recorded dividends, and a spin-off that stays unapplied until the ratio is published. Reconciliation re-applies every split ratio and subtracts every return of capital before comparing against the stored positions: '
+          + (breaks.length ? breaks.length + ' breaks across ' + rec.length + ' instruments.' : 'zero breaks across all ' + rec.length + ' instruments, on shares, cost basis and income alike.')
+    });
+  }
+}
+</script>
+</body>
+</html>

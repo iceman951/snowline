@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <script src="snowline-data.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --canvas:#FAFAF9; --card:#FFFFFF; --t1:#171717; --t2:#737373; --t3:#A3A3A3; --line:#E7E5E4;
+      --accent:#0F7B57; --neg:#B91C1C; --amber:#B45309; --hover:#F5F5F4; --on-accent:#FFFFFF;
+      --grey-series:#A8A29E; --shadow:0 10px 28px rgba(23,23,23,.10);
+      --accent-2:color-mix(in oklab, var(--accent) 74%, var(--card));
+      --accent-3:color-mix(in oklab, var(--accent) 48%, var(--card));
+      --accent-4:color-mix(in oklab, var(--accent) 26%, var(--card));
+      --accent-soft:color-mix(in oklab, var(--accent) 9%, var(--card));
+      --accent-tint:color-mix(in oklab, var(--accent) 16%, var(--card));
+      --tag-bg:color-mix(in oklab, var(--amber) 8%, var(--card));
+      --tag-fg:var(--amber);
+      --track:#E4E1DF; --tick:#CFCAC6; --veil:rgba(255,255,255,.72);
+    }
+    html[data-theme="dark"]{
+      --canvas:#0C0C0C; --card:#171717; --t1:#FAFAF9; --t2:#A3A3A3; --t3:#737373; --line:#292524;
+      --accent:#34D399; --neg:#F87171; --amber:#F59E0B; --hover:#201E1D; --on-accent:#0C0C0C;
+      --grey-series:#57534E; --shadow:0 10px 28px rgba(0,0,0,.55);
+      --tag-bg:color-mix(in oklab, var(--amber) 7%, var(--card));
+      --tag-fg:color-mix(in oklab, var(--amber) 58%, var(--t2));
+      --track:#3A3431; --tick:#4E4642; --veil:rgba(23,23,23,.70);
+    }
+    html,body{margin:0;padding:0;background:var(--canvas)}
+    *{box-sizing:border-box}
+    body{font-family:'Inter',system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif;font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
+    a{color:var(--accent);text-decoration:none}
+    a:hover{color:var(--accent);text-decoration:underline}
+    button,input{font-family:inherit;font-variant-numeric:tabular-nums}
+    ::selection{background:var(--accent-tint)}
+    @keyframes menuIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+    @media print{
+      [data-r="tabbar"],[data-r="noprint"]{display:none!important}
+      [data-r="scroller"]{overflow:visible!important}
+    }
+    @media (max-width:960px){
+      [data-r="navd"]{display:none!important}
+      [data-r="navm"]{display:flex!important}
+      [data-r="tabbar"]{display:flex!important}
+      [data-r="main"]{padding:16px 16px 104px!important}
+      [data-r="toolbar"]{flex-direction:column!important;align-items:stretch!important}
+    }
+  </style>
+</helmet>
+<div style="min-height:100vh;background:var(--canvas);color:var(--t1);font-size:14px;line-height:1.45">
+
+  <dc-import name="TopNav" active="Analytics" sub-active="Report" hint-size="100%,56px"></dc-import>
+
+  <main data-r="main" data-screen-label="Analytics — Report" style="max-width:1392px;margin:0 auto;padding:24px 24px 88px;display:flex;flex-direction:column;gap:22px">
+
+    <div style="display:flex;flex-direction:column;gap:5px;min-width:0">
+      <div style="display:flex;align-items:center;gap:9px">
+        <h1 style="margin:0;font-size:32px;font-weight:600;letter-spacing:-0.028em;line-height:1.1;color:var(--t1)">Report</h1>
+        <span style="font-size:13px;color:var(--t3);padding-top:6px">{{ portfolioName }}</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:9px;font-size:12px;color:var(--t3);flex-wrap:wrap">
+        <span>{{ headSpan }}</span>
+        <span style="width:1px;height:10px;background:var(--line)"></span>
+        <span>{{ headValue }}</span>
+      </div>
+    </div>
+
+    <dc-import name="AnalyticsSubnav" active="Report" hint-size="100%,48px"></dc-import>
+
+    <div style="display:flex;flex-direction:column;gap:0;background:var(--card);border:1px solid var(--line);border-radius:8px">
+
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:16px 20px;border-bottom:1px solid var(--line)">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <span style="font-size:12px;font-weight:500;color:var(--t2)">Benchmarks</span>
+          <div style="position:relative">
+            <button onClick="{{ togBench }}" style="display:inline-flex;align-items:center;gap:8px;height:30px;padding:0 11px;border:1px solid {{ benchBorder }};border-radius:7px;background:{{ benchBg }};color:var(--t1);font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap" style-hover="background:var(--hover)">
+              {{ benchLabel }}
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--t3)"><path d="M6 9l6 6 6-6"></path></svg>
+            </button>
+            <sc-if value="{{ mBench }}" hint-placeholder-val="{{ false }}">
+              <div onClick="{{ stop }}" style="position:absolute;top:38px;left:0;z-index:50;width:274px;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:6px;animation:menuIn .12s ease-out">
+                <span style="display:block;padding:7px 10px 6px;font-size:11px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;color:var(--t3)">Compare against</span>
+                <sc-for list="{{ benchRows }}" as="b" hint-placeholder-count="1">
+                  <button onClick="{{ b.onClick }}" style="display:flex;align-items:flex-start;gap:10px;width:100%;padding:9px 10px;border:none;border-radius:6px;background:transparent;text-align:left;cursor:{{ b.cursor }};opacity:{{ b.opacity }}" style-hover="background:var(--hover)">
+                    <span style="flex:none;width:15px;height:15px;margin-top:1px;border:1px solid {{ b.boxBorder }};border-radius:4px;background:{{ b.boxBg }};display:flex;align-items:center;justify-content:center">
+                      <svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="{{ b.tick }}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6.5l2.6 2.5L10 3.5"></path></svg>
+                    </span>
+                    <span style="display:flex;flex-direction:column;gap:2px;min-width:0">
+                      <span style="font-size:12.5px;font-weight:500;color:var(--t1)">{{ b.label }}</span>
+                      <span style="font-size:11px;line-height:1.45;color:var(--t3)">{{ b.hint }}</span>
+                    </span>
+                  </button>
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <span style="font-size:12px;color:var(--t3)">{{ hint }}</span>
+          <sc-if value="{{ anySelected }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ clearAll }}" style="border:none;background:transparent;padding:0;font-size:12px;font-weight:500;color:var(--accent);cursor:pointer;text-decoration:underline;text-underline-offset:2px">Clear all</button>
+          </sc-if>
+        </div>
+      </div>
+
+      <div style="padding:18px 20px 16px;display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
+          <span style="font-size:12px;font-weight:500;color:var(--t2)">{{ chartTitle }}</span>
+          <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+            <sc-for list="{{ legend }}" as="l" hint-placeholder-count="1">
+              <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--t2);white-space:nowrap">
+                <span style="width:12px;height:{{ l.h }};border-radius:2px;background:{{ l.color }}"></span>{{ l.label }}
+              </span>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="position:relative;display:flex;gap:10px">
+          <div style="display:flex;flex-direction:column;justify-content:space-between;height:236px;padding:2px 0 0;flex:none">
+            <sc-for list="{{ yTicks }}" as="y" hint-placeholder-count="5">
+              <span style="font-size:10px;color:var(--t3);text-align:right;line-height:1">{{ y.label }}</span>
+            </sc-for>
+          </div>
+
+          <div style="position:relative;flex:1;min-width:0">
+            <div style="position:absolute;inset:0 0 20px 0;display:flex;flex-direction:column;justify-content:space-between;pointer-events:none">
+              <sc-for list="{{ yTicks }}" as="y" hint-placeholder-count="5">
+                <span style="height:1px;background:var(--line);opacity:{{ y.op }};border-top:1px dashed var(--line)"></span>
+              </sc-for>
+            </div>
+
+            <div style="position:relative;display:flex;align-items:flex-end;height:216px">
+              <sc-for list="{{ bars }}" as="b" hint-placeholder-count="12">
+                <div onMouseEnter="{{ b.onEnter }}" onMouseLeave="{{ b.onLeave }}" style="flex:1;min-width:0;height:100%;display:flex;align-items:flex-end;justify-content:center;cursor:default;background:{{ b.slotBg }}">
+                  <span style="width:62%;max-width:44px;height:{{ b.h }};background:{{ b.fill }};display:block"></span>
+                </div>
+              </sc-for>
+              <sc-if value="{{ hasLines }}" hint-placeholder-val="{{ false }}">
+                <svg viewBox="0 0 1000 216" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:216px;pointer-events:none">
+                  <sc-for list="{{ lines }}" as="s" hint-placeholder-count="1">
+                    <path d="{{ s.d }}" fill="none" stroke="{{ s.color }}" stroke-width="2" stroke-dasharray="{{ s.dash }}" vector-effect="non-scaling-stroke" stroke-linejoin="round" stroke-linecap="round"></path>
+                  </sc-for>
+                </svg>
+              </sc-if>
+            </div>
+
+            <div style="display:flex;height:20px;align-items:center">
+              <sc-for list="{{ bars }}" as="b" hint-placeholder-count="12">
+                <span style="flex:1;min-width:0;text-align:center;font-size:10px;color:var(--t3);white-space:nowrap;overflow:hidden">{{ b.tickLabel }}</span>
+              </sc-for>
+            </div>
+
+            <sc-if value="{{ tip }}" hint-placeholder-val="{{ false }}">
+              <div style="position:absolute;top:0;left:{{ tipLeft }};transform:translateX({{ tipShift }});z-index:20;pointer-events:none">
+                <dc-import name="ChartTooltip" tip="{{ tip }}" hint-size="240px,180px"></dc-import>
+              </div>
+            </sc-if>
+          </div>
+
+          <sc-if value="{{ hasRightAxis }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;justify-content:space-between;height:236px;padding:2px 0 0;flex:none">
+              <sc-for list="{{ rTicks }}" as="y" hint-placeholder-count="5">
+                <span style="font-size:10px;color:var(--t3);line-height:1">{{ y.label }}</span>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+
+      <div data-r="toolbar" style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:14px 20px;border-top:1px solid var(--line);background:var(--canvas);border-radius:0 0 8px 8px">
+        <div data-r="noprint" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <sc-for list="{{ exports }}" as="e" hint-placeholder-count="2">
+            <button onClick="{{ e.onClick }}" style="display:inline-flex;align-items:center;gap:7px;height:32px;padding:0 13px;border:1px solid var(--line);border-radius:7px;background:var(--card);color:var(--t1);font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap" style-hover="background:var(--hover)">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="color:var(--t3)"><path d="M12 3v11m0 0l-4-4m4 4l4-4M4 17v3h16v-3"></path></svg>
+              {{ e.label }}
+            </button>
+          </sc-for>
+          <sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+            <span style="font-size:11px;color:var(--t2)">{{ toast }}</span>
+          </sc-if>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <sc-for list="{{ pickers }}" as="p" hint-placeholder-count="2">
+            <div style="position:relative">
+              <button onClick="{{ p.onToggle }}" style="display:inline-flex;align-items:center;gap:8px;height:32px;padding:0 12px;border:1px solid var(--line);border-radius:7px;background:{{ p.bg }};font-size:12px;cursor:pointer;white-space:nowrap" style-hover="background:var(--hover)">
+                <span style="color:var(--t3)">{{ p.title }}</span>
+                <span style="color:var(--t1);font-weight:500">{{ p.value }}</span>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--t3)"><path d="M6 9l6 6 6-6"></path></svg>
+              </button>
+              <sc-if value="{{ p.open }}" hint-placeholder-val="{{ false }}">
+                <div onClick="{{ stop }}" style="position:absolute;top:40px;right:0;z-index:50;min-width:190px;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:6px;animation:menuIn .12s ease-out">
+                  <sc-for list="{{ p.options }}" as="o" hint-placeholder-count="3">
+                    <button onClick="{{ o.onClick }}" style="display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;padding:8px 10px;border:none;border-radius:6px;background:{{ o.bg }};text-align:left;cursor:pointer;font-size:12.5px;color:{{ o.color }};font-weight:{{ o.weight }}" style-hover="background:var(--hover)">
+                      {{ o.label }}
+                      <span style="font-size:11px;color:var(--t3)">{{ o.note }}</span>
+                    </button>
+                  </sc-for>
+                </div>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+
+    <div data-r="scroller" style="position:relative;max-width:100%;border:1px solid var(--line);border-radius:8px;background:var(--card);overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain">
+      <div style="min-width:{{ minWidth }}">
+
+        <div style="display:grid;grid-template-columns:{{ gridCols }};border-bottom:1px solid var(--line);background:var(--card)">
+          <div style="position:sticky;left:0;z-index:3;background:var(--card);border-right:1px solid var(--line);display:flex;align-items:center;padding:11px 14px">
+            <span style="font-size:12px;font-weight:500;color:var(--t2)">Metric</span>
+          </div>
+          <sc-for list="{{ cols }}" as="c" hint-placeholder-count="12">
+            <div style="display:flex;align-items:center;justify-content:flex-end;padding:11px 14px;background:{{ c.bg }}">
+              <span style="font-size:12px;font-weight:500;color:{{ c.color }};white-space:nowrap">{{ c.label }}</span>
+            </div>
+          </sc-for>
+        </div>
+
+        <sc-for list="{{ freeRows }}" as="r" hint-placeholder-count="7">
+          <div onClick="{{ r.onClick }}" onMouseEnter="{{ r.onEnter }}" onMouseLeave="{{ r.onLeave }}" style="display:grid;grid-template-columns:{{ gridCols }};border-bottom:1px solid var(--line);cursor:pointer;background:{{ r.bg }}">
+            <div style="position:sticky;left:0;z-index:2;background:{{ r.bg }};border-right:1px solid var(--line);border-left:3px solid {{ r.rule }};display:flex;align-items:center;gap:9px;padding:10px 14px 10px 11px;min-width:0">
+              <span style="width:9px;height:9px;flex:none;border-radius:2px;background:{{ r.dot }};border:1px solid {{ r.dotBorder }}"></span>
+              <span style="font-size:13px;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.label }}</span>
+            </div>
+            <sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="12">
+              <div style="display:flex;align-items:center;justify-content:flex-end;padding:10px 14px;background:{{ c.bg }}">
+                <span style="font-size:13px;color:{{ c.color }};white-space:nowrap">{{ c.text }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </sc-for>
+
+      </div>
+    </div>
+
+    <span style="font-size:11px;line-height:1.5;color:var(--t3)">{{ footnote }}</span>
+  </main>
+
+  <div data-r="tabbar" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:60;height:60px;background:var(--card);border-top:1px solid var(--line);align-items:stretch;padding:0 4px">
+    <sc-for list="{{ tabRows }}" as="t" hint-placeholder-count="4">
+      <a href="{{ t.href }}" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-decoration:none;color:{{ t.color }}">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="{{ t.d }}"></path></svg>
+        <span style="font-size:10px;font-weight:500">{{ t.label }}</span>
+      </a>
+    </sc-for>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;defaultGrouping&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Monthly&quot;,&quot;Quarterly&quot;,&quot;Annual&quot;],&quot;default&quot;:&quot;Monthly&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Report&quot;}}">
+class Component extends DCLogic {
+  state = {
+    grouping: null, period: 'Last 1 year',
+    menu: null, plotted: [], hover: null, benchmark: false, toast: ''
+  };
+
+  componentDidMount() {
+    this.doc = () => { if (this.state.menu) this.setState({ menu: null }); };
+    document.addEventListener('click', this.doc);
+    if (!window.SnowlineData) {
+      const check = () => { if (window.SnowlineData) this.forceUpdate(); else setTimeout(check, 30); };
+      setTimeout(check, 20);
+    }
+  }
+  componentWillUnmount() {
+    if (this.doc) document.removeEventListener('click', this.doc);
+    if (this.toastT) clearTimeout(this.toastT);
+  }
+
+  say(msg) {
+    if (this.toastT) clearTimeout(this.toastT);
+    this.setState({ toast: msg });
+    this.toastT = setTimeout(() => this.setState({ toast: '' }), 3600);
+  }
+
+  niceMax(raw, steps) {
+    if (!(raw > 0)) return steps;
+    const mag = Math.pow(10, Math.floor(Math.log10(raw / steps)));
+    const cands = [1, 2, 2.5, 5, 10];
+    for (let m = mag; m <= mag * 100000; m *= 10) {
+      for (const c of cands) { const s = c * m; if (s * steps >= raw) return s * steps; }
+    }
+    return Math.ceil(raw / steps) * steps;
+  }
+
+  /* one bucket per column: levels come from the last month in the bucket,
+     flows are summed across it */
+  group(months, mode) {
+    if (mode === 'Monthly') return months.map((m) => Object.assign({ colLabel: m.short }, m));
+    const order = [], by = {};
+    months.forEach((m) => {
+      const k = mode === 'Quarterly'
+        ? 'Q' + (Math.floor(m.monthIndex / 3) + 1) + " '" + String(m.year).slice(2)
+        : String(m.year);
+      if (!by[k]) { by[k] = []; order.push(k); }
+      by[k].push(m);
+    });
+    return order.map((k) => {
+      const g = by[k], first = g[0], last = g[g.length - 1];
+      const s = (f) => g.reduce((a, m) => a + m[f], 0);
+      return {
+        colLabel: k, key: k, value: last.value, begin: first.begin, end: last.end,
+        change: s('change'), dividends: s('dividends'), taxes: s('taxes'), fees: s('fees'),
+        deposits: s('deposits'), withdrawals: s('withdrawals'),
+        totalProfit: last.totalProfit, capitalGain: last.capitalGain
+      };
+    });
+  }
+
+  csv(cols, rows) {
+    const esc = (v) => '"' + String(v).replace(/"/g, '""') + '"';
+    const lines = [['Metric'].concat(cols.map((c) => c.colLabel)).map(esc).join(',')];
+    rows.forEach((r) => lines.push([r.label].concat(cols.map((c) => r.get(c).toFixed(2))).map(esc).join(',')));
+    return lines.join('\r\n');
+  }
+
+  download(name, text) {
+    const url = URL.createObjectURL(new Blob([text], { type: 'text/csv;charset=utf-8' }));
+    const a = document.createElement('a');
+    a.href = url; a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1500);
+  }
+
+  renderVals() {
+    const st = Object.assign({}, this.state);
+    if (st.grouping === null) st.grouping = this.props.defaultGrouping || 'Monthly';
+    const I = {
+      bars: 'M4 20V10M10 20V4M16 20v-7M22 20H2', table: 'M3 5h18v14H3V5Zm0 5h18M9 10v9',
+      home: 'M4 11l8-7 8 7v9H4v-9Zm5 9v-6h6v6',
+      scale: 'M12 4v16M6 8l-3 6h6l-3-6Zm12 0l-3 6h6l-3-6ZM5 8h14', dots: 'M5 12h.01M12 12h.01M19 12h.01'
+    };
+    const base = {
+      tabRows: [
+        { label: 'Dashboard', d: I.home, href: 'Snowline.dc.html', color: 'var(--t3)' },
+        { label: 'Analytics', d: I.bars, href: 'Analytics.dc.html', color: 'var(--accent)' },
+        { label: 'Portfolio', d: I.table, href: 'Holdings.dc.html', color: 'var(--t3)' },
+        { label: 'Tools', d: I.scale, href: 'Rebalancing.dc.html', color: 'var(--t3)' }
+      ],
+      stop: (e) => e.stopPropagation()
+    };
+    if (!window.SnowlineData) return base;
+
+    const D = window.SnowlineData, F = D.fmt, K = D.constants;
+    const PERIODS = [
+      { label: 'Last 1 year', range: '1y', note: '12 months' },
+      { label: 'Year to date', range: 'YTD', note: String(K.today.year) },
+      { label: 'All time', range: 'all', note: 'since Oct 2024' }
+    ];
+    const period = PERIODS.filter((p) => p.label === st.period)[0] || PERIODS[0];
+    const months = D.historyRange(period.range);
+    const cols = this.group(months, st.grouping);
+    const benchAll = D.benchmarkValuePath();
+    const benchByKey = {};
+    benchAll.forEach((b) => { benchByKey[b.key] = b.value; });
+
+    /* --- row definitions; the last four sit behind the upgrade bar -------- */
+    const ROWS = [
+      { id: 'value', label: 'Portfolio value', get: (c) => c.value, kind: 'level' },
+      { id: 'begin', label: 'At the beginning of the period', get: (c) => c.begin, kind: 'level' },
+      { id: 'end', label: 'At the end of the period', get: (c) => c.end, kind: 'level' },
+      { id: 'change', label: 'Change', get: (c) => c.change, kind: 'signed' },
+      { id: 'profit', label: 'Total profit', get: (c) => c.totalProfit, kind: 'signed' },
+      { id: 'capital', label: 'Capital gain', get: (c) => c.capitalGain, kind: 'signed' },
+      { id: 'dividends', label: 'Dividends', get: (c) => c.dividends, kind: 'flow' },
+      { id: 'taxes', label: 'Taxes', get: (c) => c.taxes, kind: 'flow' },
+      { id: 'fees', label: 'Fees', get: (c) => c.fees, kind: 'flow' },
+      { id: 'deposits', label: 'Deposits', get: (c) => c.deposits, kind: 'flow' },
+      { id: 'withdrawals', label: 'Withdrawals', get: (c) => c.withdrawals, kind: 'flow' }
+    ];
+    const free = ROWS.filter((r) => !r.locked);
+    const RAMP = ['var(--accent)', 'var(--accent-2)', 'var(--accent-3)', 'var(--grey-series)'];
+    const plotted = st.plotted.filter((id) => free.some((r) => r.id === id));
+    const colorOf = (id) => RAMP[plotted.indexOf(id) % RAMP.length];
+
+    /* --- bars: portfolio value, always the left axis ---------------------- */
+    const yMax = this.niceMax(Math.max.apply(null, cols.map((c) =>
+      Math.max(c.value, st.benchmark ? (benchByKey[c.key] || 0) : 0))), 4);
+    const bars = cols.map((c, i) => {
+      const on = st.hover === i;
+      return {
+        h: Math.max(1, c.value / yMax * 100).toFixed(2) + '%',
+        fill: on ? 'var(--accent)' : 'var(--accent-4)',
+        slotBg: on ? 'var(--hover)' : 'transparent',
+        tickLabel: cols.length > 18 && i % 2 ? '' : c.colLabel,
+        onEnter: () => this.setState({ hover: i }),
+        onLeave: () => this.setState({ hover: null })
+      };
+    });
+
+    /* --- lines: plotted rows share one right axis, all being dollars ------ */
+    const series = plotted.map((id) => {
+      const r = free.filter((x) => x.id === id)[0];
+      return { id: id, label: r.label, values: cols.map(r.get), color: colorOf(id) };
+    });
+    const flat = series.reduce((a, s) => a.concat(s.values), []);
+    let rMin = 0, rMax = 1;
+    if (flat.length) {
+      const lo = Math.min.apply(null, flat), hi = Math.max.apply(null, flat);
+      rMax = this.niceMax(Math.max(Math.abs(lo), Math.abs(hi)), 4);
+      rMin = lo < 0 ? -rMax : 0;
+    }
+    const px = (i) => cols.length < 2 ? 500 : (i + 0.5) / cols.length * 1000;
+    const ry = (v) => 216 - (v - rMin) / (rMax - rMin) * 200 - 8;
+    const by = (v) => 216 - v / yMax * 216;
+    const lines = series.map((s) => ({
+      color: s.color, dash: 'none',
+      d: s.values.map((v, i) => (i ? 'L' : 'M') + px(i).toFixed(1) + ' ' + ry(v).toFixed(1)).join(' ')
+    }));
+    if (st.benchmark) {
+      lines.push({
+        color: 'var(--grey-series)', dash: '5 4',
+        d: cols.map((c, i) => (i ? 'L' : 'M') + px(i).toFixed(1) + ' ' + by(benchByKey[c.key] || 0).toFixed(1)).join(' ')
+      });
+    }
+
+    const legend = [{ label: 'Portfolio value', color: 'var(--accent-4)', h: '9px' }]
+      .concat(st.benchmark ? [{ label: K.benchmark + ' equivalent', color: 'var(--grey-series)', h: '3px' }] : [])
+      .concat(series.map((s) => ({ label: s.label, color: s.color, h: '3px' })));
+
+    /* --- tooltip ---------------------------------------------------------- */
+    const hi = st.hover;
+    const hc = hi === null ? null : cols[hi];
+    const tip = !hc ? null : {
+      title: hc.colLabel,
+      headline: F.money(hc.value),
+      sub: st.grouping === 'Monthly' ? 'Value at month end' : 'Value at period end',
+      rows: [
+        { label: 'Change', value: F.signed(hc.change), color: 'var(--accent-4)', tone: F.tone(hc.change) },
+        { label: 'Dividends', value: F.money(hc.dividends), color: 'var(--accent-3)' }
+      ].concat(st.benchmark ? [{
+        label: K.benchmark + ' equivalent', value: F.money(benchByKey[hc.key] || 0), color: 'var(--grey-series)'
+      }] : []).concat(series.map((s) => ({
+        label: s.label, value: F.signed(s.values[hi]), color: s.color, tone: F.tone(s.values[hi])
+      }))),
+      footer: hc.deposits > 0 ? 'Deposits ' + F.money(hc.deposits) : ''
+    };
+    const tipPos = hi === null ? 0 : (hi + 0.5) / cols.length * 100;
+
+    const cellText = (r, c) => {
+      const v = r.get(c);
+      if (r.kind === 'signed') return F.signed(v);
+      if (r.kind === 'flow' && v === 0) return '—';
+      return F.money(v);
+    };
+    const cellColor = (r, c) => {
+      const v = r.get(c);
+      if (r.kind === 'signed') return v > 0 ? 'var(--accent)' : v < 0 ? 'var(--neg)' : 'var(--t2)';
+      if (r.kind === 'flow' && v === 0) return 'var(--t3)';
+      return 'var(--t1)';
+    };
+    const rowOf = (r, locked) => {
+      const on = plotted.indexOf(r.id) >= 0;
+      return {
+        label: r.label,
+        bg: on ? 'var(--accent-soft)' : 'var(--card)',
+        rule: on ? colorOf(r.id) : 'transparent',
+        dot: on ? colorOf(r.id) : 'transparent',
+        dotBorder: on ? colorOf(r.id) : 'var(--line)',
+        cells: cols.map((c) => ({
+          text: cellText(r, c),
+          color: locked ? 'var(--t2)' : cellColor(r, c),
+          bg: 'transparent'
+        })),
+        onClick: () => this.setState({
+          plotted: on ? plotted.filter((x) => x !== r.id) : plotted.concat([r.id])
+        }),
+        onEnter: () => {}, onLeave: () => {}
+      };
+    };
+
+    const menuOpen = (k) => st.menu === k;
+    const picker = (k, title, value, options) => ({
+      title: title, value: value, open: menuOpen(k),
+      bg: menuOpen(k) ? 'var(--hover)' : 'var(--card)',
+      onToggle: (e) => { e.stopPropagation(); this.setState({ menu: menuOpen(k) ? null : k }); },
+      options: options
+    });
+
+    return Object.assign(base, {
+      portfolioName: K.portfolioName,
+      headSpan: cols.length + ' ' + (st.grouping === 'Monthly' ? 'months' : st.grouping === 'Quarterly' ? 'quarters' : 'years') + ' · ' + months[0].key + ' – ' + months[months.length - 1].key,
+      headValue: 'Ending value ' + F.money(cols[cols.length - 1].value),
+
+      benchLabel: st.benchmark ? K.benchmark : 'Select',
+      benchBg: st.benchmark ? 'var(--accent-soft)' : 'var(--card)',
+      benchBorder: st.benchmark ? 'var(--accent)' : 'var(--line)',
+      mBench: menuOpen('bench'),
+      togBench: (e) => { e.stopPropagation(); this.setState({ menu: menuOpen('bench') ? null : 'bench' }); },
+      benchRows: [
+        {
+          label: K.benchmark, on: st.benchmark, cursor: 'pointer', opacity: 1,
+          hint: 'The same deposits, run at ' + K.benchmark + "'s monthly returns.",
+          onClick: (e) => { e.stopPropagation(); this.setState({ benchmark: !st.benchmark }); }
+        },
+        {
+          label: 'Add a benchmark…', on: false, cursor: 'not-allowed', opacity: 0.55,
+          hint: 'Only ' + K.benchmark + ' has a price history in this portfolio.',
+          onClick: (e) => e.stopPropagation()
+        }
+      ].map((b) => Object.assign(b, {
+        boxBg: b.on ? 'var(--accent)' : 'transparent',
+        boxBorder: b.on ? 'var(--accent)' : 'var(--line)',
+        tick: b.on ? 'var(--on-accent)' : 'transparent'
+      })),
+
+      hint: 'Click a row in the table to make it appear on the graph',
+      anySelected: plotted.length > 0 || st.benchmark,
+      clearAll: () => this.setState({ plotted: [], benchmark: false }),
+
+      chartTitle: 'Portfolio value by ' + (st.grouping === 'Monthly' ? 'month' : st.grouping === 'Quarterly' ? 'quarter' : 'year'),
+      legend: legend,
+      bars: bars,
+      lines: lines,
+      hasLines: lines.length > 0,
+      yTicks: [4, 3, 2, 1, 0].map((i) => ({ label: F.k(yMax / 4 * i), op: i === 0 ? 0 : 1 })),
+      hasRightAxis: series.length > 0,
+      rTicks: [4, 3, 2, 1, 0].map((i) => ({ label: F.k(rMin + (rMax - rMin) / 4 * i) })),
+      tip: tip,
+      tipLeft: tipPos.toFixed(2) + '%',
+      tipShift: tipPos > 62 ? '-92%' : tipPos < 20 ? '-8%' : '-50%',
+
+      exports: [
+        {
+          label: 'Export to PDF',
+          onClick: () => { this.say('Opening the print view…'); setTimeout(() => window.print(), 260); }
+        },
+        {
+          label: 'Export to Excel',
+          onClick: () => {
+            this.download('snowline-report-' + st.grouping.toLowerCase() + '.csv', this.csv(cols, free));
+            this.say('Downloaded ' + free.length + ' rows × ' + cols.length + ' columns (CSV).');
+          }
+        }
+      ],
+      toast: st.toast,
+
+      pickers: [
+        picker('group', 'Time grouping', st.grouping, ['Monthly', 'Quarterly', 'Annual'].map((g) => ({
+          label: g, note: '', bg: st.grouping === g ? 'var(--accent-soft)' : 'transparent',
+          color: st.grouping === g ? 'var(--accent)' : 'var(--t1)',
+          weight: st.grouping === g ? 600 : 400,
+          onClick: (e) => { e.stopPropagation(); this.setState({ grouping: g, menu: null, hover: null }); }
+        }))),
+        picker('period', 'Time period', st.period, PERIODS.map((p) => ({
+          label: p.label, note: p.note,
+          bg: st.period === p.label ? 'var(--accent-soft)' : 'transparent',
+          color: st.period === p.label ? 'var(--accent)' : 'var(--t1)',
+          weight: st.period === p.label ? 600 : 400,
+          onClick: (e) => { e.stopPropagation(); this.setState({ period: p.label, menu: null, hover: null }); }
+        })))
+      ],
+
+      gridCols: '236px repeat(' + cols.length + ', minmax(112px, 1fr))',
+      minWidth: (236 + cols.length * 112) + 'px',
+      cols: cols.map((c, i) => ({
+        label: c.colLabel,
+        bg: st.hover === i ? 'var(--hover)' : 'transparent',
+        color: st.hover === i ? 'var(--t1)' : 'var(--t2)'
+      })),
+      freeRows: free.map((r) => rowOf(r, false)),
+      footnote: 'Levels (portfolio value, beginning, end) are taken at the close of each ' + (st.grouping === 'Monthly' ? 'month' : st.grouping === 'Quarterly' ? 'quarter' : 'year') + '; flows (change, dividends, deposits) are summed across it. Dividends are net of ' + F.num(K.withholdingTax * 100, 0) + '% withholding tax.'
+    });
+  }
+}
+</script>
+</body>
+</html>

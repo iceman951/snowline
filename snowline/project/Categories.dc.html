@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <script src="snowline-data.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --canvas:#FAFAF9; --card:#FFFFFF; --t1:#171717; --t2:#737373; --t3:#A3A3A3; --line:#E7E5E4;
+      --accent:#0F7B57; --neg:#B91C1C; --amber:#B45309; --hover:#F5F5F4; --on-accent:#FFFFFF;
+      --grey-series:#A8A29E; --shadow:0 10px 28px rgba(23,23,23,.10);
+      --accent-2:color-mix(in oklab, var(--accent) 74%, var(--card));
+      --accent-3:color-mix(in oklab, var(--accent) 48%, var(--card));
+      --accent-4:color-mix(in oklab, var(--accent) 26%, var(--card));
+      --accent-soft:color-mix(in oklab, var(--accent) 9%, var(--card));
+      --accent-tint:color-mix(in oklab, var(--accent) 16%, var(--card));
+      --tag-bg:color-mix(in oklab, var(--amber) 8%, var(--card));
+      --tag-fg:var(--amber); --chip-bg:var(--hover);
+      --track:#E4E1DF; --tick:#CFCAC6; --off:#FAFAF9;
+    }
+    html[data-theme="dark"]{
+      --canvas:#0C0C0C; --card:#171717; --t1:#FAFAF9; --t2:#A3A3A3; --t3:#737373; --line:#292524;
+      --accent:#34D399; --neg:#F87171; --amber:#F59E0B; --hover:#201E1D; --on-accent:#0C0C0C;
+      --grey-series:#57534E; --shadow:0 10px 28px rgba(0,0,0,.55);
+      --tag-bg:color-mix(in oklab, var(--amber) 7%, var(--card));
+      --tag-fg:color-mix(in oklab, var(--amber) 58%, var(--t2));
+      --chip-bg:var(--hover); --track:#3A3431; --tick:#3A3431; --off:#121110;
+    }
+    html,body{margin:0;padding:0;background:var(--canvas)}
+    *{box-sizing:border-box}
+    body{font-family:'Inter',system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif;font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
+    a{color:var(--accent);text-decoration:none}
+    a:hover{color:var(--accent);text-decoration:underline}
+    button,input,select{font-family:inherit;font-variant-numeric:tabular-nums}
+    ::selection{background:var(--accent-tint)}
+    @keyframes menuIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+    @media (max-width:1320px){
+      [data-r="two"]{grid-template-columns:minmax(0,1fr)!important}
+      [data-r="panel"]{position:static!important}
+    }
+    @media (max-width:960px){
+      [data-r="navd"]{display:none!important}
+      [data-r="navm"]{display:flex!important}
+      [data-r="tabbar"]{display:flex!important}
+      [data-r="main"]{padding:16px 16px 104px!important}
+      [data-r="catwrap"]{min-width:900px}
+    }
+  </style>
+</helmet>
+<div style="min-height:100vh;background:var(--canvas);color:var(--t1);font-size:14px;line-height:1.45">
+
+  <dc-import name="TopNav" active="Portfolio" sub-active="Categories" hint-size="100%,56px"></dc-import>
+
+  <main data-r="main" data-screen-label="Portfolio — Categories" style="max-width:1392px;margin:0 auto;padding:24px 24px 88px;display:flex;flex-direction:column;gap:18px">
+
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap">
+      <div style="display:flex;flex-direction:column;gap:5px;min-width:0">
+        <div style="display:flex;align-items:center;gap:8px;position:relative">
+          <h1 style="margin:0;font-size:32px;font-weight:600;letter-spacing:-0.028em;line-height:1.1;color:var(--t1)">Categories</h1>
+          <span onMouseEnter="{{ titleTipOn }}" onMouseLeave="{{ titleTipOff }}" style="width:16px;height:16px;margin-top:6px;flex:none;border:1px solid var(--line);border-radius:50%;font-size:10px;font-weight:500;color:var(--t3);display:flex;align-items:center;justify-content:center;cursor:help" style-hover="border-color:var(--t3);color:var(--t2)">?</span>
+          <sc-if value="{{ titleTip }}" hint-placeholder-val="{{ false }}">
+            <span style="position:absolute;top:44px;left:0;z-index:40;width:340px;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:10px 12px;font-size:11.5px;line-height:1.55;color:var(--t2)">{{ titleTipText }}</span>
+          </sc-if>
+          <span style="font-size:13px;color:var(--t3);padding-top:6px">{{ portfolioName }}</span>
+        </div>
+        <span style="font-size:12px;color:var(--t3)">{{ headNote }}</span>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <div style="position:relative">
+          <button onClick="{{ togNew }}" style="display:inline-flex;align-items:center;gap:7px;height:32px;padding:0 14px;border:none;border-radius:999px;background:var(--accent);color:var(--on-accent);font-size:12.5px;font-weight:500;cursor:pointer;white-space:nowrap" style-hover="opacity:.9">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
+            New category
+          </button>
+          <sc-if value="{{ mNew }}" hint-placeholder-val="{{ false }}">
+            <div onClick="{{ stop }}" style="position:absolute;top:38px;right:0;z-index:50;width:268px;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:14px;animation:menuIn .12s ease-out;display:flex;flex-direction:column;gap:11px">
+              <span style="font-size:12px;font-weight:500;color:var(--t2)">New category</span>
+              <input value="{{ newName }}" onChange="{{ onNewName }}" placeholder="e.g. Speculative" autofocus="{{ true }}" style="height:34px;padding:0 11px;border:1px solid var(--line);border-radius:7px;background:var(--canvas);color:var(--t1);font-size:13px;outline:none">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+                <span style="font-size:12px;color:var(--t2)">Target weight</span>
+                <div style="display:flex;align-items:stretch;width:96px;border:1px solid var(--line);border-radius:7px;overflow:hidden">
+                  <input value="{{ newTarget }}" onChange="{{ onNewTarget }}" inputmode="decimal" style="flex:1;min-width:0;height:30px;padding:0 4px 0 9px;border:none;background:transparent;color:var(--t1);font-size:13px;text-align:right;outline:none">
+                  <span style="display:flex;align-items:center;padding:0 8px 0 2px;font-size:12px;color:var(--t3)">%</span>
+                </div>
+              </div>
+              <sc-if value="{{ newError }}" hint-placeholder-val="{{ false }}">
+                <span style="font-size:11px;color:var(--amber)">{{ newError }}</span>
+              </sc-if>
+              <button onClick="{{ onCreate }}" style="height:32px;border:none;border-radius:7px;background:var(--accent);color:var(--on-accent);font-size:12.5px;font-weight:600;cursor:pointer" style-hover="opacity:.9">Create category</button>
+            </div>
+          </sc-if>
+        </div>
+        <div style="position:relative">
+          <button onClick="{{ togMore }}" title="More" style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;border:1px solid var(--line);border-radius:7px;background:{{ moreBg }};color:var(--t2);cursor:pointer" style-hover="background:var(--hover)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.6"></circle><circle cx="12" cy="12" r="1.6"></circle><circle cx="19" cy="12" r="1.6"></circle></svg>
+          </button>
+          <sc-if value="{{ mMore }}" hint-placeholder-val="{{ false }}">
+            <div onClick="{{ stop }}" style="position:absolute;top:38px;right:0;z-index:50;min-width:238px;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:6px;animation:menuIn .12s ease-out">
+              <sc-for list="{{ moreRows }}" as="m" hint-placeholder-count="3">
+                <button onClick="{{ m.onClick }}" style="display:flex;align-items:center;width:100%;padding:8px 10px;border:none;border-radius:6px;background:transparent;text-align:left;cursor:pointer;font-size:12.5px;color:var(--t1)" style-hover="background:var(--hover)">{{ m.label }}</button>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+    </div>
+
+    <sc-if value="{{ showBar }}" hint-placeholder-val="{{ true }}">
+    <div style="display:flex;flex-direction:column;gap:13px;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:18px 20px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
+        <span style="font-size:12px;font-weight:500;color:var(--t2)">Current allocation</span>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <span style="display:inline-flex;align-items:center;gap:7px;height:26px;padding:0 11px;border-radius:999px;background:{{ sumBg }};color:{{ sumFg }};font-size:12px;font-weight:500;white-space:nowrap">{{ sumLabel }}</span>
+          <sc-if value="{{ sumOff }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ onNormalise }}" style="height:26px;padding:0 11px;border:1px solid var(--line);border-radius:999px;background:transparent;font-size:12px;font-weight:500;color:var(--t1);cursor:pointer;white-space:nowrap" style-hover="background:var(--hover)">Scale targets to 100%</button>
+          </sc-if>
+        </div>
+      </div>
+      <div style="display:flex;gap:2px;height:14px;border-radius:3px;overflow:hidden">
+        <sc-for list="{{ ramp }}" as="r" hint-placeholder-count="7">
+          <span onMouseEnter="{{ r.onEnter }}" onMouseLeave="{{ r.onLeave }}" style="width:{{ r.w }};background:{{ r.color }};display:block;cursor:default;opacity:{{ r.opacity }}"></span>
+        </sc-for>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+        <sc-for list="{{ ramp }}" as="r" hint-placeholder-count="7">
+          <span onMouseEnter="{{ r.onEnter }}" onMouseLeave="{{ r.onLeave }}" style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:{{ r.labelColor }};white-space:nowrap">
+            <span style="width:9px;height:9px;border-radius:2px;background:{{ r.color }}"></span>{{ r.name }}
+            <span style="color:var(--t3)">{{ r.pct }}</span>
+          </span>
+        </sc-for>
+      </div>
+    </div>
+    </sc-if>
+
+    <div data-r="two" style="display:grid;grid-template-columns:minmax(0,1.45fr) minmax(340px,1fr);gap:18px;align-items:start">
+
+      <div style="display:flex;flex-direction:column;gap:0;background:var(--card);border:1px solid var(--line);border-radius:8px;overflow:hidden">
+        <div style="max-width:100%;overflow-x:auto;overscroll-behavior-x:contain">
+          <div data-r="catwrap">
+            <div style="display:grid;grid-template-columns:{{ cols }};border-bottom:1px solid var(--line)">
+              <sc-for list="{{ head }}" as="h" hint-placeholder-count="6">
+                <div style="display:flex;align-items:center;justify-content:{{ h.justify }};padding:10px 13px">
+                  <span style="font-size:12px;font-weight:500;color:var(--t2);white-space:nowrap">{{ h.label }}</span>
+                </div>
+              </sc-for>
+            </div>
+            <sc-for list="{{ rows }}" as="r" hint-placeholder-count="7">
+              <div onClick="{{ r.onSelect }}" style="display:grid;grid-template-columns:{{ cols }};border-bottom:1px solid var(--line);background:{{ r.bg }};cursor:pointer" style-hover="background:var(--hover)">
+                <div style="display:flex;align-items:center;gap:9px;padding:11px 13px;min-width:0;overflow:hidden">
+                  <span style="width:9px;height:9px;flex:none;border-radius:2px;background:{{ r.color }}"></span>
+                  <span style="min-width:0;overflow:hidden;text-overflow:ellipsis">
+                    <dc-import name="TwoLineCell" primary="{{ r.name }}" secondary="{{ r.members }}" align="left" hint-size="140px,36px"></dc-import>
+                  </span>
+                </div>
+                <div style="display:flex;align-items:center;justify-content:flex-end;padding:11px 13px;min-width:0">
+                  <dc-import name="TwoLineCell" primary="{{ r.value }}" secondary="{{ r.invested }}" align="right" hint-size="104px,36px"></dc-import>
+                </div>
+                <div style="display:flex;flex-direction:column;justify-content:center;gap:5px;padding:11px 13px;min-width:0">
+                  <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px">
+                    <span style="font-size:13px;font-weight:500;color:var(--t1);white-space:nowrap">{{ r.alloc }}</span>
+                    <span style="font-size:12px;color:var(--t3);white-space:nowrap">{{ r.target }}</span>
+                  </div>
+                  <span style="position:relative;display:block;height:5px;border-radius:3px;background:var(--track, var(--line))">
+                    <span style="position:absolute;left:0;top:0;bottom:0;width:{{ r.barW }};border-radius:3px;background:{{ r.color }}"></span>
+                    <span style="position:absolute;left:{{ r.tickX }};top:-3px;bottom:-3px;width:2px;background:var(--t2);border-radius:1px"></span>
+                  </span>
+                </div>
+                <div onClick="{{ stop }}" style="display:flex;align-items:center;justify-content:flex-end;padding:11px 10px">
+                  <div style="display:flex;align-items:stretch;width:80px;border:1px solid {{ r.inputBorder }};border-radius:7px;overflow:hidden;background:var(--card)">
+                    <input value="{{ r.targetDraft }}" onChange="{{ r.onTarget }}" inputmode="decimal" style="flex:1;min-width:0;height:30px;padding:0 2px 0 7px;border:none;background:transparent;color:var(--t1);font-size:13px;text-align:right;outline:none">
+                    <span style="display:flex;align-items:center;padding:0 7px 0 2px;font-size:12px;color:var(--t3)">%</span>
+                  </div>
+                </div>
+                <div style="display:flex;align-items:center;justify-content:flex-end;padding:11px 13px;min-width:0">
+                  <dc-import name="TwoLineCell" primary="{{ r.drift }}" secondary="{{ r.driftMoney }}" tone="{{ r.driftTone }}" align="right" hint-size="104px,36px"></dc-import>
+                </div>
+                <div onClick="{{ stop }}" style="display:flex;align-items:center;justify-content:flex-end;gap:1px;padding:11px 9px">
+                  <button onClick="{{ r.onUp }}" title="Move up" disabled="{{ r.isFirst }}" style="display:flex;align-items:center;justify-content:center;width:26px;height:26px;border:none;border-radius:6px;background:transparent;color:{{ r.upColor }};cursor:{{ r.upCursor }}" style-hover="background:var(--hover)">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"></path></svg>
+                  </button>
+                  <button onClick="{{ r.onDown }}" title="Move down" disabled="{{ r.isLast }}" style="display:flex;align-items:center;justify-content:center;width:26px;height:26px;border:none;border-radius:6px;background:transparent;color:{{ r.downColor }};cursor:{{ r.downCursor }}" style-hover="background:var(--hover)">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg>
+                  </button>
+                  <button onClick="{{ r.onDelete }}" title="Delete category" style="display:flex;align-items:center;justify-content:center;width:26px;height:26px;border:none;border-radius:6px;background:transparent;color:var(--t3);cursor:pointer" style-hover="background:var(--hover);color:var(--neg)">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13"></path></svg>
+                  </button>
+                </div>
+              </div>
+            </sc-for>
+            <div style="display:grid;grid-template-columns:{{ cols }};border-top:1px solid var(--t3)">
+              <div style="display:flex;align-items:center;padding:12px 13px;min-width:0">
+                <dc-import name="TwoLineCell" primary="Total" secondary="{{ totalMembers }}" align="left" hint-size="140px,36px"></dc-import>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:flex-end;padding:12px 13px;min-width:0">
+                <dc-import name="TwoLineCell" primary="{{ totalValue }}" secondary="{{ totalInvested }}" align="right" hint-size="104px,36px"></dc-import>
+              </div>
+              <div style="display:flex;align-items:center;padding:12px 13px">
+                <span style="font-size:13px;font-weight:600;color:var(--t1)">100.00%</span>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:flex-end;padding:12px 10px">
+                <span style="font-size:13px;font-weight:600;color:{{ sumFg }}">{{ totalTarget }}</span>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:flex-end;padding:12px 13px">
+                <span style="font-size:13px;font-weight:600;color:var(--t1);white-space:nowrap">{{ totalDrift }}</span>
+              </div>
+              <div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div data-r="panel" style="position:sticky;top:74px;display:flex;flex-direction:column;gap:0;background:var(--card);border:1px solid var(--line);border-radius:8px;overflow:hidden">
+        <div style="display:flex;flex-direction:column;gap:12px;padding:18px 20px;border-bottom:1px solid var(--line)">
+          <div style="display:flex;align-items:center;gap:2px;padding:2px;border:1px solid var(--line);border-radius:8px">
+            <sc-for list="{{ views }}" as="v" hint-placeholder-count="2">
+              <button onClick="{{ v.onClick }}" style="flex:1;height:28px;border:none;border-radius:6px;background:{{ v.bg }};color:{{ v.color }};font-size:12px;font-weight:{{ v.weight }};cursor:pointer;white-space:nowrap" style-hover="background:var(--hover)">{{ v.label }}</button>
+            </sc-for>
+          </div>
+          <sc-if value="{{ isCategoryView }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div style="display:flex;align-items:center;gap:8px">
+                <input value="{{ renameDraft }}" onChange="{{ onRename }}" style="flex:1;min-width:0;height:34px;padding:0 11px;border:1px solid var(--line);border-radius:7px;background:var(--canvas);color:var(--t1);font-size:14px;font-weight:600;outline:none" style-focus="border-color:var(--accent)">
+                <button onClick="{{ onRenameSave }}" style="height:34px;padding:0 13px;border:1px solid var(--line);border-radius:7px;background:{{ renameBg }};color:{{ renameFg }};font-size:12.5px;font-weight:500;cursor:pointer;white-space:nowrap" style-hover="background:var(--hover)">Rename</button>
+              </div>
+              <sc-if value="{{ renameError }}" hint-placeholder-val="{{ false }}">
+                <span style="font-size:11px;color:var(--amber)">{{ renameError }}</span>
+              </sc-if>
+              <div style="display:flex;align-items:baseline;gap:9px;flex-wrap:wrap">
+                <span style="font-size:24px;font-weight:600;letter-spacing:-0.02em;color:var(--t1)">{{ selValue }}</span>
+                <span style="font-size:13px;color:var(--t2)">{{ selAlloc }}</span>
+                <span style="font-size:12px;color:var(--t3)">{{ selTargetNote }}</span>
+              </div>
+              <span style="font-size:11.5px;line-height:1.5;color:var(--t3)">{{ selNote }}</span>
+            </div>
+          </sc-if>
+          <sc-if value="{{ isAllView }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <span style="font-size:14px;font-weight:600;color:var(--t1)">All holdings</span>
+              <span style="font-size:11.5px;line-height:1.5;color:var(--t3)">{{ allNote }}</span>
+            </div>
+          </sc-if>
+        </div>
+
+        <sc-for list="{{ panelRows }}" as="h" hint-placeholder-count="6">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 20px;border-bottom:1px solid var(--line)">
+            <span style="display:flex;align-items:center;gap:10px;min-width:0">
+              <span style="width:28px;height:28px;flex:none;border-radius:6px;background:var(--hover);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:var(--t2)">{{ h.mono }}</span>
+              <dc-import name="TwoLineCell" primary="{{ h.ticker }}" secondary="{{ h.sub }}" align="left" hint-size="150px,36px"></dc-import>
+            </span>
+            <span style="display:flex;align-items:center;gap:12px">
+              <dc-import name="TwoLineCell" primary="{{ h.value }}" secondary="{{ h.share }}" align="right" hint-size="100px,36px"></dc-import>
+              <div style="position:relative">
+                <button onClick="{{ h.onToggle }}" style="display:flex;align-items:center;gap:6px;height:30px;padding:0 10px;border:1px solid var(--line);border-radius:7px;background:{{ h.menuBg }};color:var(--t2);font-size:11.5px;cursor:pointer;white-space:nowrap" style-hover="background:var(--hover);color:var(--t1)">{{ h.moveLabel }}
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"></path></svg>
+                </button>
+                <sc-if value="{{ h.open }}" hint-placeholder-val="{{ false }}">
+                  <div onClick="{{ stop }}" style="position:absolute;top:34px;right:0;z-index:50;width:236px;max-height:266px;overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:6px;animation:menuIn .12s ease-out">
+                    <span style="display:block;padding:6px 10px 4px;font-size:10.5px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;color:var(--t3)">Move to</span>
+                    <sc-for list="{{ h.options }}" as="o" hint-placeholder-count="6">
+                      <button onClick="{{ o.onClick }}" style="display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;padding:8px 10px;border:none;border-radius:6px;background:{{ o.bg }};text-align:left;cursor:pointer;font-size:12.5px;color:{{ o.color }};font-weight:{{ o.weight }}" style-hover="background:var(--hover)">
+                        <span style="display:flex;align-items:center;gap:8px;min-width:0">
+                          <span style="width:8px;height:8px;flex:none;border-radius:2px;background:{{ o.dot }}"></span>
+                          <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ o.label }}</span>
+                        </span>
+                        <span style="font-size:11px;color:var(--t3);white-space:nowrap">{{ o.meta }}</span>
+                      </button>
+                    </sc-for>
+                  </div>
+                </sc-if>
+              </div>
+            </span>
+          </div>
+        </sc-for>
+
+        <sc-if value="{{ panelEmpty }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:7px;padding:34px 20px;border-bottom:1px solid var(--line)">
+            <span style="font-size:13.5px;font-weight:500;color:var(--t1)">No holdings in {{ selName }}</span>
+            <span style="font-size:12px;color:var(--t3);text-align:center">Move one in from another category, or give this bucket a 0% target.</span>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isCategoryView }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 20px">
+            <span style="font-size:11.5px;color:var(--t3)">{{ selFooter }}</span>
+            <button onClick="{{ onDeleteSelected }}" style="height:30px;padding:0 12px;border:1px solid var(--line);border-radius:7px;background:transparent;font-size:12px;font-weight:500;color:var(--t2);cursor:pointer;white-space:nowrap" style-hover="background:var(--hover);color:var(--neg);border-color:var(--neg)">Delete category</button>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+
+    <span style="font-size:11px;line-height:1.55;color:var(--t3);max-width:900px">{{ footnote }}</span>
+  </main>
+
+  <sc-if value="{{ confirm }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeConfirm }}" style="position:fixed;inset:0;z-index:90;background:rgba(12,12,12,.42);display:flex;align-items:center;justify-content:center;padding:24px">
+      <div onClick="{{ stop }}" style="width:440px;max-width:100%;background:var(--card);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:0">
+        <div style="display:flex;flex-direction:column;gap:5px;padding:20px 22px 14px">
+          <span style="font-size:17px;font-weight:600;letter-spacing:-0.015em;color:var(--t1)">{{ confirmTitle }}</span>
+          <span style="font-size:12.5px;line-height:1.55;color:var(--t2)">{{ confirmBody }}</span>
+        </div>
+        <sc-if value="{{ confirmHasMove }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;flex-direction:column;gap:8px;padding:0 22px 16px">
+            <span style="font-size:12px;font-weight:500;color:var(--t2)">Move its holdings to</span>
+            <div style="position:relative">
+              <button onClick="{{ togDest }}" style="display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;height:36px;padding:0 12px;border:1px solid var(--line);border-radius:7px;background:transparent;color:var(--t1);font-size:13px;cursor:pointer" style-hover="background:var(--hover)">
+                <span>{{ destName }}</span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="color:var(--t3)"><path d="M6 9l6 6 6-6"></path></svg>
+              </button>
+              <sc-if value="{{ mDest }}" hint-placeholder-val="{{ false }}">
+                <div onClick="{{ stop }}" style="position:absolute;top:40px;left:0;right:0;z-index:95;max-height:220px;overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:6px;animation:menuIn .12s ease-out">
+                  <sc-for list="{{ destOptions }}" as="o" hint-placeholder-count="5">
+                    <button onClick="{{ o.onClick }}" style="display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;padding:8px 10px;border:none;border-radius:6px;background:{{ o.bg }};text-align:left;cursor:pointer;font-size:12.5px;color:var(--t1)" style-hover="background:var(--hover)">
+                      <span>{{ o.label }}</span>
+                      <span style="font-size:11px;color:var(--t3)">{{ o.meta }}</span>
+                    </button>
+                  </sc-for>
+                </div>
+              </sc-if>
+            </div>
+          </div>
+        </sc-if>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 22px;border-top:1px solid var(--line)">
+          <span style="font-size:11.5px;line-height:1.5;color:var(--t3);max-width:230px">{{ confirmNote }}</span>
+          <span style="display:flex;align-items:center;gap:8px">
+            <button onClick="{{ closeConfirm }}" style="height:34px;padding:0 14px;border:1px solid var(--line);border-radius:7px;background:transparent;font-size:12.5px;font-weight:500;color:var(--t1);cursor:pointer" style-hover="background:var(--hover)">Cancel</button>
+            <button onClick="{{ onConfirmDelete }}" style="height:34px;padding:0 14px;border:none;border-radius:7px;background:var(--neg);color:#FFFFFF;font-size:12.5px;font-weight:600;cursor:pointer" style-hover="opacity:.9">{{ confirmAction }}</button>
+          </span>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <div data-r="tabbar" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:60;height:60px;background:var(--card);border-top:1px solid var(--line);align-items:stretch;padding:0 4px">
+    <sc-for list="{{ tabRows }}" as="t" hint-placeholder-count="4">
+      <a href="{{ t.href }}" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-decoration:none;color:{{ t.color }}">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="{{ t.d }}"></path></svg>
+        <span style="font-size:10px;font-weight:500">{{ t.label }}</span>
+      </a>
+    </sc-for>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;defaultView&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Category&quot;,&quot;All holdings&quot;],&quot;default&quot;:&quot;Category&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Categories&quot;},&quot;showAllocationBar&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Categories&quot;}}">
+class Component extends DCLogic {
+  state = {
+    tick: 0, menu: null, titleTip: false, selected: null, view: null,
+    drafts: {}, rename: null, renameError: '', newName: '', newTarget: '5', newError: '',
+    confirm: null, dest: null, hover: null
+  };
+
+  componentDidMount() {
+    this.doc = () => { if (this.state.menu) this.setState({ menu: null }); };
+    document.addEventListener('click', this.doc);
+    if (!window.SnowlineData) {
+      const check = () => { if (window.SnowlineData) this.forceUpdate(); else setTimeout(check, 30); };
+      setTimeout(check, 20);
+    }
+  }
+  componentWillUnmount() { if (this.doc) document.removeEventListener('click', this.doc); }
+
+  /* every mutation goes through the module, then re-reads it */
+  apply(fn, extra) {
+    fn();
+    this.setState(Object.assign({ tick: this.state.tick + 1, drafts: {} }, extra || {}));
+  }
+
+  RAMP = ['var(--accent)', 'var(--accent-2)', 'var(--accent-3)', 'var(--accent-4)', 'var(--grey-series)', 'var(--t3)', 'var(--track, var(--line))'];
+  colorOf(rank) { return this.RAMP[Math.min(rank, this.RAMP.length - 1)]; }
+
+  renderVals() {
+    const st = this.state;
+    const I = {
+      bars: 'M4 20V10M10 20V4M16 20v-7M22 20H2', table: 'M3 5h18v14H3V5Zm0 5h18M9 10v9',
+      home: 'M4 11l8-7 8 7v9H4v-9Zm5 9v-6h6v6',
+      scale: 'M12 4v16M6 8l-3 6h6l-3-6Zm12 0l-3 6h6l-3-6ZM5 8h14', dots: 'M5 12h.01M12 12h.01M19 12h.01'
+    };
+    const base = {
+      tabRows: [
+        { label: 'Dashboard', d: I.home, href: 'Snowline.dc.html', color: 'var(--t3)' },
+        { label: 'Analytics', d: I.bars, href: 'Analytics.dc.html', color: 'var(--t3)' },
+        { label: 'Portfolio', d: I.table, href: 'Holdings.dc.html', color: 'var(--accent)' },
+        { label: 'Tools', d: I.scale, href: 'Rebalancing.dc.html', color: 'var(--t3)' }
+      ],
+      stop: (e) => e.stopPropagation()
+    };
+    if (!window.SnowlineData) return base;
+
+    const D = window.SnowlineData, F = D.fmt, K = D.constants, T = D.totals();
+    const money = (v) => F.money(v);
+    const cats = D.categories(true);                 /* the user's own order */
+    const byValue = D.categories();                  /* the dashboard's order */
+    const rank = {};
+    byValue.forEach((c, i) => { rank[c.name] = i; });
+    const sum = D.targetTotal();
+    const sumOff = Math.abs(sum - 100) > 0.005;
+
+    const selName = st.selected && cats.some((c) => c.name === st.selected) ? st.selected : cats[0].name;
+    const sel = cats.filter((c) => c.name === selName)[0];
+    const view = st.view || this.props.defaultView || 'Category';
+    const renameDraft = st.rename === null ? selName : st.rename;
+
+    const driftTone = (d) => Math.abs(d) <= 1 ? 'pos' : Math.abs(d) <= 5 ? 'plain' : 'neg';
+    const pp = (d) => (d >= 0 ? '▲' : '▼') + F.num(Math.abs(d), 2) + 'pp';
+
+    const moveMenu = (p, currentName) => ({
+      mono: p.mono, ticker: p.ticker,
+      sub: p.name.length > 24 ? p.name.slice(0, 23) + '…' : p.name,
+      value: money(p.value),
+      share: view === 'Category'
+        ? F.pct(sel.value ? p.value / sel.value * 100 : 0, 1) + ' of category'
+        : currentName,
+      moveLabel: view === 'Category' ? 'Move' : currentName.length > 14 ? currentName.slice(0, 13) + '…' : currentName,
+      menuBg: st.menu === 'mv' + p.ticker ? 'var(--hover)' : 'transparent',
+      open: st.menu === 'mv' + p.ticker,
+      onToggle: (e) => { e.stopPropagation(); this.setState({ menu: st.menu === 'mv' + p.ticker ? null : 'mv' + p.ticker }); },
+      options: cats.map((c) => ({
+        label: c.name, meta: c.count + (c.count === 1 ? ' holding' : ' holdings'),
+        dot: this.colorOf(rank[c.name]),
+        bg: c.name === currentName ? 'var(--accent-soft)' : 'transparent',
+        color: c.name === currentName ? 'var(--accent)' : 'var(--t1)',
+        weight: c.name === currentName ? 600 : 400,
+        onClick: (e) => {
+          e.stopPropagation();
+          this.apply(() => D.assignHolding(p.ticker, c.name), { menu: null });
+        }
+      }))
+    });
+
+    const panelRows = view === 'Category'
+      ? sel.holdings.slice().sort((a, b) => b.value - a.value).map((p) => moveMenu(p, selName))
+      : D.open().slice().sort((a, b) => b.value - a.value).map((p) => moveMenu(p, D.categoryOf(p.ticker)));
+
+    const confirmCat = st.confirm ? cats.filter((c) => c.name === st.confirm)[0] : null;
+    const destOptions = confirmCat ? cats.filter((c) => c.name !== confirmCat.name) : [];
+    const destName = st.dest && destOptions.some((c) => c.name === st.dest) ? st.dest : (destOptions[0] ? destOptions[0].name : '');
+
+    return Object.assign(base, {
+      portfolioName: K.portfolioName,
+      headNote: cats.length + ' categories · ' + T.holdings + ' holdings · targets sum to ' + F.pct(sum, 2)
+        + ' · every change here is live on the dashboard and the cash screen',
+      titleTip: st.titleTip,
+      titleTipOn: () => this.setState({ titleTip: true }),
+      titleTipOff: () => this.setState({ titleTip: false }),
+      titleTipText: 'Categories are yours, not GICS sectors. They were seeded from each holding’s sector with the original target plan, and this screen owns them from here: which bucket a holding sits in, each target weight, and the order. The dashboard allocation table, the holdings table’s share-of-category and the cash screen’s target weight all read this one model.',
+
+      togNew: (e) => { e.stopPropagation(); this.setState({ menu: st.menu === 'new' ? null : 'new', newError: '' }); },
+      mNew: st.menu === 'new',
+      newName: st.newName, newTarget: st.newTarget, newError: st.newError,
+      onNewName: (e) => this.setState({ newName: e.target.value, newError: '' }),
+      onNewTarget: (e) => this.setState({ newTarget: e.target.value.replace(/[^0-9.]/g, '') }),
+      onCreate: (e) => {
+        e.stopPropagation();
+        const name = st.newName.trim();
+        if (!name) return this.setState({ newError: 'Give the category a name.' });
+        if (cats.some((c) => c.name.toLowerCase() === name.toLowerCase())) return this.setState({ newError: '“' + name + '” already exists.' });
+        this.apply(() => D.createCategory(name, parseFloat(st.newTarget) || 0),
+          { menu: null, newName: '', newTarget: '5', newError: '', selected: name, view: 'Category', rename: null });
+      },
+
+      togMore: (e) => { e.stopPropagation(); this.setState({ menu: st.menu === 'more' ? null : 'more' }); },
+      mMore: st.menu === 'more',
+      moreBg: st.menu === 'more' ? 'var(--hover)' : 'var(--card)',
+      moreRows: [
+        { label: 'Scale targets to 100%', onClick: (e) => { e.stopPropagation(); this.apply(() => D.normaliseTargets(), { menu: null }); } },
+        { label: 'Reset to the seeded categories', onClick: (e) => { e.stopPropagation(); this.apply(() => D.resetCategories(), { menu: null, selected: null, rename: null }); } },
+        { label: 'Open the dashboard allocation', onClick: (e) => { e.stopPropagation(); this.setState({ menu: null }); window.location.href = 'Snowline.dc.html'; } }
+      ],
+
+      sumLabel: sumOff
+        ? 'Targets sum to ' + F.pct(sum, 2) + ' · ' + F.num(Math.abs(sum - 100), 2) + 'pp ' + (sum > 100 ? 'over' : 'under')
+        : 'Targets sum to 100%',
+      sumBg: sumOff ? 'var(--tag-bg)' : 'var(--accent-soft)',
+      sumFg: sumOff ? 'var(--tag-fg)' : 'var(--accent)',
+      sumOff: sumOff,
+      showBar: this.props.showAllocationBar !== false,
+      onNormalise: () => this.apply(() => D.normaliseTargets()),
+
+      ramp: byValue.filter((c) => c.value > 0).map((c, i) => ({
+        name: c.name, pct: F.pct(c.allocN, 1), color: this.colorOf(i),
+        w: c.allocN.toFixed(2) + '%',
+        opacity: st.hover === null || st.hover === c.name ? 1 : 0.45,
+        labelColor: st.hover === c.name ? 'var(--t1)' : 'var(--t2)',
+        onEnter: () => this.setState({ hover: c.name }),
+        onLeave: () => this.setState({ hover: null })
+      })),
+
+      cols: 'minmax(150px,1.4fr) minmax(108px,1fr) minmax(152px,1.15fr) 100px minmax(112px,1fr) 94px',
+      head: [
+        { label: 'Category', justify: 'flex-start' }, { label: 'Value', justify: 'flex-end' },
+        { label: 'Current', justify: 'flex-start' }, { label: 'Target', justify: 'flex-end' },
+        { label: 'Drift', justify: 'flex-end' }, { label: '', justify: 'flex-end' }
+      ],
+      rows: cats.map((c, i) => ({
+        name: c.name,
+        members: c.count === 0 ? 'no holdings' : c.count + (c.count === 1 ? ' holding · ' : ' holdings · ') + c.tickers.slice(0, 2).join(', ') + (c.count > 2 ? ' +' + (c.count - 2) : ''),
+        color: this.colorOf(rank[c.name]),
+        value: money(c.value), invested: money(c.invested) + ' invested',
+        alloc: F.pct(c.allocN, 2), target: 'of ' + F.pct(c.targetN, 2),
+        barW: Math.min(100, c.allocN / Math.max(1, Math.max(c.allocN, c.targetN)) * 100).toFixed(1) + '%',
+        tickX: Math.min(99, c.targetN / Math.max(1, Math.max(c.allocN, c.targetN)) * 100).toFixed(1) + '%',
+        targetDraft: st.drafts[c.name] === undefined ? F.num(c.targetN, c.targetN % 1 === 0 ? 0 : 2) : st.drafts[c.name],
+        inputBorder: c.name === selName ? 'var(--accent)' : 'var(--line)',
+        onTarget: (e) => {
+          const raw = e.target.value.replace(/[^0-9.]/g, '');
+          const drafts = Object.assign({}, st.drafts); drafts[c.name] = raw;
+          D.setCategoryTarget(c.name, parseFloat(raw) || 0);
+          this.setState({ drafts: drafts, tick: st.tick + 1 });
+        },
+        drift: pp(c.driftN), driftTone: driftTone(c.driftN),
+        driftMoney: (c.deltaValue >= 0 ? 'buy ' : 'sell ') + money(Math.abs(c.deltaValue)),
+        bg: c.name === selName ? 'var(--accent-soft)' : 'transparent',
+        onSelect: () => this.setState({ selected: c.name, view: 'Category', rename: null, renameError: '' }),
+        isFirst: i === 0, isLast: i === cats.length - 1,
+        upColor: i === 0 ? 'var(--line)' : 'var(--t3)', upCursor: i === 0 ? 'default' : 'pointer',
+        downColor: i === cats.length - 1 ? 'var(--line)' : 'var(--t3)', downCursor: i === cats.length - 1 ? 'default' : 'pointer',
+        onUp: (e) => { e.stopPropagation(); if (i > 0) this.apply(() => D.moveCategory(c.name, -1)); },
+        onDown: (e) => { e.stopPropagation(); if (i < cats.length - 1) this.apply(() => D.moveCategory(c.name, 1)); },
+        onDelete: (e) => { e.stopPropagation(); this.setState({ confirm: c.name, dest: null, menu: null }); }
+      })),
+      totalMembers: T.holdings + ' holdings · ' + cats.length + ' buckets',
+      totalValue: money(T.value), totalInvested: money(T.invested) + ' invested',
+      totalTarget: F.pct(sum, 2),
+      totalDrift: sumOff ? F.num(Math.abs(sum - 100), 2) + 'pp ' + (sum > 100 ? 'over' : 'under') : 'balanced',
+
+      views: ['Category', 'All holdings'].map((v) => ({
+        label: v === 'Category' ? selName : v,
+        onClick: () => this.setState({ view: v, menu: null }),
+        bg: view === v ? 'var(--accent-soft)' : 'transparent',
+        color: view === v ? 'var(--accent)' : 'var(--t2)',
+        weight: view === v ? 600 : 500
+      })),
+      isCategoryView: view === 'Category',
+      isAllView: view === 'All holdings',
+      selName: selName,
+      renameDraft: renameDraft,
+      onRename: (e) => this.setState({ rename: e.target.value, renameError: '' }),
+      onRenameSave: () => {
+        const to = renameDraft.trim();
+        if (!to) return this.setState({ renameError: 'A category needs a name.' });
+        if (to !== selName && cats.some((c) => c.name.toLowerCase() === to.toLowerCase())) {
+          return this.setState({ renameError: '“' + to + '” already exists.' });
+        }
+        if (to === selName) return this.setState({ renameError: '' });
+        this.apply(() => D.renameCategory(selName, to), { selected: to, rename: null, renameError: '' });
+      },
+      renameError: st.renameError,
+      renameBg: renameDraft.trim() !== selName ? 'var(--accent-soft)' : 'transparent',
+      renameFg: renameDraft.trim() !== selName ? 'var(--accent)' : 'var(--t2)',
+      selValue: money(sel.value),
+      selAlloc: F.pct(sel.allocN, 2) + ' of the portfolio',
+      selTargetNote: 'target ' + F.pct(sel.targetN, 2) + ' · ' + pp(sel.driftN),
+      selNote: sel.count === 0
+        ? 'Empty bucket. Its ' + F.pct(sel.targetN, 2) + ' target still counts towards the plan.'
+        : sel.count + (sel.count === 1 ? ' holding · ' : ' holdings · ') + money(sel.income) + ' of income a year at '
+          + F.pct(sel.yieldPct, 2) + ' · ' + (sel.deltaValue >= 0 ? money(sel.deltaValue) + ' under target' : money(-sel.deltaValue) + ' over target'),
+      selFooter: 'Deleting moves its holdings, never drops them',
+      onDeleteSelected: () => this.setState({ confirm: selName, dest: null }),
+      allNote: T.holdings + ' holdings across ' + cats.length + ' categories. A holding belongs to exactly one.',
+      panelRows: panelRows,
+      panelEmpty: view === 'Category' && sel.count === 0,
+
+      confirm: !!confirmCat,
+      confirmTitle: confirmCat ? 'Delete “' + confirmCat.name + '”?' : '',
+      confirmBody: confirmCat
+        ? (confirmCat.count === 0
+          ? 'It holds nothing. Its ' + F.pct(confirmCat.targetN, 2) + ' target moves to the category you pick below, so the plan still sums to ' + F.pct(sum, 2) + '.'
+          : 'Its ' + confirmCat.count + (confirmCat.count === 1 ? ' holding (' : ' holdings (') + confirmCat.tickers.join(', ')
+            + ') will move to the category you pick below, along with its ' + F.pct(confirmCat.targetN, 2) + ' target. Nothing is sold and no holding is lost.')
+        : '',
+      confirmHasMove: destOptions.length > 0,
+      confirmNote: 'This changes the dashboard allocation table too.',
+      confirmAction: 'Delete category',
+      destName: destName,
+      togDest: (e) => { e.stopPropagation(); this.setState({ menu: st.menu === 'dest' ? null : 'dest' }); },
+      mDest: st.menu === 'dest',
+      destOptions: destOptions.map((c) => ({
+        label: c.name, meta: F.pct(c.targetN, 2) + ' target',
+        bg: c.name === destName ? 'var(--accent-soft)' : 'transparent',
+        onClick: (e) => { e.stopPropagation(); this.setState({ dest: c.name, menu: null }); }
+      })),
+      closeConfirm: () => this.setState({ confirm: null, menu: null }),
+      onConfirmDelete: () => {
+        const name = confirmCat.name;
+        this.apply(() => D.deleteCategory(name, destName),
+          { confirm: null, dest: null, selected: destName, rename: null, menu: null });
+      },
+
+      footnote: 'One model behind every category figure in the app: ' + cats.length + ' buckets holding '
+        + T.holdings + ' positions, targets summing to ' + F.pct(sum, 2)
+        + '. Seeded from each holding’s GICS sector and the original target plan, then owned here — the dashboard allocation table, the holdings table’s share-of-category, the nav’s insights and the cash screen’s '
+        + F.pct(D.cashStats().target, 2) + ' cash target all read it, and the rebalancing tool will use the same targets.'
+    });
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<header style="position:sticky;top:0;z-index:60;height:56px;background:var(--card);border-bottom:1px solid var(--line)">
+  <div data-r="navwrap" style="height:56px;max-width:1392px;margin:0 auto;padding:0 24px;display:flex;align-items:center;gap:6px">
+
+    <a href="Snowline.dc.html" style="display:flex;align-items:center;gap:9px;text-decoration:none;margin-right:10px;flex:none">
+      <span style="width:26px;height:26px;border-radius:6px;background:var(--accent);color:var(--on-accent);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;letter-spacing:-0.02em">S</span>
+      <span style="font-size:15px;font-weight:600;color:var(--t1);letter-spacing:-0.015em">Snowline</span>
+    </a>
+
+    <button data-r="navm" onClick="{{ togMobile }}" style="display:none;align-items:center;justify-content:center;width:32px;height:32px;border:1px solid var(--line);border-radius:6px;background:transparent;color:var(--t2);cursor:pointer" style-hover="background:var(--hover);color:var(--t1)">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"></path></svg>
+    </button>
+
+    <nav data-r="navd" style="display:flex;align-items:center;gap:2px">
+      <a href="Snowline.dc.html" style="display:flex;align-items:center;height:32px;padding:0 12px;border-radius:6px;background:{{ dashBg }};color:{{ dashFg }};font-size:13px;font-weight:500;text-decoration:none" style-hover="background:var(--hover)">Dashboard</a>
+
+      <div style="position:relative">
+        <button onClick="{{ togAnalytics }}" style="display:flex;align-items:center;gap:5px;height:32px;padding:0 11px;border:none;border-radius:6px;background:{{ anaBg }};color:{{ anaFg }};font-size:13px;font-weight:500;cursor:pointer" style-hover="background:var(--hover);color:var(--t1)">Analytics
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 9l6 6 6-6"></path></svg>
+        </button>
+        <sc-if value="{{ mAnalytics }}" hint-placeholder-val="{{ false }}">
+          <div onClick="{{ stop }}" style="position:absolute;top:38px;left:0;z-index:70;width:250px;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:6px;animation:menuIn .12s ease-out">
+            <sc-for list="{{ analyticsRows }}" as="r" hint-placeholder-count="4">
+              <sc-if value="{{ r.sep }}" hint-placeholder-val="{{ false }}"><div style="height:1px;background:var(--line);margin:6px 4px"></div></sc-if>
+              <sc-if value="{{ r.label }}" hint-placeholder-val="{{ true }}">
+                <a href="{{ r.href }}" style="display:flex;align-items:center;justify-content:space-between;gap:11px;height:44px;padding:0 10px;border-radius:6px;text-decoration:none;color:var(--t1);font-size:13px;background:{{ r.bg }}" style-hover="background:var(--hover)">
+                  <span style="display:flex;align-items:center;gap:11px">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="{{ r.d }}"></path></svg>
+                    <span>{{ r.label }}</span>
+                  </span>
+                  <span style="font-size:12px;color:var(--accent);opacity:{{ r.check }}">✓</span>
+                </a>
+              </sc-if>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+
+      <div style="position:relative">
+        <button onClick="{{ togPortfolio }}" style="display:flex;align-items:center;gap:5px;height:32px;padding:0 11px;border:none;border-radius:6px;background:{{ portBg }};color:{{ portFg }};font-size:13px;font-weight:500;cursor:pointer" style-hover="background:var(--hover);color:var(--t1)">Portfolio
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 9l6 6 6-6"></path></svg>
+        </button>
+        <sc-if value="{{ mPortfolio }}" hint-placeholder-val="{{ false }}">
+          <div onClick="{{ stop }}" style="position:absolute;top:38px;left:0;z-index:70;width:250px;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:6px;animation:menuIn .12s ease-out">
+            <sc-for list="{{ portfolioRows }}" as="r" hint-placeholder-count="4">
+              <sc-if value="{{ r.sep }}" hint-placeholder-val="{{ false }}"><div style="height:1px;background:var(--line);margin:6px 4px"></div></sc-if>
+              <sc-if value="{{ r.label }}" hint-placeholder-val="{{ true }}">
+                <a href="{{ r.href }}" style="display:flex;align-items:center;gap:11px;height:44px;padding:0 10px;border-radius:6px;text-decoration:none;color:var(--t1);font-size:13px" style-hover="background:var(--hover)">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="{{ r.d }}"></path></svg>
+                  <span>{{ r.label }}</span>
+                </a>
+              </sc-if>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+
+      <div style="position:relative">
+        <button onClick="{{ togTools }}" style="display:flex;align-items:center;gap:5px;height:32px;padding:0 11px;border:none;border-radius:6px;background:{{ toolsBg }};color:{{ toolsFg }};font-size:13px;font-weight:500;cursor:pointer" style-hover="background:var(--hover);color:var(--t1)">Tools
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 9l6 6 6-6"></path></svg>
+        </button>
+        <sc-if value="{{ mTools }}" hint-placeholder-val="{{ false }}">
+          <div onClick="{{ stop }}" style="position:absolute;top:38px;left:0;z-index:70;width:262px;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:6px;animation:menuIn .12s ease-out">
+            <sc-for list="{{ toolsRows }}" as="r" hint-placeholder-count="5">
+              <sc-if value="{{ r.sep }}" hint-placeholder-val="{{ false }}"><div style="height:1px;background:var(--line);margin:6px 4px"></div></sc-if>
+              <sc-if value="{{ r.label }}" hint-placeholder-val="{{ true }}">
+                <a href="{{ r.href }}" style="display:flex;align-items:center;gap:11px;height:44px;padding:0 10px;border-radius:6px;text-decoration:none;color:var(--t1);font-size:13px" style-hover="background:var(--hover)">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="{{ r.d }}"></path></svg>
+                  <span>{{ r.label }}</span>
+                </a>
+              </sc-if>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+
+    </nav>
+
+    <div style="flex:1"></div>
+
+    <div style="display:flex;align-items:center;gap:6px">
+      <div style="position:relative">
+        <button onClick="{{ togInsights }}" title="Insights" style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;border:1px solid var(--line);border-radius:6px;background:transparent;color:var(--t2);cursor:pointer" style-hover="background:var(--hover);color:var(--t1)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3-7 4 14 3-7h4"></path></svg>
+        </button>
+        <sc-if value="{{ mInsights }}" hint-placeholder-val="{{ false }}">
+          <div onClick="{{ stop }}" style="position:absolute;top:38px;right:0;z-index:70;width:300px;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:14px;animation:menuIn .12s ease-out;display:flex;flex-direction:column;gap:12px">
+            <span style="font-size:12px;font-weight:500;color:var(--t2)">{{ insightsHead }}</span>
+            <sc-for list="{{ insightList }}" as="i" hint-placeholder-count="3">
+              <div style="display:flex;flex-direction:column;gap:3px;border-left:2px solid var(--amber);padding-left:10px">
+                <span style="font-size:13px;font-weight:500;color:var(--t1)">{{ i.title }}</span>
+                <span style="font-size:11px;color:var(--t3);line-height:1.45">{{ i.short }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+
+      <div style="position:relative">
+        <button onClick="{{ togAdd }}" style="display:flex;align-items:center;gap:6px;height:32px;padding:0 14px;border:none;border-radius:999px;background:var(--accent);color:var(--on-accent);font-size:13px;font-weight:500;cursor:pointer" style-hover="opacity:.9">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
+          Add
+        </button>
+        <sc-if value="{{ mAdd }}" hint-placeholder-val="{{ false }}">
+          <div onClick="{{ stop }}" style="position:absolute;top:38px;right:0;z-index:70;width:262px;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:6px;animation:menuIn .12s ease-out">
+            <sc-for list="{{ addRows }}" as="r" hint-placeholder-count="4">
+              <sc-if value="{{ r.group }}" hint-placeholder-val="{{ false }}">
+                <div style="padding:8px 10px 4px;font-size:11px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;color:var(--t3)">{{ r.group }}</div>
+              </sc-if>
+              <sc-if value="{{ r.sep }}" hint-placeholder-val="{{ false }}"><div style="height:1px;background:var(--line);margin:6px 4px"></div></sc-if>
+              <sc-if value="{{ r.label }}" hint-placeholder-val="{{ true }}">
+                <a href="{{ r.href }}" style="display:flex;align-items:center;gap:11px;height:44px;padding:0 10px;border-radius:6px;text-decoration:none;color:var(--t1);font-size:13px" style-hover="background:var(--hover)">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="{{ r.d }}"></path></svg>
+                  <span>{{ r.label }}</span>
+                </a>
+              </sc-if>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+
+      <div style="position:relative">
+        <sc-if value="{{ searchOpen }}" hint-placeholder-val="{{ false }}">
+          <input value="{{ query }}" onChange="{{ onQuery }}" onClick="{{ stop }}" placeholder="Search holdings…" autofocus="{{ true }}" style="height:32px;width:210px;padding:0 11px;border:1px solid var(--accent);border-radius:6px;background:var(--canvas);color:var(--t1);font-size:13px;outline:none">
+        </sc-if>
+        <sc-if value="{{ hasResults }}" hint-placeholder-val="{{ false }}">
+          <div onClick="{{ stop }}" style="position:absolute;top:38px;right:0;z-index:70;width:284px;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:6px;animation:menuIn .12s ease-out">
+            <sc-for list="{{ results }}" as="r" hint-placeholder-count="4">
+              <a href="{{ r.href }}" style="display:flex;align-items:center;gap:10px;height:44px;padding:0 10px;border-radius:6px;text-decoration:none" style-hover="background:var(--hover)">
+                <span style="width:26px;height:26px;flex:none;border-radius:6px;background:var(--hover);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:600;color:var(--t2)">{{ r.mono }}</span>
+                <span style="display:flex;flex-direction:column;gap:1px;min-width:0;flex:1">
+                  <span style="font-size:13px;font-weight:500;color:var(--t1)">{{ r.ticker }}</span>
+                  <span style="font-size:11px;color:var(--t3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</span>
+                </span>
+                <span style="font-size:12px;color:var(--t2);white-space:nowrap">{{ r.value }}</span>
+              </a>
+            </sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{ noResults }}" hint-placeholder-val="{{ false }}">
+          <div onClick="{{ stop }}" style="position:absolute;top:38px;right:0;z-index:70;width:284px;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:13px;font-size:12px;color:var(--t3);animation:menuIn .12s ease-out">{{ noResultsNote }}</div>
+        </sc-if>
+      </div>
+      <button onClick="{{ toggleSearch }}" title="Search holdings" style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;border:none;border-radius:6px;background:transparent;color:var(--t2);cursor:pointer" style-hover="background:var(--hover);color:var(--t1)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="M16.6 16.6L21 21"></path></svg>
+      </button>
+
+      <div style="width:1px;height:22px;background:var(--line);margin:0 3px"></div>
+
+      <span style="display:flex;align-items:center;gap:7px;height:32px;padding:0 10px;border:1px solid var(--line);border-radius:6px;color:var(--t1);font-size:13px;font-weight:500;white-space:nowrap">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="1.6"><rect x="3" y="7" width="18" height="13" rx="2"></rect><path d="M9 7V5h6v2"></path></svg>
+        {{ portfolioName }}
+      </span>
+
+      <div style="position:relative">
+        <button onClick="{{ togAvatar }}" style="display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:var(--hover);color:var(--t2);font-size:11px;font-weight:600;cursor:pointer;letter-spacing:.02em" style-hover="border-color:var(--t3)">AK</button>
+        <sc-if value="{{ mAvatar }}" hint-placeholder-val="{{ false }}">
+          <div onClick="{{ stop }}" style="position:absolute;top:38px;right:0;z-index:70;width:250px;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:6px;animation:menuIn .12s ease-out">
+            <div style="padding:8px 10px 10px;display:flex;flex-direction:column;gap:1px">
+              <span style="font-size:13px;font-weight:500;color:var(--t1)">Anna Keller</span>
+              <span style="font-size:11px;color:var(--t3)">{{ acctSub }}</span>
+            </div>
+            <div style="height:1px;background:var(--line);margin:2px 4px 8px"></div>
+            <div style="padding:0 10px 10px;display:flex;flex-direction:column;gap:7px">
+              <span style="font-size:11px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;color:var(--t3)">Theme</span>
+              <div style="display:flex;padding:2px;border:1px solid var(--line);border-radius:7px;gap:2px">
+                <button onClick="{{ setLight }}" style="flex:1;height:28px;border:none;border-radius:5px;font-size:12px;font-weight:500;cursor:pointer;background:{{ lightBg }};color:{{ lightFg }}">Light</button>
+                <button onClick="{{ setDark }}" style="flex:1;height:28px;border:none;border-radius:5px;font-size:12px;font-weight:500;cursor:pointer;background:{{ darkBg }};color:{{ darkFg }}">Dark</button>
+              </div>
+            </div>
+            <div style="height:1px;background:var(--line);margin:2px 4px"></div>
+            <sc-for list="{{ avatarRows }}" as="r" hint-placeholder-count="3">
+              <span style="display:flex;align-items:center;justify-content:space-between;height:38px;padding:0 10px;color:var(--t2);font-size:13px">
+                <span>{{ r.label }}</span>
+                <span style="font-size:12px;font-weight:500;color:var(--t1)">{{ r.value }}</span>
+              </span>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+  </div>
+
+  <sc-if value="{{ mMobile }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ stop }}" style="position:absolute;top:56px;left:0;right:0;z-index:70;background:var(--card);border-bottom:1px solid var(--line);box-shadow:var(--shadow);padding:8px 16px 14px;display:flex;flex-direction:column;gap:2px">
+      <sc-for list="{{ mobileRows }}" as="r" hint-placeholder-count="5">
+        <a href="{{ r.href }}" style="display:flex;align-items:center;gap:11px;height:44px;padding:0 6px;border-radius:6px;text-decoration:none;color:{{ r.color }};font-size:14px" style-hover="background:var(--hover)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="{{ r.d }}"></path></svg>
+          <span>{{ r.label }}</span>
+        </a>
+      </sc-for>
+    </div>
+  </sc-if>
+</header>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1392,&quot;height&quot;:56},&quot;active&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Dashboard&quot;,&quot;Analytics&quot;,&quot;Portfolio&quot;,&quot;Tools&quot;],&quot;default&quot;:&quot;Dashboard&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;subActive&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = { menu: null, theme: 'light', searchOpen: false, query: '' };
+
+  ICONS = {
+    bars: 'M4 20V10M10 20V4M16 20v-7M22 20H2', pie: 'M12 3a9 9 0 1 0 9 9h-9V3Z',
+    coins: 'M4 8h13l-3-3M20 16H7l3 3', trend: 'M3 17l6-6 4 4 8-8M21 7v6h-6',
+    gauge: 'M4 18a8 8 0 1 1 16 0M12 18l4-6', doc: 'M6 3h8l5 5v13H6V3Zm8 0v5h5',
+    table: 'M3 5h18v14H3V5Zm0 5h18M9 10v9', list: 'M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01',
+    cal: 'M4 6h16v14H4V6Zm3-3v3m10-3v3M4 11h16', target: 'M12 3v18M3 12h18M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10Z',
+    wallet: 'M3 7h15a3 3 0 0 1 3 3v7H3V7Zm0 0V5h12', tag: 'M4 11l7-7 9 9-7 7-9-9Zm4-1h.01',
+    split: 'M4 6h6l10 12h-4M20 6h-4L6 18H4', scale: 'M12 4v16M6 8l-3 6h6l-3-6Zm12 0l-3 6h6l-3-6ZM5 8h14',
+    search: 'M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14Zm5.5 12.5L21 21', dip: 'M3 6l5 8 4-3 3 5 6-10',
+    lab: 'M9 3h6v5l5 13H4L9 8V3Zm-2 12h10', home: 'M4 11l8-7 8 7v9H4v-9Zm5 9v-6h6v6',
+    plus: 'M12 5v14M5 12h14', upload: 'M12 20V6M6 12l6-6 6 6M4 20h16',
+    users: 'M8 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm8 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM2 19c0-3 3-5 6-5s6 2 6 5m2-5c3 0 6 2 6 5'
+  };
+
+  componentDidMount() {
+    let t = 'light';
+    try { const s = localStorage.getItem('snowline.theme'); if (s === 'light' || s === 'dark') t = s; } catch (e) {}
+    this.applyTheme(t, false);
+    this.doc = () => { if (this.state.menu) this.setState({ menu: null }); };
+    document.addEventListener('click', this.doc);
+    if (!window.SnowlineData) {
+      const check = () => { if (window.SnowlineData) this.forceUpdate(); else setTimeout(check, 30); };
+      setTimeout(check, 20);
+    }
+  }
+  componentWillUnmount() { if (this.doc) document.removeEventListener('click', this.doc); }
+
+  applyTheme(t, persist) {
+    document.documentElement.setAttribute('data-theme', t);
+    if (persist !== false) { try { localStorage.setItem('snowline.theme', t); } catch (e) {} }
+    this.setState({ theme: t });
+  }
+
+  renderVals() {
+    const st = this.state, I = this.ICONS;
+    const active = this.props.active || 'Dashboard';
+    const sub = this.props.subActive || '';
+    const tog = (k) => (e) => { e.stopPropagation(); this.setState((s) => ({ menu: s.menu === k ? null : k })); };
+    const pill = (name) => ({
+      bg: active === name ? 'var(--accent-soft)' : 'transparent',
+      fg: active === name ? 'var(--accent)' : 'var(--t2)'
+    });
+    const D = window.SnowlineData;
+    const F = D ? D.fmt : null;
+    const K = D ? D.constants : null;
+    const T = D ? D.totals() : null;
+
+    const analytics = [
+      { label: 'Common', d: I.bars, href: 'Analytics.dc.html' },
+      { label: 'Diversification', d: I.pie, href: 'Diversification.dc.html' },
+      { label: 'Dividends', d: I.coins, href: 'AnalyticsDividends.dc.html' },
+      { label: 'Growth', d: I.trend, href: 'Growth.dc.html' },
+      { sep: true },
+      { label: 'Metrics', d: I.gauge, href: 'Metrics.dc.html' },
+      { label: 'Report', d: I.doc, href: 'Report.dc.html' }
+    ].map((r) => Object.assign({}, r, {
+      check: r.label && r.label === sub ? 1 : 0,
+      bg: r.label && r.label === sub ? 'var(--accent-soft)' : 'transparent'
+    }));
+
+    let insightList = [];
+    if (D) {
+      const cats = D.categories();
+      const under = cats.slice().sort((a, b) => a.driftN - b.driftN);
+      const biggest = cats[0];
+      insightList = [
+        { title: 'Asset allocation is concentrated', short: biggest.name + ' hold ' + F.pct(biggest.allocN, 1) + ' against a ' + F.pct(biggest.targetN, 1) + ' target.' },
+        { title: 'Sector allocation is uneven', short: under[0].name + ' sits ' + F.num(Math.abs(under[0].driftN), 1) + 'pp under target.' },
+        { title: '“Dead weight” holdings', short: 'GLDI and QQQI trail ' + K.benchmark + ' by over 20pp.' }
+      ];
+    }
+
+    /* the search field resolves to a real holding and deep-links its panel */
+    const q = st.query.trim();
+    let matches = [];
+    if (D && q) {
+      const needle = q.toLowerCase();
+      matches = D.open()
+        .filter((p) => (p.ticker + ' ' + p.name + ' ' + p.sector).toLowerCase().indexOf(needle) >= 0)
+        .slice(0, 6)
+        .map((p) => ({
+          ticker: p.ticker, name: p.name, mono: p.mono,
+          value: F.money(p.value), href: 'Holdings.dc.html#' + p.ticker
+        }));
+    }
+
+    return {
+      stop: (e) => e.stopPropagation(),
+      dashBg: pill('Dashboard').bg, dashFg: pill('Dashboard').fg,
+      anaBg: pill('Analytics').bg, anaFg: pill('Analytics').fg,
+      portBg: pill('Portfolio').bg, portFg: pill('Portfolio').fg,
+      toolsBg: pill('Tools').bg, toolsFg: pill('Tools').fg,
+
+      togAnalytics: tog('analytics'), mAnalytics: st.menu === 'analytics',
+      togPortfolio: tog('portfolio'), mPortfolio: st.menu === 'portfolio',
+      togTools: tog('tools'), mTools: st.menu === 'tools',
+      togInsights: tog('insights'), mInsights: st.menu === 'insights',
+      togAdd: tog('add'), mAdd: st.menu === 'add',
+      togPortSel: tog('portsel'), mPortSel: st.menu === 'portsel',
+      togCcy: tog('ccy'), mCcy: st.menu === 'ccy',
+      togAvatar: tog('avatar'), mAvatar: st.menu === 'avatar',
+      togMobile: tog('mobile'), mMobile: st.menu === 'mobile',
+
+      analyticsRows: analytics,
+      portfolioRows: [
+        { label: 'Holdings', d: I.table, href: 'Holdings.dc.html' },
+        { label: 'Transactions', d: I.list, href: 'Transactions.dc.html' },
+        { label: 'Dividend calendar', d: I.cal, href: 'DividendCalendar.dc.html' },
+        { label: 'My goal', d: I.target, href: 'MyGoal.dc.html' },
+        { sep: true },
+        { label: 'Cash', d: I.wallet, href: 'Cash.dc.html' },
+        { label: 'Categories', d: I.tag, href: 'Categories.dc.html' },
+        { label: 'Corporate actions', d: I.split, href: 'CorporateActions.dc.html' }
+      ],
+      toolsRows: [
+        { label: 'Portfolio rebalancing', d: I.scale, href: 'Rebalancing.dc.html' },
+        { label: 'Top dividend stocks', d: I.search, href: 'Screener.dc.html' },
+        { label: 'Dividend payout calendar', d: I.cal, href: 'PayoutCalendar.dc.html' },
+        { label: 'Portfolio Lab', d: I.lab, href: 'PortfolioLab.dc.html' },
+        { label: 'Find the Dip', d: I.dip, href: 'FindTheDip.dc.html' }
+      ],
+      addRows: [
+        { group: 'Holdings' }, { label: 'New trade / holding', d: I.plus, href: 'Transactions.dc.html' },
+        { label: 'New dividend income', d: I.coins, href: 'Transactions.dc.html' },
+        { label: 'Manage cash', d: I.wallet, href: 'Cash.dc.html' }, { sep: true }, { group: 'Other' },
+        { label: 'New corporate action', d: I.split, href: 'CorporateActions.dc.html#add' }
+      ],
+      mobileRows: [
+        { label: 'Dashboard', d: I.home, href: 'Snowline.dc.html', color: active === 'Dashboard' ? 'var(--accent)' : 'var(--t1)' },
+        { label: 'Analytics', d: I.bars, href: 'Analytics.dc.html', color: active === 'Analytics' ? 'var(--accent)' : 'var(--t1)' },
+        { label: 'Portfolio', d: I.table, href: 'Holdings.dc.html', color: active === 'Portfolio' ? 'var(--accent)' : 'var(--t1)' },
+        { label: 'Tools', d: I.scale, href: 'Rebalancing.dc.html', color: active === 'Tools' ? 'var(--accent)' : 'var(--t1)' }
+      ],
+      insightList: insightList,
+      insightsHead: K ? '3 insights for ' + K.portfolioName : '',
+      portfolioName: K ? K.portfolioName : 'US Core',
+
+      searchOpen: st.searchOpen, query: st.query,
+      onQuery: (e) => this.setState({ query: e.target.value }),
+      toggleSearch: (e) => { e.stopPropagation(); this.setState((s) => ({ searchOpen: !s.searchOpen, query: '', menu: null })); },
+      hasResults: st.searchOpen && matches.length > 0,
+      noResults: st.searchOpen && q.length > 0 && matches.length === 0,
+      noResultsNote: 'No holding matches “' + q + '”.',
+      results: matches,
+      setLight: (e) => { e.stopPropagation(); this.applyTheme('light'); },
+      setDark: (e) => { e.stopPropagation(); this.applyTheme('dark'); },
+      lightBg: st.theme === 'light' ? 'var(--accent-soft)' : 'transparent',
+      lightFg: st.theme === 'light' ? 'var(--accent)' : 'var(--t2)',
+      darkBg: st.theme === 'dark' ? 'var(--accent-soft)' : 'transparent',
+      darkFg: st.theme === 'dark' ? 'var(--accent)' : 'var(--t2)',
+      acctSub: 'anna@keller.io · ' + (K ? K.baseCurrency : 'USD'),
+      avatarRows: [
+        { label: 'Base currency', value: K ? K.baseCurrency : 'USD' },
+        { label: 'Dividend tax rate', value: K ? F.pct(K.withholdingTax * 100, 0) : '15%' },
+        { label: 'Benchmark', value: K ? K.benchmark : 'SPY' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

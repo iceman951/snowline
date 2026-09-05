@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="display:flex;flex-direction:column;gap:14px;position:relative">
+
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px">
+    <div style="display:flex;flex-direction:column;gap:3px">
+      <span style="font-size:14px;font-weight:600;color:var(--t1)">{{ title }}</span>
+      <span style="font-size:12px;color:var(--t3)">{{ countLabel }}</span>
+    </div>
+    <sc-if value="{{ showAdd }}" hint-placeholder-val="{{ true }}">
+      <div style="position:relative;flex:none">
+        <button onClick="{{ togAdd }}" style="display:flex;align-items:center;gap:7px;height:32px;padding:0 14px;border:none;border-radius:999px;background:var(--accent);color:var(--on-accent);font-size:13px;font-weight:500;cursor:pointer" style-hover="opacity:.9">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
+          Add investments
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 9l6 6 6-6"></path></svg>
+        </button>
+        <sc-if value="{{ mAdd }}" hint-placeholder-val="{{ false }}">
+          <div onClick="{{ stop }}" style="position:absolute;top:38px;right:0;z-index:40;width:264px;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:6px">
+            <sc-for list="{{ addRows }}" as="r" hint-placeholder-count="6">
+              <sc-if value="{{ r.group }}" hint-placeholder-val="{{ false }}">
+                <div style="padding:8px 10px 4px;font-size:11px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;color:var(--t3)">{{ r.group }}</div>
+              </sc-if>
+              <sc-if value="{{ r.sep }}" hint-placeholder-val="{{ false }}"><div style="height:1px;background:var(--line);margin:6px 4px"></div></sc-if>
+              <sc-if value="{{ r.label }}" hint-placeholder-val="{{ true }}">
+                <a href="{{ r.href }}" style="display:flex;align-items:center;gap:11px;height:44px;padding:0 10px;border-radius:6px;text-decoration:none;color:var(--t1);font-size:13px" style-hover="background:var(--hover)">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="{{ r.d }}"></path></svg>
+                  <span>{{ r.label }}</span>
+                </a>
+              </sc-if>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+  </div>
+
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+    <div style="display:flex;padding:2px;border:1px solid var(--line);border-radius:7px;gap:2px">
+      <button onClick="{{ setLocalCcy }}" style="height:26px;padding:0 10px;border:none;border-radius:5px;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;background:{{ localBg }};color:{{ localFg }}">In holding currency</button>
+      <button onClick="{{ setUsdCcy }}" style="height:26px;padding:0 10px;border:none;border-radius:5px;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;background:{{ usdBg }};color:{{ usdFg }}">In USD</button>
+    </div>
+    <button onClick="{{ toggleSold }}" style="display:flex;align-items:center;gap:7px;height:30px;padding:0 10px 0 8px;border:none;background:transparent;color:var(--t2);font-size:12px;cursor:pointer;border-radius:6px" style-hover="background:var(--hover);color:var(--t1)">
+      <span style="width:15px;height:15px;border:1px solid {{ soldBorder }};border-radius:4px;background:{{ soldBg }};color:var(--on-accent);display:flex;align-items:center;justify-content:center;font-size:10px">{{ soldMark }}</span>
+      Show sold
+    </button>
+    <span style="font-size:11px;color:var(--t3)">{{ ccyNote }}</span>
+    <div style="flex:1;min-width:12px"></div>
+    <div style="position:relative">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="1.8" stroke-linecap="round" style="position:absolute;left:9px;top:8px"><circle cx="11" cy="11" r="7"></circle><path d="M16.6 16.6L21 21"></path></svg>
+      <input value="{{ query }}" onChange="{{ onQuery }}" placeholder="Search" style="height:30px;width:186px;padding:0 10px 0 29px;border:1px solid var(--line);border-radius:6px;background:var(--canvas);color:var(--t1);font-size:12px;outline:none" style-focus="border-color:var(--accent)">
+    </div>
+    <div style="position:relative">
+      <button onClick="{{ togSort }}" title="Sort" style="display:flex;align-items:center;justify-content:center;width:30px;height:30px;border:1px solid var(--line);border-radius:6px;background:transparent;color:var(--t2);cursor:pointer" style-hover="background:var(--hover);color:var(--t1)">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 7h16M6 12h12M9 17h6"></path></svg>
+      </button>
+      <sc-if value="{{ mSort }}" hint-placeholder-val="{{ false }}">
+        <div onClick="{{ stop }}" style="position:absolute;top:36px;right:0;z-index:40;width:232px;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:6px;max-height:340px;overflow-y:auto">
+          <div style="padding:7px 10px 5px;font-size:11px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;color:var(--t3)">Sort by</div>
+          <sc-for list="{{ sortOptions }}" as="o" hint-placeholder-count="6">
+            <button onClick="{{ o.onClick }}" style="display:flex;align-items:center;justify-content:space-between;width:100%;height:38px;padding:0 10px;border:none;border-radius:6px;background:transparent;color:var(--t1);font-size:13px;cursor:pointer;text-align:left" style-hover="background:var(--hover)">
+              <span>{{ o.label }}</span><span style="color:var(--accent);font-size:10px">{{ o.arrow }}</span>
+            </button>
+          </sc-for>
+        </div>
+      </sc-if>
+    </div>
+    <div style="position:relative">
+      <button onClick="{{ togCols }}" title="Columns" style="display:flex;align-items:center;justify-content:center;width:30px;height:30px;border:1px solid var(--line);border-radius:6px;background:transparent;color:var(--t2);cursor:pointer" style-hover="background:var(--hover);color:var(--t1)">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="4" width="18" height="16" rx="2"></rect><path d="M9 4v16M15 4v16"></path></svg>
+      </button>
+      <sc-if value="{{ mCols }}" hint-placeholder-val="{{ false }}">
+        <div onClick="{{ stop }}" style="position:absolute;top:36px;right:0;z-index:40;width:250px;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:6px;max-height:360px;overflow-y:auto">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 10px 6px">
+            <span style="font-size:11px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;color:var(--t3)">Columns</span>
+            <button onClick="{{ resetCols }}" style="border:none;background:transparent;color:var(--accent);font-size:11px;font-weight:500;cursor:pointer;padding:0">Reset</button>
+          </div>
+          <div style="display:flex;align-items:center;gap:9px;height:36px;padding:0 10px;font-size:13px;color:var(--t3)">
+            <span style="width:15px;height:15px;border:1px solid var(--line);border-radius:4px;background:var(--hover);display:flex;align-items:center;justify-content:center;font-size:10px">✓</span>
+            Holding <span style="font-size:11px;color:var(--t3)">· pinned</span>
+          </div>
+          <sc-for list="{{ colOptions }}" as="c" hint-placeholder-count="9">
+            <button onClick="{{ c.onClick }}" style="display:flex;align-items:center;gap:9px;width:100%;height:36px;padding:0 10px;border:none;border-radius:6px;background:transparent;color:var(--t1);font-size:13px;cursor:pointer;text-align:left" style-hover="background:var(--hover)">
+              <span style="width:15px;height:15px;flex:none;border:1px solid {{ c.border }};border-radius:4px;background:{{ c.bg }};color:var(--on-accent);display:flex;align-items:center;justify-content:center;font-size:10px">{{ c.mark }}</span>
+              <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.label }}</span>
+            </button>
+          </sc-for>
+        </div>
+      </sc-if>
+    </div>
+  </div>
+
+  <div style="display:flex;align-items:center;gap:2px;border-bottom:1px solid var(--line)">
+    <sc-for list="{{ viewTabs }}" as="t" hint-placeholder-count="4">
+      <button onClick="{{ t.onClick }}" style="height:36px;padding:0 14px;border:none;border-bottom:2px solid {{ t.rule }};background:transparent;color:{{ t.color }};font-size:13px;font-weight:{{ t.weight }};cursor:pointer;margin-bottom:-1px" style-hover="color:var(--t1)">{{ t.label }}</button>
+    </sc-for>
+  </div>
+
+  <sc-if value="{{ hasSelection }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;align-items:center;gap:14px;padding:9px 14px;background:var(--accent-soft);border:1px solid var(--line);border-radius:8px">
+      <span style="font-size:12px;font-weight:500;color:var(--t1)">{{ selectionLabel }}</span>
+      <a href="Categories.dc.html" style="font-size:12px;font-weight:500">Assign to category</a>
+      <div style="flex:1"></div>
+      <button onClick="{{ clearSelection }}" style="border:none;background:transparent;color:var(--t2);font-size:12px;cursor:pointer;padding:0" style-hover="color:var(--t1)">Clear</button>
+    </div>
+  </sc-if>
+
+  <div data-r="scroller" style="position:relative;max-width:100%;border:1px solid var(--line);border-radius:8px;background:var(--card);overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain">
+    <div style="min-width:{{ minWidth }}">
+
+      <div style="display:grid;grid-template-columns:{{ gridCols }};align-items:stretch;border-bottom:1px solid var(--line);background:var(--card)">
+        <div style="position:sticky;left:0;z-index:3;background:var(--card);display:flex;align-items:center;justify-content:center;padding:10px 0 10px 12px">
+          <span onClick="{{ toggleAll }}" style="width:15px;height:15px;border:1px solid {{ allBorder }};border-radius:4px;background:{{ allBg }};color:var(--on-accent);display:flex;align-items:center;justify-content:center;font-size:10px;cursor:pointer">{{ allMark }}</span>
+        </div>
+        <div style="position:sticky;left:{{ holdingLeft }};z-index:3;background:var(--card);display:flex;align-items:center;padding:10px 14px 10px 10px;border-right:1px solid var(--line)">
+          <button onClick="{{ sortHolding }}" style="display:flex;align-items:center;gap:5px;border:none;background:transparent;padding:0;cursor:pointer;font-size:12px;font-weight:500;color:var(--t2)" style-hover="color:var(--t1)">Holding<span style="color:var(--accent);font-size:9px">{{ arrowHolding }}</span></button>
+        </div>
+        <sc-for list="{{ headers }}" as="h" hint-placeholder-count="9">
+          <div style="position:relative;display:flex;align-items:center;justify-content:{{ h.justify }};padding:10px 12px">
+            <button onClick="{{ h.onSort }}" onMouseEnter="{{ h.onTipOn }}" onMouseLeave="{{ h.onTipOff }}" style="display:flex;align-items:center;gap:5px;border:none;background:transparent;padding:0;cursor:pointer;font-size:12px;font-weight:500;color:var(--t2);text-align:{{ h.align }};line-height:1.3;border-bottom:{{ h.underline }}" style-hover="color:var(--t1)">
+              <span>{{ h.label }}</span><span style="color:var(--accent);font-size:9px">{{ h.arrow }}</span>
+            </button>
+            <sc-if value="{{ h.showTip }}" hint-placeholder-val="{{ false }}">
+              <span style="position:absolute;top:34px;{{ h.tipSide }}:8px;z-index:12;width:214px;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:9px 11px;font-size:11px;line-height:1.5;color:var(--t2);pointer-events:none;text-align:left;font-weight:400">{{ h.tip }}</span>
+            </sc-if>
+          </div>
+        </sc-for>
+        <div style="position:sticky;right:0;z-index:3;background:var(--card);border-left:1px solid var(--line);padding:10px 0"></div>
+      </div>
+
+      <sc-for list="{{ rows }}" as="r" hint-placeholder-count="12">
+        <div onClick="{{ r.onOpen }}" onMouseEnter="{{ r.onEnter }}" onMouseLeave="{{ r.onLeave }}" style="display:grid;grid-template-columns:{{ gridCols }};align-items:stretch;border-bottom:1px solid var(--line);background:{{ r.bg }};cursor:pointer">
+          <div style="position:sticky;left:0;z-index:2;background:{{ r.bg }};display:flex;align-items:center;justify-content:center;padding:0 0 0 12px">
+            <span onClick="{{ r.onSelect }}" style="width:15px;height:15px;border:1px solid {{ r.selBorder }};border-radius:4px;background:{{ r.selBg }};color:var(--on-accent);display:flex;align-items:center;justify-content:center;font-size:10px;cursor:pointer">{{ r.selMark }}</span>
+          </div>
+          <div style="position:sticky;left:{{ holdingLeft }};z-index:2;background:{{ r.bg }};display:flex;align-items:center;gap:10px;padding:11px 14px 11px 10px;border-right:1px solid var(--line);min-width:0">
+            <span style="width:30px;height:30px;flex:none;border-radius:6px;background:var(--hover);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:var(--t2)">{{ r.mono }}</span>
+            <span style="display:flex;flex-direction:column;gap:1px;min-width:0">
+              <span style="font-size:13px;font-weight:500;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</span>
+              <span style="display:flex;align-items:center;gap:6px">
+                <span style="font-size:12px;color:var(--t3)">{{ r.ticker }}</span>
+                <sc-if value="{{ r.soldTag }}" hint-placeholder-val="{{ false }}">
+                  <span style="font-size:10px;color:var(--t3);border:1px solid var(--line);border-radius:3px;padding:0 4px">{{ r.soldTag }}</span>
+                </sc-if>
+              </span>
+            </span>
+            <sc-if value="{{ r.caveat }}" hint-placeholder-val="{{ false }}">
+              <span title="{{ r.caveat }}" style="flex:none;display:flex;align-items:center;color:var(--amber)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4l9 16H3z"></path><path d="M12 10v4M12 17h.01"></path></svg>
+              </span>
+            </sc-if>
+          </div>
+          <sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="9">
+            <div style="display:flex;flex-direction:column;gap:2px;justify-content:center;align-items:{{ c.items }};padding:11px 12px">
+              <span style="font-size:13px;font-weight:500;line-height:1.3;color:{{ c.color }};white-space:nowrap">{{ c.primary }}</span>
+              <span style="font-size:12px;line-height:1.3;color:{{ c.subColor }};white-space:nowrap">{{ c.secondary }}</span>
+            </div>
+          </sc-for>
+          <div style="position:sticky;right:0;z-index:2;background:{{ r.bg }};border-left:1px solid var(--line);display:flex;align-items:center;justify-content:center">
+            <button onClick="{{ r.onMenu }}" style="display:flex;align-items:center;justify-content:center;width:26px;height:26px;border:none;border-radius:6px;background:transparent;color:var(--t3);cursor:pointer" style-hover="background:var(--line);color:var(--t1)">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.5"></circle><circle cx="12" cy="12" r="1.5"></circle><circle cx="19" cy="12" r="1.5"></circle></svg>
+            </button>
+          </div>
+        </div>
+      </sc-for>
+
+      <div style="display:grid;grid-template-columns:{{ gridCols }};align-items:stretch;background:var(--card);border-top:1px solid var(--t3)">
+        <div style="position:sticky;left:0;z-index:2;background:var(--card)"></div>
+        <div style="position:sticky;left:{{ holdingLeft }};z-index:2;background:var(--card);display:flex;align-items:center;padding:12px 14px 12px 10px;border-right:1px solid var(--line)">
+          <span style="font-size:13px;font-weight:600;color:var(--t1)">Total</span>
+        </div>
+        <sc-for list="{{ totalCells }}" as="c" hint-placeholder-count="9">
+          <div style="display:flex;flex-direction:column;gap:2px;justify-content:center;align-items:{{ c.items }};padding:12px">
+            <span style="font-size:13px;font-weight:600;line-height:1.3;color:{{ c.color }};white-space:nowrap">{{ c.primary }}</span>
+            <span style="font-size:12px;line-height:1.3;color:{{ c.subColor }};white-space:nowrap">{{ c.secondary }}</span>
+          </div>
+        </sc-for>
+        <div style="position:sticky;right:0;z-index:2;background:var(--card);border-left:1px solid var(--line)"></div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--t3);margin-top:-4px">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18M7 8l-4 4 4 4M17 8l4 4-4 4"></path></svg>
+    <span>{{ scrollHint }}</span>
+  </div>
+
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:14px">
+    <div style="display:flex;align-items:center;gap:9px">
+      <span style="font-size:12px;color:var(--t3)">Rows</span>
+      <div style="position:relative">
+        <button onClick="{{ togSize }}" style="display:flex;align-items:center;gap:7px;height:30px;padding:0 10px;border:1px solid var(--line);border-radius:6px;background:transparent;color:var(--t1);font-size:12px;cursor:pointer" style-hover="background:var(--hover)">{{ pageSize }}
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2.2" stroke-linecap="round"><path d="M6 9l6 6 6-6"></path></svg>
+        </button>
+        <sc-if value="{{ mSize }}" hint-placeholder-val="{{ false }}">
+          <div onClick="{{ stop }}" style="position:absolute;bottom:36px;left:0;z-index:40;width:120px;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:6px">
+            <sc-for list="{{ sizeOptions }}" as="o" hint-placeholder-count="4">
+              <button onClick="{{ o.onClick }}" style="display:flex;align-items:center;justify-content:space-between;width:100%;height:36px;padding:0 10px;border:none;border-radius:6px;background:transparent;color:var(--t1);font-size:13px;cursor:pointer;text-align:left" style-hover="background:var(--hover)">
+                <span>{{ o.label }}</span><span style="color:var(--accent);font-size:12px;opacity:{{ o.check }}">✓</span>
+              </button>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="font-size:12px;color:var(--t2)">{{ rangeLabel }}</span>
+      <div style="display:flex;gap:2px">
+        <button onClick="{{ prevPage }}" style="display:flex;align-items:center;justify-content:center;width:28px;height:28px;border:1px solid var(--line);border-radius:6px;background:transparent;color:{{ prevColor }};cursor:pointer" style-hover="background:var(--hover)">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 6l-6 6 6 6"></path></svg>
+        </button>
+        <button onClick="{{ nextPage }}" style="display:flex;align-items:center;justify-content:center;width:28px;height:28px;border:1px solid var(--line);border-radius:6px;background:transparent;color:{{ nextColor }};cursor:pointer" style-hover="background:var(--hover)">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"></path></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <sc-if value="{{ rowMenuOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ stop }}" style="position:fixed;top:{{ rowMenuTop }};left:{{ rowMenuLeft }};z-index:70;width:214px;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:6px;text-align:left">
+      <sc-for list="{{ rowMenu }}" as="m" hint-placeholder-count="5">
+        <sc-if value="{{ m.sep }}" hint-placeholder-val="{{ false }}"><div style="height:1px;background:var(--line);margin:6px 4px"></div></sc-if>
+        <sc-if value="{{ m.label }}" hint-placeholder-val="{{ true }}">
+          <a href="{{ m.href }}" style="display:flex;align-items:center;height:40px;padding:0 10px;border-radius:6px;text-decoration:none;color:{{ m.color }};font-size:13px" style-hover="background:var(--hover)">{{ m.label }}</a>
+        </sc-if>
+      </sc-for>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ panelOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;z-index:80;display:flex;justify-content:flex-end">
+      <div onClick="{{ closePanel }}" style="position:absolute;inset:0;background:rgba(12,12,12,.28)"></div>
+      <div onClick="{{ stop }}" style="position:relative;width:448px;max-width:100%;height:100%;background:var(--card);border-left:1px solid var(--line);box-shadow:var(--shadow);overflow-y:auto">
+        <div style="position:sticky;top:0;z-index:2;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:18px 20px;background:var(--card);border-bottom:1px solid var(--line)">
+          <div style="display:flex;align-items:center;gap:11px;min-width:0">
+            <span style="width:34px;height:34px;flex:none;border-radius:7px;background:var(--hover);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--t2)">{{ panelMono }}</span>
+            <span style="display:flex;flex-direction:column;gap:1px;min-width:0">
+              <span style="font-size:15px;font-weight:600;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ panelName }}</span>
+              <span style="font-size:12px;color:var(--t3)">{{ panelMeta }}</span>
+            </span>
+          </div>
+          <button onClick="{{ closePanel }}" style="display:flex;align-items:center;justify-content:center;width:28px;height:28px;flex:none;border:none;border-radius:6px;background:transparent;color:var(--t2);cursor:pointer" style-hover="background:var(--hover);color:var(--t1)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+          </button>
+        </div>
+
+        <div style="padding:18px 20px 28px;display:flex;flex-direction:column;gap:22px">
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:12px">
+              <div style="display:flex;flex-direction:column;gap:2px">
+                <span style="font-size:24px;font-weight:600;letter-spacing:-0.02em;color:var(--t1)">{{ panelPrice }}</span>
+                <span style="font-size:12px;color:{{ panelDayColor }}">{{ panelDay }}</span>
+              </div>
+              <div style="display:flex;gap:2px">
+                <sc-for list="{{ panelRanges }}" as="t" hint-placeholder-count="4">
+                  <button onClick="{{ t.onClick }}" style="height:26px;padding:0 9px;border:none;border-radius:5px;background:{{ t.bg }};color:{{ t.color }};font-size:11px;font-weight:500;cursor:pointer">{{ t.label }}</button>
+                </sc-for>
+              </div>
+            </div>
+            <svg viewBox="0 0 408 120" style="width:100%;height:auto;display:block">
+              <line x1="0" y1="8" x2="408" y2="8" stroke="var(--line)" stroke-width="1" stroke-dasharray="3 4"></line>
+              <line x1="0" y1="60" x2="408" y2="60" stroke="var(--line)" stroke-width="1" stroke-dasharray="3 4"></line>
+              <line x1="0" y1="112" x2="408" y2="112" stroke="var(--line)" stroke-width="1" stroke-dasharray="3 4"></line>
+              <polyline points="{{ panelSeries }}" fill="none" stroke="{{ panelSeriesColor }}" stroke-width="1.8" stroke-linejoin="round"></polyline>
+            </svg>
+            <div style="display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--t3)">
+              <span>{{ panelRangeFrom }}</span>
+              <span>{{ panelRangeChange }}</span>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:11px">
+            <span style="font-size:12px;font-weight:600;color:var(--t1)">Position</span>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px 12px;padding:14px;border:1px solid var(--line);border-radius:8px">
+              <sc-for list="{{ panelSummary }}" as="s" hint-placeholder-count="6">
+                <div style="display:flex;flex-direction:column;gap:3px;min-width:0">
+                  <span style="font-size:11px;color:var(--t3);white-space:nowrap">{{ s.label }}</span>
+                  <span style="font-size:14px;font-weight:600;color:{{ s.color }};white-space:nowrap">{{ s.primary }}</span>
+                  <span style="font-size:11px;color:var(--t3);white-space:nowrap">{{ s.secondary }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:11px">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <span style="font-size:12px;font-weight:600;color:var(--t1)">Transactions</span>
+              <a href="Transactions.dc.html" style="font-size:12px;font-weight:500">All transactions →</a>
+            </div>
+            <div style="display:flex;flex-direction:column">
+              <sc-for list="{{ panelTx }}" as="t" hint-placeholder-count="3">
+                <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)">
+                  <span style="font-size:11px;font-weight:500;color:{{ t.typeColor }};min-width:34px">{{ t.type }}</span>
+                  <span style="font-size:12px;color:var(--t2);min-width:88px">{{ t.date }}</span>
+                  <span style="font-size:12px;color:var(--t3);flex:1">{{ t.detail }}</span>
+                  <span style="font-size:13px;font-weight:500;color:var(--t1)">{{ t.total }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:11px">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <span style="font-size:12px;font-weight:600;color:var(--t1)">Dividend history</span>
+              <span style="font-size:11px;color:var(--t3)">{{ panelDivTotal }}</span>
+            </div>
+            <sc-if value="{{ panelHasDivs }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex;flex-direction:column">
+                <sc-for list="{{ panelDivs }}" as="d" hint-placeholder-count="4">
+                  <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)">
+                    <span style="font-size:12px;color:var(--t2);min-width:94px">{{ d.payDate }}</span>
+                    <span style="font-size:12px;color:var(--t3);flex:1">{{ d.perShare }}</span>
+                    <span style="font-size:13px;font-weight:500;color:var(--t1)">{{ d.net }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+            <sc-if value="{{ panelNoDivs }}" hint-placeholder-val="{{ false }}">
+              <span style="font-size:12px;color:var(--t3)">This holding pays no dividend.</span>
+            </sc-if>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:11px">
+            <span style="font-size:12px;font-weight:600;color:var(--t1)">Notes</span>
+            <textarea value="{{ note }}" onChange="{{ onNote }}" placeholder="Why you own it, when you would sell…" style="width:100%;min-height:82px;resize:vertical;padding:11px 12px;border:1px solid var(--line);border-radius:8px;background:var(--canvas);color:var(--t1);font-family:inherit;font-size:12px;line-height:1.55;outline:none" style-focus="border-color:var(--accent)"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1344,&quot;height&quot;:900},&quot;title&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Holdings&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;view&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;My holdings&quot;,&quot;General&quot;,&quot;Dividends&quot;,&quot;Returns&quot;],&quot;default&quot;:&quot;My holdings&quot;,&quot;tsType&quot;:&quot;'My holdings'|'General'|'Dividends'|'Returns'&quot;},&quot;pageSize&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:25,&quot;min&quot;:10,&quot;max&quot;:100,&quot;step&quot;:5,&quot;tsType&quot;:&quot;number&quot;},&quot;showAdd&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  state = {
+    view: null, sortKey: 'value', sortDir: 'desc', query: '', sel: [], hidden: [],
+    ccy: 'USD', showSold: false, size: null, page: 0, menu: null, rowMenu: null,
+    hover: null, hdr: null, panel: null, range: '1y', notes: {}, rowMenuAt: null
+  };
+
+  SETS = {
+    'My holdings': ['shares', 'cost', 'value', 'divs', 'yield', 'growth5y', 'profit', 'irr', 'share'],
+    'General': ['shares', 'price', 'cost', 'value', 'profit', 'share', 'sector', 'class', 'currency'],
+    'Dividends': ['shares', 'annual', 'pershare', 'yield', 'yoc', 'payout', 'growth5y', 'freq', 'nextex'],
+    'Returns': ['cost', 'value', 'divrecv', 'capgain', 'realized', 'profit', 'daily', 'irr']
+  };
+
+  componentDidMount() {
+    this.doc = () => { if (this.state.menu || this.state.rowMenu) this.setState({ menu: null, rowMenu: null, rowMenuAt: null }); };
+    document.addEventListener('click', this.doc);
+    /* Deep link: Holdings.dc.html#GLDI opens that position's panel, so a
+       ticker linked from another screen lands on the holding it names. */
+    this.openHash = () => {
+      const t = decodeURIComponent(String(window.location.hash || '').replace('#', '')).toUpperCase();
+      if (!t || !window.SnowlineData) return;
+      const p = window.SnowlineData.byTicker(t);
+      if (p && p.status === 'open') this.setState({ panel: t, query: '', page: 0 });
+    };
+    window.addEventListener('hashchange', this.openHash);
+    setTimeout(this.openHash, 40);
+    if (!window.SnowlineData) {
+      const check = () => { if (window.SnowlineData) this.forceUpdate(); else setTimeout(check, 30); };
+      setTimeout(check, 20);
+    }
+  }
+  componentWillUnmount() {
+    if (this.doc) document.removeEventListener('click', this.doc);
+    if (this.openHash) window.removeEventListener('hashchange', this.openHash);
+  }
+
+  get view() { return this.state.view || this.props.view || 'My holdings'; }
+  get size() { return this.state.size || this.props.pageSize || 25; }
+  get cols() { return this.SETS[this.view].filter((k) => this.state.hidden.indexOf(this.view + ':' + k) < 0); }
+  cur(p) { return this.state.ccy === 'USD' || !p ? '$' : (p.currency === 'USD' ? '$' : p.currency + ' '); }
+
+  defs() {
+    const F = window.SnowlineData.fmt;
+    const money = (n, p) => F.money(n, this.cur(p));
+    const signed = (n, p) => F.signed(n, this.cur(p));
+    const two = (primary, secondary, tone, align) => ({ primary: primary, secondary: secondary === undefined ? '' : secondary, tone: tone || 'plain', align: align || 'right' });
+    return {
+      shares: {
+        label: 'Shares', w: 92, tip: 'Fractional positions are shown to six decimals.',
+        sort: (h) => h.p.shares,
+        cell: (h) => two(F.shares(h.p.shares), h.p.price ? money(h.p.price, h.p) + '/sh' : '—'),
+        total: (T) => two(F.shares(T.shares), T.holdings + ' positions')
+      },
+      price: {
+        label: 'Price', w: 110, sort: (h) => h.p.price,
+        cell: (h) => two(h.p.price ? money(h.p.price, h.p) : '—', h.p.dayChangePct ? F.caret(h.p.dayChangePct) : 'flat', F.tone(h.p.dayChangePct)),
+        total: () => two('—', '')
+      },
+      cost: {
+        label: 'Cost basis', w: 116, sort: (h) => h.p.costTotal,
+        cell: (h) => two(money(h.p.costTotal, h.p), h.p.costPerShare ? money(h.p.costPerShare, h.p) + '/sh' : '—'),
+        total: (T) => two(F.money(T.invested), 'invested')
+      },
+      value: {
+        label: 'Current value', w: 124, sort: (h) => h.p.value,
+        cell: (h) => two(money(h.p.value, h.p), h.p.price ? money(h.p.price, h.p) + '/sh' : 'closed'),
+        total: (T) => two(F.money(T.value), 'market value')
+      },
+      divs: {
+        label: 'Dividends', w: 110, tip: 'Total dividends received after tax.',
+        sort: (h) => h.p.dividendsReceived,
+        cell: (h) => two(money(h.p.dividendsReceived, h.p), h.dividendsPerShare ? money(h.dividendsPerShare, h.p) + '/sh' : '—'),
+        total: (T) => two(F.money(T.dividendsReceived), 'after tax')
+      },
+      divrecv: {
+        label: 'Div. received', w: 118, tip: 'Total dividends received after tax.',
+        sort: (h) => h.p.dividendsReceived,
+        cell: (h) => two(money(h.p.dividendsReceived, h.p), h.dividendsPerShare ? money(h.dividendsPerShare, h.p) + '/sh' : '—'),
+        total: (T) => two(F.money(T.dividendsReceived), 'after tax')
+      },
+      yield: {
+        label: 'Dividend yield', w: 116, tip: 'Forward yield on today’s price, before withholding tax.',
+        sort: (h) => h.p.yieldPct,
+        cell: (h) => two(h.p.yieldPct ? F.pct(h.p.yieldPct) : '—', h.yieldOnCost ? F.pct(h.yieldOnCost) + ' on cost' : ''),
+        total: (T) => two(F.pct(T.grossYield), F.pct(T.yieldOnCost) + ' on cost')
+      },
+      yoc: {
+        label: 'Yield on cost', w: 116, tip: 'Forward income divided by what you paid for the position.',
+        sort: (h) => h.yieldOnCost,
+        cell: (h) => two(h.yieldOnCost ? F.pct(h.yieldOnCost) : '—', h.p.yieldPct ? F.pct(h.p.yieldPct) + ' current' : ''),
+        total: (T) => two(F.pct(T.yieldOnCost), F.pct(T.grossYield) + ' current')
+      },
+      growth5y: {
+        label: 'Dividend growth (5Y)', w: 132,
+        tip: 'Compound annual growth of the dividend over five years. Blank where the holding has less than five years of payments.',
+        sort: (h) => h.p.dividendGrowth5Y === null ? -999 : h.p.dividendGrowth5Y,
+        cell: (h) => h.p.dividendGrowth5Y === null ? two('—', 'no 5Y history') : two(F.caret(h.p.dividendGrowth5Y, 1), '5Y CAGR', F.tone(h.p.dividendGrowth5Y)),
+        total: () => two('—', 'mixed history')
+      },
+      payout: {
+        label: 'Payout ratio', w: 116, tip: 'Dividend as a share of earnings. Not meaningful for option-income funds.',
+        sort: (h) => h.p.payoutRatio === null ? -1 : h.p.payoutRatio,
+        cell: (h) => h.p.payoutRatio === null ? two('—', 'option income') : two(F.pct(h.p.payoutRatio, 1), 'of earnings'),
+        total: () => two('—', '')
+      },
+      annual: {
+        label: 'Annual dividend', w: 130, tip: 'Forward 12-month gross income at today’s yield.',
+        sort: (h) => h.annualGross,
+        cell: (h) => h.annualGross ? two(money(h.annualGross, h.p), money(h.annualNet, h.p) + ' net') : two('—', ''),
+        total: (T) => two(F.money(T.forwardGross), F.money(T.forwardNet) + ' net')
+      },
+      pershare: {
+        label: 'Per share', w: 108, sort: (h) => h.perShareGross,
+        cell: (h) => h.perShareGross ? two(money(h.perShareGross, h.p), h.p.frequency.toLowerCase()) : two('—', ''),
+        total: () => two('—', '')
+      },
+      freq: {
+        label: 'Payment frequency', w: 138, align: 'left', sort: (h) => h.p.frequency,
+        cell: (h) => Object.assign(two(h.p.yieldPct ? h.p.frequency : '—', h.p.yieldPct ? (h.p.frequency === 'Monthly' ? '12 × a year' : '4 × a year') : 'no dividend'), { align: 'left' }),
+        total: () => Object.assign(two('—', ''), { align: 'left' })
+      },
+      nextex: {
+        label: 'Next ex-date', w: 122, tip: 'Own the shares before this date to receive the next payment.',
+        sort: (h) => h.p.nextExDate || '',
+        cell: (h) => two(h.p.nextExDate || '—', h.p.nextPayDate ? 'pays ' + h.p.nextPayDate : ''),
+        total: () => two('—', '')
+      },
+      profit: {
+        label: 'Total profit', w: 124, tip: 'Capital gain plus dividends received and realised P&L, net of fees.',
+        sort: (h) => h.totalProfit,
+        cell: (h) => two(signed(h.totalProfit, h.p), h.p.costTotal ? F.caret(h.totalProfitPct) : 'realised', F.tone(h.totalProfit)),
+        total: (T) => two(F.signed(T.totalProfit), F.caret(T.totalProfitPct), F.tone(T.totalProfit))
+      },
+      capgain: {
+        label: 'Capital gain', w: 124, sort: (h) => h.capitalGain,
+        cell: (h) => h.p.costTotal ? two(signed(h.capitalGain, h.p), F.caret(h.capitalGainPct), F.tone(h.capitalGain)) : two('—', 'position closed'),
+        total: (T) => two(F.signed(T.capitalGain), F.caret(T.capitalGainPct), F.tone(T.capitalGain))
+      },
+      realized: {
+        label: 'Realized P&L', w: 118, tip: 'Profit locked in on shares you have already sold.',
+        sort: (h) => h.p.realizedPnL,
+        cell: (h) => h.p.realizedPnL ? two(signed(h.p.realizedPnL, h.p), 'closed lots', F.tone(h.p.realizedPnL)) : two('—', ''),
+        total: (T) => two(F.signed(T.realizedPnL), 'closed lots', F.tone(T.realizedPnL))
+      },
+      daily: {
+        label: 'Daily', w: 116, sort: (h) => h.p.dayChangeAbs,
+        cell: (h) => h.p.dayChangeAbs ? two(signed(h.p.dayChangeAbs, h.p), F.caret(h.p.dayChangePct), F.tone(h.p.dayChangeAbs)) : two('—', 'flat'),
+        total: (T) => two(F.signed(T.dayChange), F.caret(T.dayChangePct), F.tone(T.dayChange))
+      },
+      irr: {
+        label: 'IRR', w: 92, tip: 'Money-weighted annualised return, including dividends.',
+        sort: (h) => h.p.irr,
+        cell: (h) => two(F.caret(h.p.irr), 'annualised', F.tone(h.p.irr)),
+        total: (T, K) => two(F.caret(K.irrHoldingsTable), 'open holdings', 'pos')
+      },
+      share: {
+        label: 'Share in portfolio', w: 128, sort: (h) => h.shareOfPortfolio,
+        cell: (h) => h.shareOfPortfolio ? two(F.pct(h.shareOfPortfolio), F.pct(h.shareOfCategory, 1) + ' of ' + h.categoryName) : two('—', 'sold'),
+        total: (T) => two('100.0%', T.categoryCount + ' categories')
+      },
+      sector: {
+        label: 'Sector', w: 158, align: 'left', sort: (h) => h.p.sector,
+        cell: (h) => Object.assign(two(h.p.sector, F.pct(h.shareOfPortfolio, 1) + ' of portfolio'), { align: 'left' }),
+        total: (T) => Object.assign(two(T.categoryCount + ' categories', ''), { align: 'left' })
+      },
+      class: {
+        label: 'Class', w: 96, align: 'left', sort: (h) => h.p.assetClass,
+        cell: (h) => Object.assign(two(h.p.assetClass, ''), { align: 'left' }),
+        total: () => { const seen = {}; window.SnowlineData.open().forEach((p) => { seen[p.assetClass] = 1; }); return Object.assign(two(Object.keys(seen).length + ' classes', ''), { align: 'left' }); }
+      },
+      currency: {
+        label: 'Currency', w: 104, align: 'left', sort: (h) => h.p.currency,
+        cell: (h) => Object.assign(two(h.p.currency, 'FX ' + h.p.fxToUsd.toFixed(4)), { align: 'left' }),
+        total: (T, K) => Object.assign(two(K.baseCurrency, 'base'), { align: 'left' })
+      }
+    };
+  }
+
+  renderVals() {
+    if (!window.SnowlineData) return { stop: (e) => e.stopPropagation() };
+    const D = window.SnowlineData, F = D.fmt, K = D.constants, T = D.totals(), st = this.state;
+    const defs = this.defs();
+    const cols = this.cols;
+    const view = this.view;
+    const stop = (e) => e.stopPropagation();
+    const tog = (k) => (e) => { e.stopPropagation(); this.setState((s) => ({ menu: s.menu === k ? null : k, rowMenu: null, rowMenuAt: null })); };
+    const tone = (t) => t === 'pos' ? 'var(--accent)' : t === 'neg' ? 'var(--neg)' : 'var(--t1)';
+
+    let list = D.holdings(st.showSold);
+    const q = st.query.trim().toLowerCase();
+    if (q) list = list.filter((h) => (h.p.ticker + ' ' + h.p.name + ' ' + h.p.sector + ' ' + h.p.assetClass).toLowerCase().indexOf(q) >= 0);
+    const dir = st.sortDir === 'asc' ? 1 : -1;
+    const acc = st.sortKey === 'holding' ? (h) => h.p.ticker : (defs[st.sortKey] ? defs[st.sortKey].sort : (h) => h.p.value);
+    list = list.slice().sort((a, b) => {
+      const x = acc(a), y = acc(b);
+      if (typeof x === 'string' || typeof y === 'string') return String(x).localeCompare(String(y)) * dir;
+      return (x - y) * dir;
+    });
+
+    const total = list.length;
+    const size = this.size;
+    const pages = Math.max(1, Math.ceil(total / size));
+    const page = Math.min(st.page, pages - 1);
+    const from = total ? page * size + 1 : 0;
+    const to = Math.min(total, (page + 1) * size);
+    const paged = list.slice(page * size, page * size + size);
+
+    const setSort = (k) => (e) => {
+      e.stopPropagation();
+      this.setState((s) => ({ sortKey: k, sortDir: s.sortKey === k ? (s.sortDir === 'desc' ? 'asc' : 'desc') : (k === 'holding' || k === 'sector' || k === 'class' || k === 'currency' || k === 'freq' ? 'asc' : 'desc'), menu: null }));
+    };
+    const arrow = (k) => st.sortKey === k ? (st.sortDir === 'asc' ? '▲' : '▼') : '';
+
+    const cell = (c) => ({
+      primary: c.primary, secondary: c.secondary,
+      color: tone(c.tone), subColor: c.tone === 'pos' ? 'var(--accent)' : c.tone === 'neg' ? 'var(--neg)' : 'var(--t2)',
+      items: c.align === 'left' ? 'flex-start' : 'flex-end'
+    });
+
+    const selected = st.sel;
+    const allSelected = paged.length > 0 && paged.every((h) => selected.indexOf(h.p.ticker) >= 0);
+    const someSelected = paged.some((h) => selected.indexOf(h.p.ticker) >= 0);
+    const panel = st.panel ? D.holding(D.byTicker(st.panel)) : null;
+
+    let series = [], seriesPts = '', rangeChange = '', rangeFrom = '';
+    if (panel) {
+      const counts = { '1m': 22, '3m': 46, '1y': 60, all: 60 };
+      const all = D.priceSeries(panel.p.ticker, 60);
+      series = all.slice(-counts[st.range]);
+      const min = Math.min.apply(null, series), max = Math.max.apply(null, series);
+      const span = (max - min) || 1;
+      seriesPts = series.map((v, i) => (i / (series.length - 1) * 408).toFixed(1) + ',' + (112 - (v - min) / span * 104).toFixed(1)).join(' ');
+      const chg = (series[series.length - 1] - series[0]) / series[0] * 100;
+      rangeChange = F.caret(chg) + ' over ' + (st.range === 'all' ? 'all time' : st.range);
+      rangeFrom = F.money(series[0], this.cur(panel.p)) + ' → ' + F.money(series[series.length - 1], this.cur(panel.p));
+    }
+
+    return {
+      stop: stop,
+      title: this.props.title || 'Holdings',
+      countLabel: T.holdings + ' open positions' + (st.showSold ? ' · ' + T.soldCount + ' sold shown' : '') + ' · ' + K.baseCurrency,
+      showAdd: this.props.showAdd !== false,
+      togAdd: tog('add'), mAdd: st.menu === 'add',
+      addRows: [
+        { group: 'Holdings' },
+        { label: 'New trade / holding', d: 'M12 5v14M5 12h14', href: 'Transactions.dc.html' },
+        { label: 'New dividend income', d: 'M4 8h13l-3-3M20 16H7l3 3', href: 'Transactions.dc.html' },
+        { label: 'Manage cash', d: 'M3 7h15a3 3 0 0 1 3 3v7H3V7Zm0 0V5h12', href: 'Cash.dc.html' },
+        { sep: true }, { group: 'Other' },
+        { label: 'New corporate action', d: 'M4 6h6l10 12h-4M20 6h-4L6 18H4', href: 'CorporateActions.dc.html#add' }
+      ],
+
+      setLocalCcy: (e) => { e.stopPropagation(); this.setState({ ccy: 'local' }); },
+      setUsdCcy: (e) => { e.stopPropagation(); this.setState({ ccy: 'USD' }); },
+      localBg: st.ccy === 'local' ? 'var(--accent-soft)' : 'transparent',
+      localFg: st.ccy === 'local' ? 'var(--accent)' : 'var(--t2)',
+      usdBg: st.ccy === 'USD' ? 'var(--accent-soft)' : 'transparent',
+      usdFg: st.ccy === 'USD' ? 'var(--accent)' : 'var(--t2)',
+      ccyNote: st.ccy === 'local' ? 'all ' + T.holdings + ' positions are USD-listed' : '',
+      toggleSold: (e) => { e.stopPropagation(); this.setState((s) => ({ showSold: !s.showSold, page: 0 })); },
+      soldMark: st.showSold ? '✓' : '',
+      soldBg: st.showSold ? 'var(--accent)' : 'transparent',
+      soldBorder: st.showSold ? 'var(--accent)' : 'var(--line)',
+
+      query: st.query,
+      onQuery: (e) => this.setState({ query: e.target.value, page: 0 }),
+      togSort: tog('sort'), mSort: st.menu === 'sort',
+      sortOptions: [{ key: 'holding', label: 'Holding' }].concat(cols.map((k) => ({ key: k, label: defs[k].label })))
+        .map((o) => ({ label: o.label, arrow: arrow(o.key), onClick: setSort(o.key) })),
+      togCols: tog('cols'), mCols: st.menu === 'cols',
+      colOptions: this.SETS[view].map((k) => {
+        const on = cols.indexOf(k) >= 0;
+        return {
+          label: defs[k].label, mark: on ? '✓' : '',
+          bg: on ? 'var(--accent)' : 'transparent', border: on ? 'var(--accent)' : 'var(--line)',
+          onClick: (e) => {
+            e.stopPropagation();
+            const id = view + ':' + k;
+            this.setState((s) => ({ hidden: s.hidden.indexOf(id) >= 0 ? s.hidden.filter((x) => x !== id) : s.hidden.concat([id]) }));
+          }
+        };
+      }),
+      resetCols: (e) => { e.stopPropagation(); this.setState((s) => ({ hidden: s.hidden.filter((x) => x.indexOf(view + ':') !== 0) })); },
+
+      viewTabs: Object.keys(this.SETS).map((v) => ({
+        label: v, rule: v === view ? 'var(--accent)' : 'transparent',
+        color: v === view ? 'var(--accent)' : 'var(--t2)', weight: v === view ? 600 : 500,
+        onClick: (e) => { e.stopPropagation(); this.setState({ view: v, page: 0, menu: null, sortKey: this.SETS[v].indexOf(st.sortKey) >= 0 || st.sortKey === 'holding' ? st.sortKey : 'value' }); }
+      })),
+
+      gridCols: '36px 232px ' + cols.map((k) => defs[k].w + 'px').join(' ') + ' 44px',
+      minWidth: (36 + 232 + cols.reduce((s, k) => s + defs[k].w, 0) + 44) + 'px',
+      holdingLeft: '36px',
+      scrollHint: cols.length + ' of ' + this.SETS[view].length + ' columns shown · Holding stays fixed, scroll sideways for the rest',
+
+      headers: cols.map((k) => {
+        const d = defs[k];
+        return {
+          label: d.label, arrow: arrow(k), onSort: setSort(k),
+          align: d.align === 'left' ? 'left' : 'right',
+          justify: d.align === 'left' ? 'flex-start' : 'flex-end',
+          underline: d.tip ? '1px dotted var(--t3)' : '1px solid transparent',
+          tip: d.tip || '', showTip: !!(d.tip && st.hdr === k),
+          tipSide: d.align === 'left' ? 'left' : 'right',
+          onTipOn: () => this.setState({ hdr: k }), onTipOff: () => this.setState({ hdr: null })
+        };
+      }),
+      sortHolding: setSort('holding'), arrowHolding: arrow('holding'),
+
+      toggleAll: (e) => {
+        e.stopPropagation();
+        const tickers = paged.map((h) => h.p.ticker);
+        this.setState((s) => ({ sel: allSelected ? s.sel.filter((t) => tickers.indexOf(t) < 0) : s.sel.concat(tickers.filter((t) => s.sel.indexOf(t) < 0)) }));
+      },
+      allMark: allSelected ? '✓' : someSelected ? '–' : '',
+      allBg: allSelected || someSelected ? 'var(--accent)' : 'transparent',
+      allBorder: allSelected || someSelected ? 'var(--accent)' : 'var(--line)',
+      hasSelection: selected.length > 0,
+      selectionLabel: selected.length + (selected.length === 1 ? ' position selected' : ' positions selected'),
+      clearSelection: (e) => { e.stopPropagation(); this.setState({ sel: [] }); },
+
+      rows: paged.map((h) => {
+        const t = h.p.ticker;
+        const isSel = selected.indexOf(t) >= 0;
+        const bg = st.hover === t ? 'var(--hover)' : isSel ? 'var(--accent-soft)' : 'var(--card)';
+        return {
+          ticker: t, name: h.p.name, mono: h.p.mono, caveat: h.p.caveat || '',
+          soldTag: h.p.status === 'sold' ? 'sold ' + h.p.soldDate : '',
+          bg: bg, cells: cols.map((k) => cell(defs[k].cell(h))),
+          selMark: isSel ? '✓' : '', selBg: isSel ? 'var(--accent)' : 'transparent',
+          selBorder: isSel ? 'var(--accent)' : 'var(--line)',
+          onSelect: (e) => { e.stopPropagation(); this.setState((s) => ({ sel: isSel ? s.sel.filter((x) => x !== t) : s.sel.concat([t]) })); },
+          onEnter: () => this.setState({ hover: t }), onLeave: () => this.setState({ hover: null }),
+          onOpen: () => this.setState({ panel: t, range: '1y', menu: null, rowMenu: null, rowMenuAt: null }),
+          onMenu: (e) => {
+            e.stopPropagation();
+            const b = e.currentTarget.getBoundingClientRect();
+            const H = 300, W = 214;
+            const flip = b.bottom + H > window.innerHeight;
+            this.setState((s) => s.rowMenu === t
+              ? { rowMenu: null, rowMenuAt: null }
+              : {
+                  rowMenu: t, menu: null,
+                  rowMenuAt: {
+                    top: Math.max(8, flip ? b.top - H - 4 : b.bottom + 4),
+                    left: Math.max(8, Math.min(b.right - W, window.innerWidth - W - 8))
+                  }
+                });
+          }
+        };
+      }),
+      rowMenuOpen: !!(st.rowMenu && st.rowMenuAt),
+      rowMenuTop: st.rowMenuAt ? st.rowMenuAt.top + 'px' : '0px',
+      rowMenuLeft: st.rowMenuAt ? st.rowMenuAt.left + 'px' : '0px',
+      rowMenu: [
+        { label: 'Open this holding', href: 'Holdings.dc.html#' + (st.rowMenu || '') },
+        { label: 'New trade', href: 'Transactions.dc.html' },
+        { label: 'New dividend income', href: 'Transactions.dc.html' },
+        { sep: true },
+        { label: 'Its transactions', href: 'Transactions.dc.html' },
+        { label: 'Assign to category', href: 'Categories.dc.html' }
+      ].map((m) => ({ label: m.label || '', sep: !!m.sep, href: m.href || '#', color: m.color || 'var(--t1)' })),
+      totalCells: cols.map((k) => cell(defs[k].total(T, K))),
+
+      pageSize: String(size),
+      togSize: tog('size'), mSize: st.menu === 'size',
+      sizeOptions: [10, 25, 50, 100].map((n) => ({
+        label: String(n), check: n === size ? 1 : 0,
+        onClick: (e) => { e.stopPropagation(); this.setState({ size: n, page: 0, menu: null }); }
+      })),
+      rangeLabel: 'See ' + from + '–' + to + ' from ' + total,
+      prevPage: (e) => { e.stopPropagation(); this.setState({ page: Math.max(0, page - 1) }); },
+      nextPage: (e) => { e.stopPropagation(); this.setState({ page: Math.min(pages - 1, page + 1) }); },
+      prevColor: page > 0 ? 'var(--t2)' : 'var(--t3)',
+      nextColor: page < pages - 1 ? 'var(--t2)' : 'var(--t3)',
+
+      panelOpen: !!panel,
+      closePanel: () => this.setState({ panel: null }),
+      panelMono: panel ? panel.p.mono : '',
+      panelName: panel ? panel.p.name : '',
+      panelMeta: panel ? panel.p.ticker + ' · ' + panel.p.assetClass + ' · ' + panel.p.sector : '',
+      panelPrice: panel ? (panel.p.price ? F.money(panel.p.price, this.cur(panel.p)) : '—') : '',
+      panelDay: panel ? (panel.p.dayChangeAbs ? F.signed(panel.p.dayChangeAbs) + ' ' + F.caret(panel.p.dayChangePct) + ' today' : 'unchanged today') : '',
+      panelDayColor: panel ? tone(F.tone(panel.p.dayChangeAbs)) : 'var(--t2)',
+      panelRanges: ['1m', '3m', '1y', 'all'].map((r) => ({
+        label: r, bg: st.range === r ? 'var(--accent-soft)' : 'transparent',
+        color: st.range === r ? 'var(--accent)' : 'var(--t2)',
+        onClick: (e) => { e.stopPropagation(); this.setState({ range: r }); }
+      })),
+      panelSeries: seriesPts,
+      panelSeriesColor: panel && panel.capitalGain >= 0 ? 'var(--accent)' : 'var(--neg)',
+      panelRangeFrom: rangeFrom, panelRangeChange: rangeChange,
+      panelSummary: panel ? [
+        { label: 'Shares', primary: F.shares(panel.p.shares), secondary: panel.p.frequency.toLowerCase() + ' payer', color: 'var(--t1)' },
+        { label: 'Cost basis', primary: F.money(panel.p.costTotal), secondary: F.money(panel.p.costPerShare) + '/sh', color: 'var(--t1)' },
+        { label: 'Value', primary: F.money(panel.p.value), secondary: F.pct(panel.shareOfPortfolio) + ' of portfolio', color: 'var(--t1)' },
+        { label: 'Total profit', primary: F.signed(panel.totalProfit), secondary: F.caret(panel.totalProfitPct), color: tone(F.tone(panel.totalProfit)) },
+        { label: 'Dividends', primary: F.money(panel.p.dividendsReceived), secondary: 'after tax', color: 'var(--t1)' },
+        { label: 'IRR', primary: F.caret(panel.p.irr), secondary: 'annualised', color: tone(F.tone(panel.p.irr)) }
+      ] : [],
+      panelTx: panel ? D.transactionsFor(panel.p.ticker).map((t) => ({
+        type: t.type, date: t.date, detail: F.shares(t.shares) + ' sh @ ' + F.money(t.price),
+        total: F.money(t.total), typeColor: t.type === 'Sell' ? 'var(--neg)' : 'var(--accent)'
+      })) : [],
+      panelDivs: panel ? D.dividendsFor(panel.p.ticker, 5).map((d) => ({
+        payDate: d.payDate, perShare: F.money(d.perShare) + '/sh gross', net: F.money(d.net)
+      })) : [],
+      panelHasDivs: !!(panel && panel.p.yieldPct && panel.p.shares),
+      panelNoDivs: !!(panel && (!panel.p.yieldPct || !panel.p.shares)),
+      panelDivTotal: panel ? F.money(panel.p.dividendsReceived) + ' received to date' : '',
+      note: panel ? (st.notes[panel.p.ticker] || '') : '',
+      onNote: (e) => {
+        const v = e.target.value, t = st.panel;
+        this.setState((s) => { const n = Object.assign({}, s.notes); n[t] = v; return { notes: n }; });
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>

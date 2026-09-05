@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="display:flex;align-items:center;gap:2px;padding:2px;border:1px solid var(--line);border-radius:8px;background:var(--card)">
+  <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="8">
+    <button onClick="{{ t.onClick }}" style="height:26px;padding:0 10px;border:none;border-radius:6px;background:{{ t.bg }};color:{{ t.color }};font-size:12px;font-weight:{{ t.weight }};cursor:pointer;white-space:nowrap" style-hover="background:var(--hover)">{{ t.label }}</button>
+  </sc-for>
+  <span style="width:1px;height:16px;background:var(--line);margin:0 2px"></span>
+  <button onClick="{{ onCustom }}" title="Custom dates" style="display:flex;align-items:center;justify-content:center;width:26px;height:26px;border:none;border-radius:6px;background:{{ customBg }};color:{{ customColor }};cursor:pointer" style-hover="background:var(--hover)">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 6h16v14H4V6Zm3-3v3m10-3v3M4 11h16"></path></svg>
+  </button>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:340,&quot;height&quot;:36},&quot;value&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;all&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;options&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string[]&quot;},&quot;onChange&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(v:string)=&gt;void&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const p = this.props;
+    const value = p.value || 'all';
+    const list = p.options || ['7d', '1m', '3m', '6m', 'YTD', '1y', '5y', 'all'];
+    return {
+      tabs: list.map((t) => ({
+        label: t,
+        bg: t === value ? 'var(--accent-soft)' : 'transparent',
+        color: t === value ? 'var(--accent)' : 'var(--t2)',
+        weight: t === value ? 600 : 500,
+        onClick: () => p.onChange && p.onChange(t)
+      })),
+      onCustom: () => p.onChange && p.onChange('custom'),
+      customBg: value === 'custom' ? 'var(--accent-soft)' : 'transparent',
+      customColor: value === 'custom' ? 'var(--accent)' : 'var(--t3)'
+    };
+  }
+}
+</script>
+</body>
+</html>

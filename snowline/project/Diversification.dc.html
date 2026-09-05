@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <script src="snowline-data.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --canvas:#FAFAF9; --card:#FFFFFF; --t1:#171717; --t2:#737373; --t3:#A3A3A3; --line:#E7E5E4;
+      --accent:#0F7B57; --neg:#B91C1C; --amber:#B45309; --hover:#F5F5F4; --on-accent:#FFFFFF;
+      --grey-series:#A8A29E; --shadow:0 10px 28px rgba(23,23,23,.10); --pad:20px;
+      --accent-2:color-mix(in oklab, var(--accent) 74%, var(--card));
+      --accent-3:color-mix(in oklab, var(--accent) 48%, var(--card));
+      --accent-4:color-mix(in oklab, var(--accent) 26%, var(--card));
+      --accent-soft:color-mix(in oklab, var(--accent) 9%, var(--card));
+      --accent-tint:color-mix(in oklab, var(--accent) 16%, var(--card));
+      --neg-soft:color-mix(in oklab, var(--neg) 9%, var(--card));
+      --amber-soft:color-mix(in oklab, var(--amber) 9%, var(--card));
+      --tag-bg:color-mix(in oklab, var(--amber) 8%, var(--card));
+      --tag-fg:var(--amber);
+    }
+    html[data-theme="dark"]{
+      --canvas:#0C0C0C; --card:#171717; --t1:#FAFAF9; --t2:#A3A3A3; --t3:#737373; --line:#292524;
+      --accent:#34D399; --neg:#F87171; --amber:#F59E0B; --hover:#201E1D; --on-accent:#0C0C0C;
+      --grey-series:#57534E; --shadow:0 10px 28px rgba(0,0,0,.55);
+      --tag-bg:color-mix(in oklab, var(--amber) 7%, var(--card));
+      --tag-fg:color-mix(in oklab, var(--amber) 58%, var(--t2));
+    }
+    html,body{margin:0;padding:0;background:var(--canvas)}
+    *{box-sizing:border-box}
+    body{font-family:'Inter',system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif;font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
+    a{color:var(--accent);text-decoration:none}
+    a:hover{color:var(--accent);text-decoration:underline}
+    button,input,textarea{font-family:inherit;font-variant-numeric:tabular-nums}
+    ::selection{background:var(--accent-tint)}
+    @keyframes menuIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+    @media (max-width:1180px){
+      [data-r="sum"]{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+      [data-r="split"]{grid-template-columns:minmax(0,1fr)!important}
+    }
+    @media (max-width:960px){
+      [data-r="sum"]{grid-template-columns:minmax(0,1fr)!important}
+      [data-r="navd"]{display:none!important}
+      [data-r="navm"]{display:flex!important}
+      [data-r="tabbar"]{display:flex!important}
+      [data-r="main"]{padding:16px 16px 104px!important}
+      [data-r="navwrap"]{padding:0 16px!important}
+    }
+  </style>
+</helmet>
+<div style="min-height:100vh;background:var(--canvas);color:var(--t1);font-size:14px;line-height:1.45">
+
+  <dc-import name="TopNav" active="Analytics" sub-active="Diversification" hint-size="100%,56px"></dc-import>
+
+  <main data-r="main" data-screen-label="Analytics — Diversification" style="max-width:1392px;margin:0 auto;padding:24px 24px 88px;display:flex;flex-direction:column;gap:22px">
+
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap">
+      <div style="display:flex;flex-direction:column;gap:5px;min-width:0">
+        <div style="display:flex;align-items:center;gap:9px">
+          <h1 style="margin:0;font-size:32px;font-weight:600;letter-spacing:-0.028em;line-height:1.1;color:var(--t1)">Diversification</h1>
+          <span style="font-size:13px;color:var(--t3);padding-top:6px">{{ portfolioName }}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:9px;font-size:12px;color:var(--t3)">
+          <span>{{ headLines }}</span>
+          <span style="width:1px;height:10px;background:var(--line)"></span>
+          <span>{{ headTop }}</span>
+        </div>
+      </div>
+
+      <button onClick="{{ toggleXray }}" style="display:flex;align-items:center;gap:10px;height:36px;padding:0 12px;border:1px solid {{ xrayBorder }};border-radius:8px;background:{{ xrayCardBg }};color:var(--t1);font-size:13px;font-weight:500;cursor:pointer;flex:none" style-hover="border-color:var(--t3)">
+        <span style="position:relative;width:34px;height:19px;flex:none;border-radius:999px;background:{{ xrayTrack }};transition:background .15s ease">
+          <span style="position:absolute;top:2px;left:{{ xrayKnob }};width:15px;height:15px;border-radius:50%;background:var(--card);box-shadow:0 1px 3px rgba(0,0,0,.28);transition:left .15s ease"></span>
+        </span>
+        X-Ray Funds
+        <span style="font-size:9px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--accent);background:var(--accent-soft);border-radius:3px;padding:2px 5px">New</span>
+      </button>
+    </div>
+
+    <dc-import name="AnalyticsSubnav" active="Diversification" hint-size="100%,48px"></dc-import>
+
+    <sc-if value="{{ xray }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;align-items:flex-start;gap:11px;padding:13px 16px;background:var(--card);border:1px solid var(--line);border-left:2px solid var(--accent);border-radius:8px">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.7" stroke-linecap="round" style="flex:none;margin-top:1px"><circle cx="12" cy="12" r="9"></circle><path d="M12 8h.01M12 11v5"></path></svg>
+        <span style="font-size:12px;color:var(--t2);line-height:1.55;text-wrap:pretty">{{ xrayNote }}</span>
+      </div>
+    </sc-if>
+
+    <div data-r="sum" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;background:var(--card);border:1px solid var(--line);border-radius:8px;overflow:hidden">
+      <sc-for list="{{ summary }}" as="s" hint-placeholder-count="4">
+        <div style="display:flex;flex-direction:column;gap:4px;padding:15px 18px;border-right:1px solid var(--line)">
+          <span style="font-size:11px;color:var(--t3)">{{ s.label }}</span>
+          <span style="font-size:19px;font-weight:600;letter-spacing:-0.02em;color:{{ s.color }}">{{ s.primary }}</span>
+          <span style="font-size:11px;color:var(--t3)">{{ s.secondary }}</span>
+        </div>
+      </sc-for>
+    </div>
+
+    <dc-import name="DonutBreakdown" title="All holdings" subtitle="{{ holdingsSubtitle }}" rows="{{ holdingRows }}" toggles="{{ holdingToggles }}" center-label="Portfolio value" unit="positions" name-header="Asset" value-header="Share / value" list-height="352px" footer="{{ holdingsFooter }}" hint-size="100%,470px"></dc-import>
+
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <sc-for list="{{ pills }}" as="p" hint-placeholder-count="5">
+        <button onClick="{{ p.onClick }}" style="height:32px;padding:0 14px;border:1px solid {{ p.border }};border-radius:999px;background:{{ p.bg }};color:{{ p.color }};font-size:13px;font-weight:500;cursor:pointer" style-hover="border-color:var(--t3)">{{ p.label }}</button>
+      </sc-for>
+    </div>
+
+    <dc-import name="DonutBreakdown" title="{{ dimTitle }}" subtitle="{{ dimSubtitle }}" rows="{{ dimRows }}" toggles="{{ dimToggles }}" center-label="{{ dimCenter }}" unit="{{ dimUnit }}" name-header="{{ dimHeader }}" value-header="Share / value" list-height="352px" footer="{{ dimFooter }}" hint-size="100%,470px"></dc-import>
+  </main>
+
+  <div data-r="tabbar" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:60;height:60px;background:var(--card);border-top:1px solid var(--line);align-items:stretch;padding:0 4px">
+    <sc-for list="{{ tabRows }}" as="t" hint-placeholder-count="4">
+      <a href="{{ t.href }}" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-decoration:none;color:{{ t.color }}">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="{{ t.d }}"></path></svg>
+        <span style="font-size:10px;font-weight:500">{{ t.label }}</span>
+      </a>
+    </sc-for>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{}">
+class Component extends DCLogic {
+  state = { xray: false, dim: 'Sectors', buyIn: false, showHoldings: false };
+
+  DIMS = {
+    Sectors: { key: 'sector', title: 'Economy sectors', center: 'Sectors', unit: 'sectors', header: 'Sector' },
+    Classes: { key: 'assetClass', title: 'Asset classes', center: 'Classes', unit: 'classes', header: 'Class' },
+    Currencies: { key: 'currency', title: 'Currencies', center: 'Currencies', unit: 'currencies', header: 'Currency' },
+    Regions: { key: 'region', title: 'Regions', center: 'Regions', unit: 'regions', header: 'Region' },
+    Countries: { key: 'country', title: 'Countries', center: 'Countries', unit: 'countries', header: 'Country' }
+  };
+
+  /* positions being added to — drives the "Buy in" filter */
+  BUYING = ['SCHD', 'JEPQ', 'V', 'GOOGL', 'BIL'];
+
+  componentDidMount() {
+    if (!window.SnowlineData) {
+      const check = () => { if (window.SnowlineData) this.forceUpdate(); else setTimeout(check, 30); };
+      setTimeout(check, 20);
+    }
+  }
+
+  renderVals() {
+    const st = this.state;
+    const I = {
+      bars: 'M4 20V10M10 20V4M16 20v-7M22 20H2', table: 'M3 5h18v14H3V5Zm0 5h18M9 10v9',
+      home: 'M4 11l8-7 8 7v9H4v-9Zm5 9v-6h6v6',
+      scale: 'M12 4v16M6 8l-3 6h6l-3-6Zm12 0l-3 6h6l-3-6ZM5 8h14', dots: 'M5 12h.01M12 12h.01M19 12h.01'
+    };
+    const base = {
+      xray: st.xray,
+      toggleXray: () => this.setState((s) => ({ xray: !s.xray })),
+      xrayTrack: st.xray ? 'var(--accent)' : 'var(--line)',
+      xrayKnob: st.xray ? '17px' : '2px',
+      xrayBorder: st.xray ? 'var(--accent)' : 'var(--line)',
+      xrayCardBg: st.xray ? 'var(--accent-soft)' : 'var(--card)',
+      pills: Object.keys(this.DIMS).map((k) => ({
+        label: k,
+        bg: st.dim === k ? 'var(--accent-soft)' : 'var(--card)',
+        color: st.dim === k ? 'var(--accent)' : 'var(--t2)',
+        border: st.dim === k ? 'var(--accent)' : 'var(--line)',
+        onClick: () => this.setState({ dim: k })
+      })),
+      tabRows: [
+        { label: 'Dashboard', d: I.home, href: 'Snowline.dc.html', color: 'var(--t3)' },
+        { label: 'Analytics', d: I.bars, href: 'Analytics.dc.html', color: 'var(--accent)' },
+        { label: 'Portfolio', d: I.table, href: 'Holdings.dc.html', color: 'var(--t3)' },
+        { label: 'Tools', d: I.scale, href: 'Rebalancing.dc.html', color: 'var(--t3)' }
+      ]
+    };
+    if (!window.SnowlineData) return base;
+
+    const D = window.SnowlineData, F = D.fmt, K = D.constants, T = D.totals();
+    const dim = this.DIMS[st.dim];
+
+    let holdingRows = D.breakdown('holdings', st.xray).map((r) => ({
+      name: r.name, subLabel: r.subLabel + (r.via.length ? ' · via ' + r.via.join(', ') : ''), value: r.value
+    }));
+    if (st.buyIn) {
+      holdingRows = holdingRows.filter((r) => this.BUYING.some((t) => r.name === t || r.subLabel.indexOf('via ' + t) >= 0 || r.subLabel.indexOf(', ' + t) >= 0));
+    }
+
+    const dimRows = D.breakdown(dim.key, st.xray).map((r) => ({
+      name: r.name,
+      subLabel: st.showHoldings ? r.count + (r.count === 1 ? ' line' : ' lines') : '',
+      value: r.value
+    }));
+
+    const lines = D.lookThrough(st.xray);
+    const top = D.breakdown('holdings', st.xray)[0];
+    const sectors = D.breakdown('sector', st.xray);
+    const uniqueNames = D.breakdown('holdings', true).length;
+    const hhi = sectors.reduce((s, r) => s + Math.pow(r.pct, 2), 0);
+
+    return Object.assign(base, {
+      portfolioName: K.portfolioName,
+      headLines: (st.xray ? lines.length + ' look-through lines' : T.holdings + ' positions') + ' · ' + F.money(T.value),
+      headTop: 'Largest single exposure ' + top.name + ' ' + F.pct(top.pct, 1),
+      xrayNote: 'Funds are decomposed into their published holdings, so single-stock exposure shows up even where you hold no shares directly. ' + uniqueNames + ' distinct names sit behind ' + T.holdings + ' positions; the undisclosed remainder of each fund stays classified as Funds.',
+      summary: [
+        { label: 'Largest position', primary: F.pct(top.pct, 1), secondary: top.name + ' · ' + F.money(top.value), color: 'var(--t1)' },
+        { label: 'Top 5 concentration', primary: F.pct(D.breakdown('holdings', st.xray).slice(0, 5).reduce((s, r) => s + r.pct, 0), 1), secondary: 'of portfolio value', color: 'var(--t1)' },
+        { label: 'Sectors represented', primary: String(sectors.length), secondary: 'largest ' + sectors[0].name + ' ' + F.pct(sectors[0].pct, 1), color: 'var(--t1)' },
+        { label: 'Concentration index', primary: F.num(hhi / 100, 0), secondary: hhi > 2500 ? 'highly concentrated' : hhi > 1500 ? 'moderately concentrated' : 'well spread', color: hhi > 2500 ? 'var(--amber)' : 'var(--t1)' }
+      ],
+
+      holdingsSubtitle: st.xray ? 'look-through · ' + holdingRows.length + ' lines' : T.holdings + ' positions',
+      holdingRows: holdingRows,
+      holdingToggles: [{
+        label: 'Buy in', on: st.buyIn,
+        onClick: () => this.setState((s) => ({ buyIn: !s.buyIn }))
+      }],
+      holdingsFooter: st.buyIn ? 'Filtered to the ' + this.BUYING.length + ' positions you are currently adding to.' : '',
+
+      dimTitle: dim.title,
+      dimSubtitle: dimRows.length + ' ' + dim.unit + (st.xray ? ' · look-through' : ''),
+      dimRows: dimRows,
+      dimCenter: dim.center,
+      dimUnit: dim.unit,
+      dimHeader: dim.header,
+      dimFooter: st.xray ? 'Fund holdings are classified by their own sector; the undisclosed remainder stays under Funds.' : 'Turn on X-Ray Funds to see the sectors inside your ETFs.',
+      dimToggles: [
+        { label: 'Buy in', on: st.buyIn, onClick: () => this.setState((s) => ({ buyIn: !s.buyIn })) },
+        { label: 'Show holdings', on: st.showHoldings, onClick: () => this.setState((s) => ({ showHoldings: !s.showHoldings })) }
+      ]
+    });
+  }
+}
+</script>
+</body>
+</html>

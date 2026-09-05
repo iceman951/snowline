@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="display:flex;flex-direction:column;gap:8px;min-width:0">
+  <div style="display:flex;align-items:center;gap:5px;min-height:16px;position:relative">
+    <span style="font-size:12px;font-weight:500;color:var(--t2);border-bottom:{{ labelBorder }};line-height:1.4">{{ label }}</span>
+    <sc-if value="{{ help }}" hint-placeholder-val="{{ true }}">
+      <span onMouseEnter="{{ tipOn }}" onMouseLeave="{{ tipOff }}" style="width:13px;height:13px;flex:none;border:1px solid var(--line);border-radius:50%;font-size:9px;font-weight:500;color:var(--t3);display:flex;align-items:center;justify-content:center;cursor:help" style-hover="border-color:var(--t3);color:var(--t2)">?</span>
+    </sc-if>
+    <sc-if value="{{ showTip }}" hint-placeholder-val="{{ false }}">
+      <span style="position:absolute;top:20px;left:0;z-index:30;width:220px;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:9px 11px;font-size:11px;line-height:1.5;color:var(--t2);pointer-events:none">{{ tipText }}</span>
+    </sc-if>
+  </div>
+  <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;filter:{{ blur }};transition:filter .18s ease">
+    <span style="font-size:{{ primarySize }};font-weight:600;letter-spacing:-0.02em;line-height:1.05;color:{{ primaryColor }}">{{ primary }}</span>
+    <sc-if value="{{ primaryDelta }}" hint-placeholder-val="{{ false }}">
+      <span style="font-size:{{ deltaSize }};font-weight:500;color:{{ deltaColor }};line-height:1.2">{{ primaryDelta }}</span>
+    </sc-if>
+  </div>
+  <div style="display:flex;align-items:baseline;gap:5px;flex-wrap:wrap;filter:{{ blur }};transition:filter .18s ease;min-height:17px">
+    <span style="font-size:12px;line-height:1.4;color:{{ secondaryColor }}">{{ secondary }}</span>
+    <sc-if value="{{ secondaryNote }}" hint-placeholder-val="{{ false }}">
+      <span style="font-size:12px;line-height:1.4;color:var(--t3)">{{ secondaryNote }}</span>
+    </sc-if>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:300,&quot;height&quot;:100},&quot;label&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Value&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;primary&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;$30,374.50&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;primaryTone&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;plain&quot;,&quot;pos&quot;,&quot;neg&quot;],&quot;default&quot;:&quot;plain&quot;,&quot;tsType&quot;:&quot;'plain'|'pos'|'neg'&quot;},&quot;primaryDelta&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;deltaTone&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;pos&quot;,&quot;neg&quot;],&quot;default&quot;:&quot;pos&quot;,&quot;tsType&quot;:&quot;'pos'|'neg'&quot;},&quot;secondary&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;$28,432.67&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;secondaryTone&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;plain&quot;,&quot;pos&quot;,&quot;neg&quot;],&quot;default&quot;:&quot;plain&quot;,&quot;tsType&quot;:&quot;'plain'|'pos'|'neg'&quot;},&quot;secondaryNote&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;invested&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;tip&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;help&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;dotted&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;masked&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;size&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;kpi&quot;,&quot;mini&quot;],&quot;default&quot;:&quot;kpi&quot;,&quot;tsType&quot;:&quot;'kpi'|'mini'&quot;}}">
+class Component extends DCLogic {
+  state = { tip: false };
+  renderVals() {
+    const p = this.props;
+    const tone = (t) => t === 'pos' ? 'var(--accent)' : t === 'neg' ? 'var(--neg)' : 'var(--t1)';
+    const dt = p.deltaTone || p.primaryTone || 'pos';
+    const mini = p.size === 'mini';
+    return {
+      label: p.label ?? '',
+      help: p.help === false ? false : !!p.tip,
+      tipText: p.tip ?? '',
+      showTip: !!(this.state.tip && p.tip),
+      tipOn: () => this.setState({ tip: true }),
+      tipOff: () => this.setState({ tip: false }),
+      labelBorder: p.dotted ? '1px dotted var(--t3)' : '1px solid transparent',
+      primary: p.primary ?? '—',
+      primaryColor: tone(p.primaryTone),
+      primarySize: mini ? '15px' : '24px',
+      primaryDelta: p.primaryDelta ?? '',
+      deltaColor: dt === 'neg' ? 'var(--neg)' : 'var(--accent)',
+      deltaSize: mini ? '12px' : '13px',
+      secondary: p.secondary ?? '',
+      secondaryColor: p.secondaryTone === 'pos' ? 'var(--accent)' : p.secondaryTone === 'neg' ? 'var(--neg)' : 'var(--t2)',
+      secondaryNote: p.secondaryNote ?? '',
+      blur: p.masked ? 'blur(8px)' : 'none'
+    };
+  }
+}
+</script>
+</body>
+</html>

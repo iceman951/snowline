@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <script src="snowline-data.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --canvas:#FAFAF9; --card:#FFFFFF; --t1:#171717; --t2:#737373; --t3:#A3A3A3; --line:#E7E5E4;
+      --accent:#0F7B57; --neg:#B91C1C; --amber:#B45309; --hover:#F5F5F4; --on-accent:#FFFFFF;
+      --grey-series:#A8A29E; --shadow:0 10px 28px rgba(23,23,23,.10);
+      --accent-2:color-mix(in oklab, var(--accent) 74%, var(--card));
+      --accent-3:color-mix(in oklab, var(--accent) 48%, var(--card));
+      --accent-4:color-mix(in oklab, var(--accent) 26%, var(--card));
+      --accent-soft:color-mix(in oklab, var(--accent) 9%, var(--card));
+      --accent-tint:color-mix(in oklab, var(--accent) 16%, var(--card));
+      --tag-bg:color-mix(in oklab, var(--amber) 8%, var(--card));
+      --tag-fg:var(--amber);
+      --track:#E4E1DF; --tick:#E7E5E4; --off:#FAFAF9;
+    }
+    html[data-theme="dark"]{
+      --canvas:#0C0C0C; --card:#171717; --t1:#FAFAF9; --t2:#A3A3A3; --t3:#737373; --line:#292524;
+      --accent:#34D399; --neg:#F87171; --amber:#F59E0B; --hover:#201E1D; --on-accent:#0C0C0C;
+      --grey-series:#57534E; --shadow:0 10px 28px rgba(0,0,0,.55);
+      --tag-bg:color-mix(in oklab, var(--amber) 7%, var(--card));
+      --tag-fg:color-mix(in oklab, var(--amber) 58%, var(--t2));
+      --track:#3A3431; --tick:#3A3431; --off:#121110;
+    }
+    html,body{margin:0;padding:0;background:var(--canvas)}
+    *{box-sizing:border-box}
+    body{font-family:'Inter',system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif;font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
+    a{color:var(--accent);text-decoration:none}
+    a:hover{color:var(--accent);text-decoration:underline}
+    button,input,select{font-family:inherit;font-variant-numeric:tabular-nums}
+    ::selection{background:var(--accent-tint)}
+    @keyframes menuIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+    @media (max-width:1180px){
+      [data-r="two"]{grid-template-columns:minmax(0,1fr)!important}
+      [data-r="cfg"]{position:static!important;max-height:none!important;max-width:420px;overflow:visible!important}
+    }
+    @media (max-width:960px){
+      [data-r="navd"]{display:none!important}
+      [data-r="navm"]{display:flex!important}
+      [data-r="tabbar"]{display:flex!important}
+      [data-r="main"]{padding:16px 16px 104px!important}
+      [data-r="tablewrap"]{min-width:820px}
+    }
+  </style>
+</helmet>
+<div style="min-height:100vh;background:var(--canvas);color:var(--t1);font-size:14px;line-height:1.45">
+
+  <dc-import name="TopNav" active="Portfolio" sub-active="My goal" hint-size="100%,56px"></dc-import>
+
+  <main data-r="main" data-screen-label="Portfolio — My goal" style="max-width:1392px;margin:0 auto;padding:24px 24px 88px;display:flex;flex-direction:column;gap:18px">
+
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap">
+      <div style="display:flex;flex-direction:column;gap:5px;min-width:0">
+        <div style="display:flex;align-items:center;gap:8px;position:relative">
+          <h1 style="margin:0;font-size:32px;font-weight:600;letter-spacing:-0.028em;line-height:1.1;color:var(--t1)">My goal</h1>
+          <span onMouseEnter="{{ titleTipOn }}" onMouseLeave="{{ titleTipOff }}" style="width:16px;height:16px;margin-top:6px;flex:none;border:1px solid var(--line);border-radius:50%;font-size:10px;font-weight:500;color:var(--t3);display:flex;align-items:center;justify-content:center;cursor:help" style-hover="border-color:var(--t3);color:var(--t2)">?</span>
+          <sc-if value="{{ titleTip }}" hint-placeholder-val="{{ false }}">
+            <span style="position:absolute;top:44px;left:0;z-index:40;width:330px;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:10px 12px;font-size:11.5px;line-height:1.55;color:var(--t2)">{{ titleTipText }}</span>
+          </sc-if>
+          <span style="font-size:13px;color:var(--t3);padding-top:6px">{{ portfolioName }}</span>
+        </div>
+        <span style="font-size:12px;color:var(--t3)">{{ headNote }}</span>
+      </div>
+
+      <div style="position:relative">
+        <button onClick="{{ togMore }}" title="More" style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;border:1px solid var(--line);border-radius:7px;background:{{ moreBg }};color:var(--t2);cursor:pointer" style-hover="background:var(--hover)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.6"></circle><circle cx="12" cy="12" r="1.6"></circle><circle cx="19" cy="12" r="1.6"></circle></svg>
+        </button>
+        <sc-if value="{{ mMore }}" hint-placeholder-val="{{ false }}">
+          <div onClick="{{ stop }}" style="position:absolute;top:38px;right:0;z-index:50;min-width:226px;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:6px;animation:menuIn .12s ease-out">
+            <sc-for list="{{ moreRows }}" as="m" hint-placeholder-count="3">
+              <button onClick="{{ m.onClick }}" style="display:flex;align-items:center;width:100%;padding:8px 10px;border:none;border-radius:6px;background:transparent;text-align:left;cursor:pointer;font-size:12.5px;color:var(--t1)" style-hover="background:var(--hover)">{{ m.label }}</button>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+
+    <div data-r="two" style="display:grid;grid-template-columns:minmax(300px,336px) minmax(0,1fr);gap:18px;align-items:start">
+
+      <aside data-r="cfg" style="position:sticky;top:74px;align-self:start;max-height:calc(100vh - 96px);overflow-x:hidden;overflow-y:auto;display:flex;flex-direction:column;gap:16px;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:20px">
+
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <span style="font-size:12px;font-weight:500;color:var(--t2)">Goal</span>
+          <div style="display:flex;gap:2px;padding:2px;border:1px solid var(--line);border-radius:8px">
+            <sc-for list="{{ modes }}" as="m" hint-placeholder-count="2">
+              <button onClick="{{ m.onClick }}" style="flex:1;height:30px;border:none;border-radius:6px;background:{{ m.bg }};color:{{ m.color }};font-size:12.5px;font-weight:{{ m.weight }};cursor:pointer;white-space:nowrap" style-hover="background:var(--hover)">{{ m.label }}</button>
+            </sc-for>
+          </div>
+          <span style="font-size:11px;line-height:1.5;color:var(--t3)">{{ modeHint }}</span>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:7px">
+          <span style="font-size:12px;font-weight:500;color:var(--t2)">{{ targetLabel }}</span>
+          <div style="display:flex;align-items:stretch;gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden">
+            <div style="position:relative;flex:none">
+              <button onClick="{{ togCcy }}" style="display:flex;align-items:center;gap:6px;height:38px;padding:0 11px;border:none;border-right:1px solid var(--line);background:var(--hover);color:var(--t1);font-size:12.5px;font-weight:500;cursor:pointer" style-hover="background:var(--track)">{{ currency }}
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="color:var(--t3)"><path d="M6 9l6 6 6-6"></path></svg>
+              </button>
+              <sc-if value="{{ mCcy }}" hint-placeholder-val="{{ false }}">
+                <div onClick="{{ stop }}" style="position:absolute;top:42px;left:0;z-index:50;width:224px;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:6px;animation:menuIn .12s ease-out">
+                  <sc-for list="{{ currencies }}" as="c" hint-placeholder-count="4">
+                    <button onClick="{{ c.onClick }}" style="display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;padding:8px 10px;border:none;border-radius:6px;background:{{ c.bg }};text-align:left;cursor:{{ c.cursor }};font-size:12.5px;color:{{ c.color }}" style-hover="background:var(--hover)">
+                      <span>{{ c.label }}</span>
+                      <span style="font-size:11px;color:var(--t3)">{{ c.note }}</span>
+                    </button>
+                  </sc-for>
+                </div>
+              </sc-if>
+            </div>
+            <span style="display:flex;align-items:center;padding:0 0 0 11px;font-size:13px;color:var(--t3)">{{ symbol }}</span>
+            <input value="{{ targetValue }}" onChange="{{ onTarget }}" inputmode="numeric" style="flex:1;min-width:0;height:38px;padding:0 11px 0 4px;border:none;background:transparent;color:var(--t1);font-size:14px;font-weight:500;outline:none">
+          </div>
+          <span style="font-size:11px;line-height:1.5;color:var(--t3)">{{ targetHint }}</span>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:7px">
+          <span style="font-size:12px;font-weight:500;color:var(--t2)">Achieve by</span>
+          <div style="position:relative">
+            <button onClick="{{ togYear }}" style="display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;height:38px;padding:0 11px;border:1px solid var(--line);border-radius:8px;background:transparent;color:var(--t1);font-size:13px;cursor:pointer" style-hover="background:var(--hover)">
+              <span>{{ byYearLabel }}</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="color:var(--t3);flex:none"><path d="M6 9l6 6 6-6"></path></svg>
+            </button>
+            <sc-if value="{{ mYear }}" hint-placeholder-val="{{ false }}">
+              <div onClick="{{ stop }}" style="position:absolute;top:42px;left:0;right:0;z-index:50;max-height:236px;overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:6px;animation:menuIn .12s ease-out">
+                <sc-for list="{{ yearOptions }}" as="y" hint-placeholder-count="8">
+                  <button onClick="{{ y.onClick }}" style="display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;padding:8px 10px;border:none;border-radius:6px;background:{{ y.bg }};text-align:left;cursor:pointer;font-size:12.5px;color:{{ y.color }};font-weight:{{ y.weight }}" style-hover="background:var(--hover)">
+                    <span>{{ y.label }}</span>
+                    <span style="font-size:11px;color:var(--t3)">{{ y.note }}</span>
+                  </button>
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:7px">
+          <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px">
+            <span style="font-size:12px;font-weight:500;color:var(--t2)">Contributions</span>
+            <span style="font-size:12px;font-weight:500;color:var(--t1);white-space:nowrap">{{ contribTotal }}</span>
+          </div>
+          <div style="display:flex;align-items:stretch;border:1px solid var(--line);border-radius:8px;overflow:hidden">
+            <span style="display:flex;align-items:center;padding:0 4px 0 11px;font-size:13px;color:var(--t3)">{{ symbol }}</span>
+            <input value="{{ contribValue }}" onChange="{{ onContrib }}" inputmode="decimal" style="flex:1;min-width:0;height:38px;padding:0 8px;border:none;background:transparent;color:var(--t1);font-size:14px;font-weight:500;outline:none">
+            <span style="display:flex;align-items:center;padding:0 11px 0 4px;font-size:12px;color:var(--t3);border-left:1px solid var(--line);background:var(--hover);white-space:nowrap">per month</span>
+          </div>
+          <span style="font-size:11px;line-height:1.5;color:var(--t3)">{{ contribHint }}</span>
+        </div>
+
+        <sc-for list="{{ sections }}" as="s" hint-placeholder-count="2">
+          <div style="display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--line);padding-top:14px">
+            <button onClick="{{ s.onToggle }}" style="display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;padding:0;border:none;background:transparent;cursor:pointer;text-align:left">
+              <span style="font-size:12.5px;font-weight:500;color:var(--t1)">{{ s.title }}</span>
+              <span style="font-size:11.5px;font-weight:500;color:var(--accent);white-space:nowrap">{{ s.toggleLabel }}</span>
+            </button>
+            <sc-if value="{{ s.collapsed }}" hint-placeholder-val="{{ true }}">
+              <span style="font-size:11px;line-height:1.5;color:var(--t3)">{{ s.summary }}</span>
+            </sc-if>
+            <sc-if value="{{ s.open }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:11px">
+                <sc-for list="{{ s.fields }}" as="f" hint-placeholder-count="3">
+                  <div style="display:flex;flex-direction:column;gap:5px">
+                    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+                      <span style="font-size:12px;color:var(--t2)">{{ f.label }}</span>
+                      <div style="display:flex;align-items:stretch;width:104px;flex:none;border:1px solid var(--line);border-radius:7px;overflow:hidden">
+                        <input value="{{ f.value }}" onChange="{{ f.onChange }}" inputmode="decimal" style="flex:1;min-width:0;height:32px;padding:0 6px 0 10px;border:none;background:transparent;color:var(--t1);font-size:13px;text-align:right;outline:none">
+                        <span style="display:flex;align-items:center;padding:0 9px 0 2px;font-size:12px;color:var(--t3)">%</span>
+                      </div>
+                    </div>
+                    <span style="font-size:10.5px;line-height:1.45;color:var(--t3)">{{ f.hint }}</span>
+                  </div>
+                </sc-for>
+                <sc-if value="{{ s.hasToggle }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+                    <span style="display:flex;flex-direction:column;gap:2px">
+                      <span style="font-size:12px;color:var(--t2)">Reinvest dividends</span>
+                      <span style="font-size:10.5px;color:var(--t3)">{{ reinvestHint }}</span>
+                    </span>
+                    <button onClick="{{ toggleReinvest }}" style="width:38px;height:22px;flex:none;border:1px solid {{ reinvestBorder }};border-radius:999px;background:{{ reinvestBg }};cursor:pointer;padding:0;display:flex;align-items:center;justify-content:{{ reinvestJustify }}">
+                      <span style="width:16px;height:16px;margin:0 2px;border-radius:50%;background:{{ reinvestKnob }};display:block"></span>
+                    </button>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-if>
+          </div>
+        </sc-for>
+
+        <div style="display:flex;flex-direction:column;gap:9px;border-top:1px solid var(--line);padding-top:14px">
+          <button onClick="{{ onSave }}" style="width:100%;height:38px;border:none;border-radius:8px;background:{{ saveBg }};color:{{ saveFg }};font-size:13px;font-weight:600;cursor:pointer" style-hover="opacity:.9">{{ saveLabel }}</button>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+            <span style="font-size:11px;color:{{ saveNoteColor }}">{{ saveNote }}</span>
+            <button onClick="{{ onReset }}" style="border:none;background:transparent;padding:0;font-size:11px;font-weight:500;color:var(--t2);cursor:pointer;text-decoration:underline" style-hover="color:var(--t1)">Reset</button>
+          </div>
+        </div>
+      </aside>
+
+      <section style="display:flex;flex-direction:column;gap:18px;min-width:0">
+
+        <div style="display:flex;align-items:center;gap:22px;flex-wrap:wrap;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:20px 22px">
+          <div style="position:relative;width:96px;height:96px;flex:none">
+            <svg width="96" height="96" viewBox="0 0 96 96" style="display:block">
+              <circle cx="48" cy="48" r="42" fill="none" stroke="var(--track, var(--line))" stroke-width="8"></circle>
+              <circle cx="48" cy="48" r="42" fill="none" stroke="var(--accent)" stroke-width="8" stroke-linecap="butt" stroke-dasharray="{{ ring }}" transform="rotate(-90 48 48)"></circle>
+            </svg>
+            <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:600;letter-spacing:-0.02em;color:var(--t1)">{{ progressLabel }}</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px;min-width:0;flex:1">
+            <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
+              <span style="font-size:32px;font-weight:600;letter-spacing:-0.028em;line-height:1.05;color:var(--t1)">{{ currentK }}</span>
+              <span style="font-size:16px;color:var(--t3)">{{ targetK }}</span>
+              <span style="font-size:13px;color:var(--t2)">{{ modeLabel }}</span>
+            </div>
+            <span style="font-size:12px;color:var(--t3)">{{ progressNote }}</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:3px;border-left:2px solid {{ verdictBorder }};padding-left:14px;min-width:250px">
+            <span style="font-size:16px;font-weight:600;letter-spacing:-0.015em;color:{{ verdictColor }}">{{ verdict }}</span>
+            <span style="font-size:12.5px;line-height:1.5;color:var(--t2)">{{ verdictSub }}</span>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:14px;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:20px 22px 18px">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
+            <span style="font-size:12px;font-weight:500;color:var(--t2)">{{ chartTitle }}</span>
+            <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+              <sc-for list="{{ legend }}" as="l" hint-placeholder-count="3">
+                <span style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--t2);white-space:nowrap">
+                  <span style="width:14px;height:0;border-top:{{ l.stroke }};display:block"></span>{{ l.label }}
+                </span>
+              </sc-for>
+              <div style="display:flex;gap:2px;padding:2px;border:1px solid var(--line);border-radius:7px">
+                <sc-for list="{{ scales }}" as="s" hint-placeholder-count="2">
+                  <button onClick="{{ s.onClick }}" style="height:24px;padding:0 10px;border:none;border-radius:5px;background:{{ s.bg }};color:{{ s.color }};font-size:11.5px;font-weight:{{ s.weight }};cursor:pointer" style-hover="background:var(--hover)">{{ s.label }}</button>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+
+          <div style="position:relative">
+            <svg viewBox="0 0 1000 320" style="width:100%;height:auto;display:block">
+              <sc-for list="{{ yTicks }}" as="t" hint-placeholder-count="4">
+                <line x1="64" y1="{{ t.y }}" x2="978" y2="{{ t.y }}" stroke="var(--tick, var(--line))" stroke-width="1" stroke-dasharray="3 4"></line>
+              </sc-for>
+              <line x1="64" y1="{{ goalY }}" x2="978" y2="{{ goalY }}" stroke="var(--t3)" stroke-width="1.4" stroke-dasharray="6 4"></line>
+              <sc-if value="{{ hoverX }}" hint-placeholder-val="{{ false }}">
+                <line x1="{{ hoverX }}" y1="14" x2="{{ hoverX }}" y2="290" stroke="var(--t3)" stroke-width="1"></line>
+              </sc-if>
+              <polyline points="{{ safePoints }}" fill="none" stroke="var(--grey-series)" stroke-width="1.8" stroke-dasharray="5 4" stroke-linejoin="round" stroke-linecap="round"></polyline>
+              <polyline points="{{ portPoints }}" fill="none" stroke="var(--accent)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"></polyline>
+              <sc-for list="{{ marks }}" as="m" hint-placeholder-count="2">
+                <rect x="{{ m.x }}" y="{{ m.y }}" width="9" height="9" fill="var(--card)" stroke="{{ m.color }}" stroke-width="2.2"></rect>
+              </sc-for>
+              <sc-if value="{{ hoverX }}" hint-placeholder-val="{{ false }}">
+                <circle cx="{{ hoverX }}" cy="{{ hoverPY }}" r="4" fill="var(--card)" stroke="var(--accent)" stroke-width="2.2"></circle>
+                <circle cx="{{ hoverX }}" cy="{{ hoverSY }}" r="4" fill="var(--card)" stroke="var(--grey-series)" stroke-width="2"></circle>
+              </sc-if>
+            </svg>
+
+            <sc-for list="{{ yTicks }}" as="t" hint-placeholder-count="4">
+              <span style="position:absolute;left:0;top:{{ t.top }};width:5.6%;transform:translateY(-50%);text-align:right;font-size:11px;color:var(--t3);pointer-events:none">{{ t.label }}</span>
+            </sc-for>
+            <span style="position:absolute;left:7%;top:{{ goalLabelTop }};font-size:11px;font-weight:500;color:var(--t2);pointer-events:none">{{ goalLineLabel }}</span>
+            <sc-for list="{{ marks }}" as="m" hint-placeholder-count="2">
+              <span style="position:absolute;left:{{ m.left }};top:{{ m.labelTop }};transform:translateX(-50%);font-size:11px;font-weight:600;color:{{ m.color }};pointer-events:none;white-space:nowrap">{{ m.label }}</span>
+            </sc-for>
+
+            <div onMouseLeave="{{ hoverOff }}" style="position:absolute;left:6.4%;right:2.2%;top:0;bottom:9%;display:flex">
+              <sc-for list="{{ slots }}" as="s" hint-placeholder-count="25">
+                <div onMouseEnter="{{ s.onEnter }}" style="flex:1;min-width:0;height:100%;cursor:crosshair"></div>
+              </sc-for>
+            </div>
+
+            <sc-if value="{{ hoverTip }}" hint-placeholder-val="{{ false }}">
+              <div style="position:absolute;left:{{ tipLeft }};top:10px;transform:{{ tipShift }};z-index:20;pointer-events:none">
+                <dc-import name="ChartTooltip" tip="{{ hoverTip }}" hint-size="240px,180px"></dc-import>
+              </div>
+            </sc-if>
+          </div>
+
+          <div style="position:relative;height:15px">
+            <sc-for list="{{ xLabels }}" as="x" hint-placeholder-count="6">
+              <span style="position:absolute;left:{{ x.left }};top:0;transform:translateX(-50%);font-size:11px;color:{{ x.color }};white-space:nowrap">{{ x.label }}</span>
+            </sc-for>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:11px;border-top:1px solid var(--line);padding-top:14px">
+            <span style="font-size:13px;line-height:1.55;color:var(--t1);max-width:760px">{{ reward }}</span>
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+              <sc-for list="{{ chips }}" as="c" hint-placeholder-count="3">
+                <span style="display:inline-flex;align-items:center;gap:7px;height:26px;padding:0 11px;border:1px solid var(--line);border-radius:999px;font-size:12px;color:var(--t2);white-space:nowrap">
+                  <span style="font-size:12px;font-weight:500;color:var(--t1)">{{ c.label }}</span>{{ c.value }}
+                </span>
+              </sc-for>
+              <button onClick="{{ togChips }}" style="height:26px;padding:0 11px;border:1px solid var(--line);border-radius:999px;background:transparent;font-size:12px;font-weight:500;color:var(--t2);cursor:pointer;white-space:nowrap" style-hover="background:var(--hover);color:var(--t1)">{{ chipsMoreLabel }}</button>
+            </div>
+            <sc-if value="{{ chipsOpen }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                <sc-for list="{{ moreChips }}" as="c" hint-placeholder-count="4">
+                  <span style="display:inline-flex;align-items:center;gap:7px;height:26px;padding:0 11px;border:1px solid var(--line);border-radius:999px;font-size:12px;color:var(--t2);white-space:nowrap">
+                    <span style="font-size:12px;font-weight:500;color:var(--t1)">{{ c.label }}</span>{{ c.value }}
+                  </span>
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:0;border-top:1px solid var(--line);padding-top:12px">
+            <button onClick="{{ togParams }}" style="display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;padding:0;border:none;background:transparent;cursor:pointer;text-align:left">
+              <span style="font-size:12.5px;font-weight:500;color:var(--t1)">All parameters and scenarios</span>
+              <span style="font-size:11.5px;font-weight:500;color:var(--accent);white-space:nowrap">{{ paramsToggle }}</span>
+            </button>
+            <sc-if value="{{ paramsOpen }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:16px;padding-top:14px">
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(212px,1fr));gap:12px">
+                  <sc-for list="{{ paramRows }}" as="p" hint-placeholder-count="6">
+                    <div style="display:flex;flex-direction:column;gap:2px;padding:11px 13px;border:1px solid var(--line);border-radius:8px">
+                      <span style="font-size:11.5px;color:var(--t2)">{{ p.label }}</span>
+                      <span style="font-size:14px;font-weight:600;color:var(--t1)">{{ p.value }}</span>
+                      <span style="font-size:11px;color:var(--t3);line-height:1.45">{{ p.note }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden">
+                  <div style="display:grid;grid-template-columns:minmax(180px,1.6fr) 132px 148px minmax(140px,1fr);border-bottom:1px solid var(--line);background:var(--hover)">
+                    <sc-for list="{{ scenarioHead }}" as="h" hint-placeholder-count="4">
+                      <div style="display:flex;align-items:center;justify-content:{{ h.justify }};padding:9px 13px">
+                        <span style="font-size:11.5px;font-weight:500;color:var(--t2);white-space:nowrap">{{ h.label }}</span>
+                      </div>
+                    </sc-for>
+                  </div>
+                  <sc-for list="{{ scenarioRows }}" as="r" hint-placeholder-count="5">
+                    <div style="display:grid;grid-template-columns:minmax(180px,1.6fr) 132px 148px minmax(140px,1fr);border-bottom:1px solid var(--line);background:{{ r.bg }}">
+                      <div style="display:flex;align-items:center;padding:9px 13px;min-width:0">
+                        <span style="font-size:12.5px;font-weight:{{ r.weight }};color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</span>
+                      </div>
+                      <div style="display:flex;align-items:center;justify-content:flex-end;padding:9px 13px">
+                        <span style="font-size:12.5px;color:var(--t1)">{{ r.ret }}</span>
+                      </div>
+                      <div style="display:flex;align-items:center;justify-content:flex-end;padding:9px 13px">
+                        <span style="font-size:12.5px;color:{{ r.reachedColor }};white-space:nowrap">{{ r.reached }}</span>
+                      </div>
+                      <div style="display:flex;align-items:center;justify-content:flex-end;padding:9px 13px">
+                        <span style="font-size:12.5px;color:var(--t1);white-space:nowrap">{{ r.end }}</span>
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:0;background:var(--card);border:1px solid var(--line);border-radius:8px;overflow:hidden">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:16px 20px 14px;border-bottom:1px solid var(--line)">
+            <div style="display:flex;flex-direction:column;gap:3px">
+              <span style="font-size:14px;font-weight:600;color:var(--t1)">Results</span>
+              <span style="font-size:11.5px;color:var(--t3)">All forecasts are approximate. Future values are calculated from today’s date.</span>
+            </div>
+            <div style="display:flex;gap:2px;padding:2px;border:1px solid var(--line);border-radius:7px">
+              <sc-for list="{{ steps }}" as="s" hint-placeholder-count="3">
+                <button onClick="{{ s.onClick }}" style="height:26px;padding:0 11px;border:none;border-radius:5px;background:{{ s.bg }};color:{{ s.color }};font-size:11.5px;font-weight:{{ s.weight }};cursor:pointer;white-space:nowrap" style-hover="background:var(--hover)">{{ s.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+          <div style="max-width:100%;overflow-x:auto;overscroll-behavior-x:contain">
+            <div data-r="tablewrap">
+              <div style="display:grid;grid-template-columns:{{ cols }};border-bottom:1px solid var(--line)">
+                <sc-for list="{{ tableHead }}" as="h" hint-placeholder-count="5">
+                  <div style="display:flex;align-items:center;justify-content:{{ h.justify }};padding:10px 16px">
+                    <span style="font-size:12px;font-weight:500;color:var(--t2);white-space:nowrap">{{ h.label }}</span>
+                  </div>
+                </sc-for>
+              </div>
+              <sc-for list="{{ tableRows }}" as="r" hint-placeholder-count="12">
+                <div style="display:grid;grid-template-columns:{{ cols }};border-bottom:1px solid var(--line);background:{{ r.bg }}">
+                  <div style="display:flex;align-items:center;padding:9px 16px;min-width:0">
+                    <dc-import name="TwoLineCell" primary="{{ r.year }}" secondary="{{ r.yearNote }}" align="left" hint-size="90px,36px"></dc-import>
+                  </div>
+                  <div style="display:flex;align-items:center;justify-content:flex-end;padding:9px 16px">
+                    <dc-import name="TwoLineCell" primary="{{ r.goal }}" secondary="{{ r.goalNote }}" secondary-tone="{{ r.goalTone }}" align="right" hint-size="130px,36px"></dc-import>
+                  </div>
+                  <div style="display:flex;align-items:center;justify-content:flex-end;padding:9px 16px">
+                    <dc-import name="TwoLineCell" primary="{{ r.contrib }}" secondary="{{ r.contribNote }}" align="right" hint-size="130px,36px"></dc-import>
+                  </div>
+                  <div style="display:flex;align-items:center;justify-content:flex-end;padding:9px 16px">
+                    <dc-import name="TwoLineCell" primary="{{ r.port }}" secondary="{{ r.portNote }}" tone="{{ r.portTone }}" align="right" hint-size="140px,36px"></dc-import>
+                  </div>
+                  <div style="display:flex;align-items:center;justify-content:flex-end;padding:9px 16px">
+                    <dc-import name="TwoLineCell" primary="{{ r.safe }}" secondary="{{ r.safeNote }}" align="right" hint-size="140px,36px"></dc-import>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+
+        <span style="font-size:11px;line-height:1.55;color:var(--t3);max-width:900px">{{ footnote }}</span>
+      </section>
+    </div>
+  </main>
+
+  <div data-r="tabbar" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:60;height:60px;background:var(--card);border-top:1px solid var(--line);align-items:stretch;padding:0 4px">
+    <sc-for list="{{ tabRows }}" as="t" hint-placeholder-count="4">
+      <a href="{{ t.href }}" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-decoration:none;color:{{ t.color }}">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="{{ t.d }}"></path></svg>
+        <span style="font-size:10px;font-weight:500">{{ t.label }}</span>
+      </a>
+    </sc-for>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;chartScale&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Log&quot;,&quot;Linear&quot;],&quot;default&quot;:&quot;Log&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;My goal&quot;},&quot;yearStep&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Every year&quot;,&quot;Every 2 years&quot;,&quot;Every 5 years&quot;],&quot;default&quot;:&quot;Every year&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;My goal&quot;},&quot;showRealTerms&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;My goal&quot;}}">
+class Component extends DCLogic {
+  state = {
+    draft: null, applied: null, menu: null,
+    openReturns: false, openOther: false, paramsOpen: false, chipsOpen: false,
+    scale: null, step: null, hover: null, saved: false
+  };
+
+  componentDidMount() {
+    this.doc = () => { if (this.state.menu) this.setState({ menu: null }); };
+    document.addEventListener('click', this.doc);
+    if (!window.SnowlineData) {
+      const check = () => { if (window.SnowlineData) this.forceUpdate(); else setTimeout(check, 30); };
+      setTimeout(check, 20);
+    }
+  }
+  componentWillUnmount() {
+    if (this.doc) document.removeEventListener('click', this.doc);
+    if (this.savedT) clearTimeout(this.savedT);
+  }
+
+  pctStr(v) { return String(Math.round(v * 10000) / 100); }
+  numOf(s) { const v = parseFloat(String(s).replace(/[^0-9.\-]/g, '')); return isFinite(v) ? v : 0; }
+  group(n) { return Math.round(n).toLocaleString('en-US'); }
+
+  draftFrom(cfg) {
+    return {
+      mode: cfg.mode,
+      valueTarget: this.group(cfg.valueTarget),
+      incomeTarget: this.group(cfg.incomeTarget),
+      byYear: cfg.byYear,
+      monthlyContribution: String(Math.round(cfg.monthlyContribution * 100) / 100),
+      contributionGrowth: this.pctStr(cfg.contributionGrowth),
+      expectedReturn: this.pctStr(cfg.expectedReturn),
+      safeReturn: this.pctStr(cfg.safeReturn),
+      dividendGrowth: this.pctStr(cfg.dividendGrowth),
+      inflation: this.pctStr(cfg.inflation),
+      taxDrag: this.pctStr(cfg.taxDrag),
+      reinvestDividends: cfg.reinvestDividends,
+      currency: cfg.currency
+    };
+  }
+
+  cfgFrom(d) {
+    return {
+      mode: d.mode,
+      valueTarget: this.numOf(d.valueTarget),
+      incomeTarget: this.numOf(d.incomeTarget),
+      byYear: this.numOf(d.byYear),
+      monthlyContribution: this.numOf(d.monthlyContribution),
+      contributionGrowth: this.numOf(d.contributionGrowth) / 100,
+      expectedReturn: this.numOf(d.expectedReturn) / 100,
+      safeReturn: this.numOf(d.safeReturn) / 100,
+      dividendGrowth: this.numOf(d.dividendGrowth) / 100,
+      inflation: this.numOf(d.inflation) / 100,
+      taxDrag: this.numOf(d.taxDrag) / 100,
+      reinvestDividends: !!d.reinvestDividends,
+      currency: d.currency
+    };
+  }
+
+  /* the smallest monthly contribution that still lands on the target in time */
+  requiredContribution(D, cfg) {
+    let lo = cfg.monthlyContribution, hi = Math.max(200, cfg.monthlyContribution) * 2;
+    for (let i = 0; i < 24; i++) {
+      if (D.projection(Object.assign({}, cfg, { monthlyContribution: hi })).achievable) break;
+      hi *= 2;
+      if (hi > 5e7) return null;
+    }
+    if (!D.projection(Object.assign({}, cfg, { monthlyContribution: hi })).achievable) return null;
+    for (let i = 0; i < 44; i++) {
+      const mid = (lo + hi) / 2;
+      if (D.projection(Object.assign({}, cfg, { monthlyContribution: mid })).achievable) hi = mid; else lo = mid;
+    }
+    return hi;
+  }
+
+  logTicks(lo, hi) {
+    const decades = [], fine = [];
+    for (let e = Math.floor(Math.log10(lo)); e <= Math.ceil(Math.log10(hi)); e++) {
+      [1, 2, 5].forEach((m) => {
+        const v = m * Math.pow(10, e);
+        if (v < lo || v > hi) return;
+        fine.push(v);
+        if (m === 1) decades.push(v);
+      });
+    }
+    return fine.length > 6 && decades.length > 2 ? decades : fine;
+  }
+  linTicks(lo, hi) {
+    const raw = (hi - lo) / 4, e = Math.pow(10, Math.floor(Math.log10(raw)));
+    const step = [1, 2, 2.5, 5, 10].map((m) => m * e).filter((s) => s >= raw)[0] || e * 10;
+    const out = [];
+    for (let v = Math.ceil(lo / step) * step; v <= hi; v += step) out.push(v);
+    return out;
+  }
+
+  renderVals() {
+    const st = this.state;
+    const I = {
+      bars: 'M4 20V10M10 20V4M16 20v-7M22 20H2', table: 'M3 5h18v14H3V5Zm0 5h18M9 10v9',
+      home: 'M4 11l8-7 8 7v9H4v-9Zm5 9v-6h6v6',
+      scale: 'M12 4v16M6 8l-3 6h6l-3-6Zm12 0l-3 6h6l-3-6ZM5 8h14', dots: 'M5 12h.01M12 12h.01M19 12h.01'
+    };
+    const base = {
+      tabRows: [
+        { label: 'Dashboard', d: I.home, href: 'Snowline.dc.html', color: 'var(--t3)' },
+        { label: 'Analytics', d: I.bars, href: 'Analytics.dc.html', color: 'var(--t3)' },
+        { label: 'Portfolio', d: I.table, href: 'Holdings.dc.html', color: 'var(--accent)' },
+        { label: 'Tools', d: I.scale, href: 'Rebalancing.dc.html', color: 'var(--t3)' }
+      ],
+      stop: (e) => e.stopPropagation()
+    };
+    if (!window.SnowlineData) return base;
+
+    const D = window.SnowlineData, F = D.fmt, K = D.constants;
+    const cfg = st.applied || D.goalConfig();
+    const draft = st.draft || this.draftFrom(cfg);
+    const pr = D.projection(cfg);
+    const income = pr.mode === 'income';
+    const scale = st.scale || (this.props.chartScale === 'Linear' ? 'Linear' : 'Log');
+    const stepLabel = st.step || this.props.yearStep || 'Every year';
+    const showReal = this.props.showRealTerms !== false;
+    const sym = { USD: '$', EUR: '€', GBP: '£', THB: '฿' }[draft.currency] || '$';
+
+    const money = (v) => F.money(v);
+    const kf = (v) => Math.abs(v) >= 1000 ? '$' + F.num(v / 1000) + 'k' : F.money(v);
+    const compact = (v) => {
+      if (v >= 1e6) { const n = v / 1e6; return '$' + F.num(n, n >= 10 || Math.abs(n - Math.round(n)) < 0.05 ? 0 : 1) + 'M'; }
+      if (v >= 1000) { const n = v / 1000; return '$' + F.num(n, n >= 10 ? 0 : 1) + 'k'; }
+      return '$' + F.num(v, 0);
+    };
+
+    /* ---- draft editing ---- */
+    const set = (k, v) => {
+      const next = Object.assign({}, draft); next[k] = v;
+      this.setState({ draft: next, saved: false });
+    };
+    const field = (k) => (e) => set(k, e.target.value);
+    const dirty = JSON.stringify(this.cfgFrom(draft)) !== JSON.stringify(this.cfgFrom(this.draftFrom(cfg)));
+
+    /* contributions over the horizon, straight from the draft */
+    const draftCfg = this.cfgFrom(draft);
+    const draftSpan = Math.max(1, Math.round(draftCfg.byYear) - K.today.year);
+    let cTotal = 0, cRate = draftCfg.monthlyContribution;
+    for (let y = 0; y < draftSpan; y++) { cTotal += cRate * 12; cRate *= (1 + draftCfg.contributionGrowth); }
+
+    /* ---- chart geometry ---- */
+    const W = 1000, H = 320, L = 64, R = 22, TOP = 16, BOT = 30;
+    const xs = (n) => L + n / pr.span * (W - L - R);
+    const vals = pr.P.concat(pr.S).concat([pr.target, pr.current]);
+    const rawHi = Math.max.apply(null, vals), rawLo = Math.min.apply(null, vals);
+    const logMode = scale === 'Log';
+    const hi = logMode ? Math.pow(10, Math.log10(rawHi) + 0.08) : rawHi * 1.08;
+    const lo = logMode ? Math.pow(10, Math.log10(Math.max(1, rawLo)) - 0.08) : 0;
+    const ys = (v) => {
+      const t = logMode
+        ? (Math.log10(Math.max(1, v)) - Math.log10(lo)) / (Math.log10(hi) - Math.log10(lo))
+        : (v - lo) / (hi - lo);
+      return H - BOT - Math.max(0, Math.min(1, t)) * (H - BOT - TOP);
+    };
+    const ticks = (logMode ? this.logTicks(lo, hi) : this.linTicks(lo, hi))
+      .filter((v) => Math.abs(ys(v) - ys(pr.target)) > 11);
+
+    const marks = [
+      { n: pr.crossP, year: pr.crossPYear, color: 'var(--accent)' },
+      { n: pr.crossS, year: pr.crossSYear, color: 'var(--t2)' }
+    ].filter((m) => m.n !== null).map((m) => ({
+      x: (xs(m.n) - 4.5).toFixed(1), y: (ys(pr.target) - 4.5).toFixed(1),
+      left: (xs(m.n) / W * 100).toFixed(2) + '%',
+      labelTop: ((ys(pr.target) + 9) / H * 100).toFixed(2) + '%',
+      color: m.color, label: String(m.year)
+    }));
+
+    const hoverN = st.hover;
+    const row = hoverN === null || hoverN === undefined ? null : pr.years[hoverN];
+    const hoverFrac = row ? xs(row.n) / W : 0;
+
+    const stepN = stepLabel === 'Every 5 years' ? 5 : stepLabel === 'Every 2 years' ? 2 : 1;
+    const rows = pr.years.filter((r) => r.n === 0 || r.n === pr.span || r.n % stepN === 0
+      || (pr.crossP !== null && r.year === pr.crossPYear));
+
+    const scen = (name, patch, note) => {
+      const p = D.projection(Object.assign({}, cfg, patch));
+      return {
+        name: name, ret: F.pct(p.cfg.expectedReturn * 100, 2),
+        reached: p.crossPYear === null ? 'not by ' + p.byYear : String(p.crossPYear) + ' · ' + p.yearsToGoal + 'y',
+        reachedColor: p.crossPYear === null ? 'var(--t3)' : 'var(--accent)',
+        end: compact(p.endValue), note: note,
+        bg: patch.__self ? 'var(--accent-soft)' : 'transparent',
+        weight: patch.__self ? 600 : 400
+      };
+    };
+    const er = cfg.expectedReturn;
+    const scenarioRows = [
+      scen('Safe scenario', { expectedReturn: cfg.safeReturn }),
+      scen('Expected return − 5pp', { expectedReturn: er - 0.05 }),
+      scen('Expected return', { __self: true }),
+      scen('Expected return + 5pp', { expectedReturn: er + 0.05 }),
+      scen('No further contributions', { monthlyContribution: 0 }),
+      scen('Dividends taken as cash', { reinvestDividends: false })
+    ];
+
+    const required = pr.achievable ? null : this.requiredContribution(D, cfg);
+
+    const verdict = pr.achievable
+      ? 'Achievable in ' + pr.yearsToGoal + (pr.yearsToGoal === 1 ? ' year' : ' years')
+      : 'Not achievable by ' + pr.byYear;
+    const verdictSub = pr.achievable
+      ? 'By ' + pr.crossPYear + (pr.crossPYear < pr.byYear
+        ? ' · ' + (pr.byYear - pr.crossPYear) + ' years ahead of your ' + pr.byYear + ' target'
+        : ' · exactly on your target year')
+      : 'Short by ' + money(pr.shortfall) + ' at ' + pr.byYear
+        + (required ? '. Contributing ' + money(required) + ' a month would close it.' : '.');
+
+    const reward = income
+      ? money(pr.target) + ' a year in dividends needs about ' + compact(pr.rewardCapital)
+        + ' of capital at today’s ' + F.pct(pr.startYield, 2) + ' gross yield — '
+        + money(pr.target / 12) + ' a month to spend, ' + money(pr.target * (1 - cfg.taxDrag) / 12) + ' after tax.'
+      : 'At ' + money(pr.target) + ' this portfolio would pay ' + money(pr.rewardIncome)
+        + ' a year at today’s ' + F.pct(pr.startYield, 2) + ' gross yield — ' + money(pr.rewardIncome / 12)
+        + ' a month, ' + money(pr.rewardIncome * (1 - cfg.taxDrag) / 12) + ' after tax.';
+
+    const secTitle = (open) => open ? '− Collapse' : '+ Expand';
+
+    return Object.assign(base, {
+      portfolioName: K.portfolioName,
+      headNote: 'Target ' + money(pr.target) + (income ? ' a year' : '') + ' by ' + pr.byYear
+        + ' · projected from ' + K.today.label + ' · ' + pr.span + '-year horizon',
+      titleTip: st.menu === 'titletip',
+      titleTipOn: () => this.setState({ menu: 'titletip' }),
+      titleTipOff: () => this.setState({ menu: null }),
+      titleTipText: 'The projection steps month by month from today’s ' + money(pr.startValue)
+        + ' and ' + money(pr.startIncome) + ' of forward income. Value grows at the expected return less the '
+        + F.pct(pr.startYield, 2) + ' income yield, so dividends are never counted twice; income grows at the dividend-growth rate and gains the yield on new money. The dashboard card reads the same function.',
+
+      togMore: (e) => { e.stopPropagation(); this.setState({ menu: st.menu === 'more' ? null : 'more' }); },
+      mMore: st.menu === 'more',
+      moreBg: st.menu === 'more' ? 'var(--hover)' : 'var(--card)',
+      moreRows: [
+        { label: 'Reset to defaults', onClick: (e) => { e.stopPropagation(); const c = D.clearGoalConfig(); this.setState({ applied: null, draft: this.draftFrom(c), menu: null, saved: false }); } },
+        { label: 'All parameters and scenarios', onClick: (e) => { e.stopPropagation(); this.setState({ paramsOpen: true, menu: null }); } },
+        { label: 'Open the dashboard card', onClick: (e) => { e.stopPropagation(); this.setState({ menu: null }); window.location.href = 'Snowline.dc.html'; } }
+      ],
+
+      /* ---- config panel ---- */
+      modes: [{ k: 'value', label: 'Value' }, { k: 'income', label: 'Passive income' }].map((m) => ({
+        label: m.label,
+        bg: draft.mode === m.k ? 'var(--accent-soft)' : 'transparent',
+        color: draft.mode === m.k ? 'var(--accent)' : 'var(--t2)',
+        weight: draft.mode === m.k ? 600 : 500,
+        onClick: () => set('mode', m.k)
+      })),
+      modeHint: draft.mode === 'income'
+        ? 'The target is gross dividend income a year, and the projection tracks the income line.'
+        : 'The target is portfolio value, and the projection tracks the value line.',
+
+      targetLabel: draft.mode === 'income' ? 'Target income a year' : 'Target amount',
+      targetValue: draft.mode === 'income' ? draft.incomeTarget : draft.valueTarget,
+      onTarget: (e) => {
+        const digits = e.target.value.replace(/[^0-9]/g, '');
+        set(draft.mode === 'income' ? 'incomeTarget' : 'valueTarget', digits ? this.group(Number(digits)) : '');
+      },
+      targetHint: draft.mode === 'income'
+        ? 'Now ' + money(pr.startIncome) + ' gross a year, ' + F.pct(pr.startYield, 2) + ' on ' + money(pr.startValue) + '.'
+        : 'Now ' + money(pr.startValue) + ' across ' + D.totals().holdings + ' holdings.',
+      symbol: sym,
+      currency: draft.currency,
+      togCcy: (e) => { e.stopPropagation(); this.setState({ menu: st.menu === 'ccy' ? null : 'ccy' }); },
+      mCcy: st.menu === 'ccy',
+      currencies: ['USD', 'EUR', 'GBP', 'THB'].map((c) => ({
+        label: c, note: c === K.baseCurrency ? 'base currency' : 'no rate on file',
+        bg: draft.currency === c ? 'var(--accent-soft)' : 'transparent',
+        color: c === K.baseCurrency ? 'var(--t1)' : 'var(--t3)',
+        cursor: c === K.baseCurrency ? 'pointer' : 'not-allowed',
+        onClick: (e) => { e.stopPropagation(); if (c === K.baseCurrency) { set('currency', c); } this.setState({ menu: null }); }
+      })),
+
+      byYearLabel: draft.byYear + ' (in ' + draftSpan + (draftSpan === 1 ? ' year)' : ' years)'),
+      togYear: (e) => { e.stopPropagation(); this.setState({ menu: st.menu === 'year' ? null : 'year' }); },
+      mYear: st.menu === 'year',
+      yearOptions: Array.from({ length: 40 }, (_, i) => K.today.year + 2 + i).map((y) => ({
+        label: String(y), note: 'in ' + (y - K.today.year) + ' years',
+        bg: Number(draft.byYear) === y ? 'var(--accent-soft)' : 'transparent',
+        color: Number(draft.byYear) === y ? 'var(--accent)' : 'var(--t1)',
+        weight: Number(draft.byYear) === y ? 600 : 400,
+        onClick: (e) => { e.stopPropagation(); set('byYear', y); this.setState({ menu: null }); }
+      })),
+
+      contribValue: draft.monthlyContribution,
+      onContrib: (e) => set('monthlyContribution', e.target.value.replace(/[^0-9.]/g, '')),
+      contribTotal: compact(cTotal) + ' total',
+      contribHint: money(draftCfg.monthlyContribution * 12) + ' per year, growing '
+        + F.pct(draftCfg.contributionGrowth * 100, 1) + ' a year over ' + draftSpan + ' years.',
+
+      sections: [
+        {
+          title: 'Returns and inflation', open: st.openReturns, collapsed: !st.openReturns,
+          toggleLabel: secTitle(st.openReturns),
+          summary: 'Return ' + F.pct(draftCfg.expectedReturn * 100, 2) + ' · safe '
+            + F.pct(draftCfg.safeReturn * 100, 2) + ' · dividend growth ' + F.pct(draftCfg.dividendGrowth * 100, 1)
+            + ' · inflation ' + F.pct(draftCfg.inflation * 100, 1),
+          onToggle: () => this.setState({ openReturns: !st.openReturns }),
+          hasToggle: false,
+          fields: [
+            { label: 'Expected return', value: draft.expectedReturn, onChange: field('expectedReturn'), hint: 'Total a year — price appreciation plus dividends.' },
+            { label: 'Safe scenario return', value: draft.safeReturn, onChange: field('safeReturn'), hint: 'The second, conservative line on the chart.' },
+            { label: 'Dividend growth', value: draft.dividendGrowth, onChange: field('dividendGrowth'), hint: 'How fast the payout itself rises each year.' },
+            { label: 'Inflation', value: draft.inflation, onChange: field('inflation'), hint: 'Only used for the “in today’s money” figures.' }
+          ]
+        },
+        {
+          title: 'Other', open: st.openOther, collapsed: !st.openOther,
+          toggleLabel: secTitle(st.openOther),
+          summary: 'Contribution growth ' + F.pct(draftCfg.contributionGrowth * 100, 1) + ' · tax '
+            + F.pct(draftCfg.taxDrag * 100, 0) + ' · dividends '
+            + (draft.reinvestDividends ? 'reinvested' : 'taken as cash'),
+          onToggle: () => this.setState({ openOther: !st.openOther }),
+          hasToggle: true,
+          fields: [
+            { label: 'Contribution growth', value: draft.contributionGrowth, onChange: field('contributionGrowth'), hint: 'Applied to the monthly amount each January.' },
+            { label: 'Tax on dividends', value: draft.taxDrag, onChange: field('taxDrag'), hint: 'Withholding, taken before anything is reinvested.' }
+          ]
+        }
+      ],
+      reinvestHint: draft.reinvestDividends ? 'Net dividends buy more shares.' : 'Dividends leave the portfolio.',
+      toggleReinvest: () => set('reinvestDividends', !draft.reinvestDividends),
+      reinvestBg: draft.reinvestDividends ? 'var(--accent)' : 'transparent',
+      reinvestBorder: draft.reinvestDividends ? 'var(--accent)' : 'var(--line)',
+      reinvestKnob: draft.reinvestDividends ? 'var(--on-accent)' : 'var(--t3)',
+      reinvestJustify: draft.reinvestDividends ? 'flex-end' : 'flex-start',
+
+      onSave: () => {
+        const next = D.saveGoalConfig(this.cfgFrom(draft));
+        if (this.savedT) clearTimeout(this.savedT);
+        this.setState({ applied: next, draft: this.draftFrom(next), saved: true, hover: null });
+        this.savedT = setTimeout(() => this.setState({ saved: false }), 3200);
+      },
+      onReset: () => { const c = D.clearGoalConfig(); this.setState({ applied: null, draft: this.draftFrom(c), saved: false }); },
+      saveLabel: 'Save and calculate',
+      saveBg: dirty ? 'var(--accent)' : 'var(--hover)',
+      saveFg: dirty ? 'var(--on-accent)' : 'var(--t2)',
+      saveNote: dirty ? 'Unsaved changes'
+        : st.saved ? 'Saved · the dashboard card now reads these settings'
+          : 'Saved to this browser · the dashboard card reads the same settings',
+      saveNoteColor: dirty ? 'var(--amber)' : st.saved ? 'var(--accent)' : 'var(--t3)',
+
+      /* ---- results head ---- */
+      ring: (pr.progressPct / 100 * 2 * Math.PI * 42).toFixed(2) + ' ' + (2 * Math.PI * 42).toFixed(2),
+      progressLabel: F.num(pr.progressPct, pr.progressPct < 10 ? 1 : 0) + '%',
+      currentK: kf(pr.current), targetK: '/ ' + kf(pr.target),
+      modeLabel: pr.modeLabel,
+      progressNote: income
+        ? money(pr.target - pr.current) + ' a year still to build · ' + money(pr.startValue) + ' invested today'
+        : money(pr.target - pr.current) + ' to go · ' + money(pr.totalContributions) + ' of that from contributions',      verdict: verdict, verdictSub: verdictSub,
+      verdictBorder: pr.achievable ? 'var(--accent)' : 'var(--amber)',
+      verdictColor: pr.achievable ? 'var(--t1)' : 'var(--amber)',
+
+      /* ---- chart ---- */
+      chartTitle: (income ? 'Projected income' : 'Projected value') + ' · ' + pr.startYear + ' – ' + pr.byYear,
+      legend: [
+        { label: 'Portfolio', stroke: '2px solid var(--accent)' },
+        { label: pr.altLabel, stroke: '2px dashed var(--grey-series)' },
+        { label: 'Goal', stroke: '1px dashed var(--t3)' }
+      ],
+      scales: ['Log', 'Linear'].map((s) => ({
+        label: s, onClick: () => this.setState({ scale: s }),
+        bg: scale === s ? 'var(--accent-soft)' : 'transparent',
+        color: scale === s ? 'var(--accent)' : 'var(--t2)',
+        weight: scale === s ? 600 : 500
+      })),
+      yTicks: ticks.map((v) => ({
+        y: ys(v).toFixed(1), top: (ys(v) / H * 100).toFixed(2) + '%', label: compact(v)
+      })),
+      goalY: ys(pr.target).toFixed(1),
+      goalLabelTop: ((ys(pr.target) - 15) / H * 100).toFixed(2) + '%',
+      goalLineLabel: 'Goal ' + compact(pr.target),
+      portPoints: pr.P.map((v, n) => xs(n).toFixed(1) + ',' + ys(v).toFixed(1)).join(' '),
+      safePoints: pr.S.map((v, n) => xs(n).toFixed(1) + ',' + ys(v).toFixed(1)).join(' '),
+      marks: marks,
+      slots: pr.years.map((r) => ({ onEnter: () => this.setState({ hover: r.n }) })),
+      hoverOff: () => this.setState({ hover: null }),
+      hoverX: row ? xs(row.n).toFixed(1) : '',
+      hoverPY: row ? ys(row.portfolio).toFixed(1) : '0',
+      hoverSY: row ? ys(row.safe).toFixed(1) : '0',
+      tipLeft: (hoverFrac * 100).toFixed(2) + '%',
+      tipShift: hoverFrac < 0.3 ? 'translateX(-10%)' : hoverFrac > 0.7 ? 'translateX(-90%)' : 'translateX(-50%)',
+      hoverTip: row ? {
+        title: row.n === 0 ? 'Today · ' + row.year : row.year + ' · in ' + row.n + (row.n === 1 ? ' year' : ' years'),
+        headline: money(row.portfolio) + (income ? ' a year' : ''),
+        sub: showReal ? money(row.portfolioReal) + ' in today’s money' : '',
+        rows: [
+          { label: pr.altLabel, value: money(row.safe), color: 'var(--grey-series)' },
+          { label: 'Goal', value: money(row.goal), color: 'var(--t3)' },
+          { label: 'Contributed to date', value: money(row.contributedToDate), color: 'var(--accent-4)' },
+          { label: 'Dividends to date', value: money(row.dividends), color: 'var(--accent-3)' }
+        ],
+        footer: row.reached ? 'Goal reached' : money(row.goal - row.portfolio) + ' to go',
+        footerTone: row.reached ? 'pos' : 'plain'
+      } : null,
+      xLabels: Array.from({ length: 6 }, (_, i) => Math.round(pr.span * i / 5)).map((n) => ({
+        left: (xs(n) / W * 100).toFixed(2) + '%', label: String(pr.startYear + n),
+        color: hoverN === n ? 'var(--t1)' : 'var(--t3)'
+      })),
+
+      reward: reward,
+      chips: [
+        { label: 'Returns', value: F.pct(cfg.expectedReturn * 100, 2) + ' expected · ' + F.pct(cfg.safeReturn * 100, 2) + ' safe' },
+        { label: 'Contributions', value: money(cfg.monthlyContribution) + ' (▲' + F.num(cfg.contributionGrowth * 100, 1) + '% annually)' },
+        { label: cfg.reinvestDividends ? 'Reinvest dividends' : 'Dividends as cash', value: '' }
+      ],
+      togChips: () => this.setState({ chipsOpen: !st.chipsOpen }),
+      chipsMoreLabel: st.chipsOpen ? 'Less' : 'More…',
+      chipsOpen: st.chipsOpen,
+      moreChips: [
+        { label: 'Dividend growth', value: F.pct(cfg.dividendGrowth * 100, 1) + ' a year' },
+        { label: 'Tax on dividends', value: F.pct(cfg.taxDrag * 100, 0) },
+        { label: 'Inflation', value: F.pct(cfg.inflation * 100, 1) },
+        { label: 'Starting yield', value: F.pct(pr.startYield, 2) + ' gross' }
+      ],
+
+      togParams: () => this.setState({ paramsOpen: !st.paramsOpen }),
+      paramsToggle: st.paramsOpen ? '− Collapse' : '+ Expand',
+      paramsOpen: st.paramsOpen,
+      paramRows: [
+        { label: 'Starting value', value: money(pr.startValue), note: 'today’s market value, from the holdings' },
+        { label: 'Starting income', value: money(pr.startIncome), note: F.pct(pr.startYield, 2) + ' gross forward yield' },
+        { label: 'Contributions', value: money(pr.totalContributions), note: 'over ' + pr.span + ' years, growing ' + F.pct(cfg.contributionGrowth * 100, 1) + ' a year' },
+        { label: 'Dividends collected', value: money(pr.totalDividends), note: money(pr.totalTaxes) + ' of that lost to tax' },
+        { label: 'Value at ' + pr.byYear, value: compact(pr.endValue), note: compact(pr.endReal) + ' in today’s money at ' + F.pct(cfg.inflation * 100, 1) + ' inflation' },
+        { label: pr.altLabel + ' at ' + pr.byYear, value: compact(pr.endSafe), note: pr.safeAchievable ? 'reaches the goal in ' + pr.crossSYear : 'does not reach the goal' }
+      ],
+      scenarioHead: [
+        { label: 'Scenario', justify: 'flex-start' }, { label: 'Return', justify: 'flex-end' },
+        { label: 'Goal reached', justify: 'flex-end' }, { label: pr.modeLabel + ' at ' + pr.byYear, justify: 'flex-end' }
+      ],
+      scenarioRows: scenarioRows,
+
+      /* ---- results table ---- */
+      steps: ['Every year', 'Every 2 years', 'Every 5 years'].map((s, i) => ({
+        label: ['1 year', '2 years', '5 years'][i], onClick: () => this.setState({ step: s }),
+        bg: stepLabel === s ? 'var(--accent-soft)' : 'transparent',
+        color: stepLabel === s ? 'var(--accent)' : 'var(--t2)',
+        weight: stepLabel === s ? 600 : 500
+      })),
+      cols: 'minmax(104px,0.9fr) minmax(140px,1fr) minmax(140px,1fr) minmax(150px,1.1fr) minmax(150px,1.1fr)',
+      tableHead: [
+        { label: 'Year', justify: 'flex-start' }, { label: 'Goal', justify: 'flex-end' },
+        { label: 'Contributions', justify: 'flex-end' },
+        { label: 'Portfolio (' + pr.modeLabel + ')', justify: 'flex-end' },
+        { label: income ? pr.altLabel : pr.altLabel + ' (' + pr.modeLabel + ')', justify: 'flex-end' }
+      ],
+      tableRows: rows.map((r) => ({
+        year: String(r.year),
+        yearNote: r.n === 0 ? 'today' : 'in ' + r.n + (r.n === 1 ? ' year' : ' years'),
+        goal: money(r.goal),
+        goalNote: r.reached ? 'reached' : money(r.goal - r.portfolio) + ' to go',
+        goalTone: r.reached ? 'pos' : 'plain',
+        contrib: r.n === 0 ? '—' : money(r.contributionYear),
+        contribNote: r.n === 0 ? 'starting point' : money(r.contributionMonthly) + ' / month',
+        port: money(r.portfolio),
+        portNote: showReal ? money(r.portfolioReal) + ' today’s money' : money(r.contributedToDate) + ' contributed',
+        portTone: r.reached ? 'pos' : 'plain',
+        safe: money(r.safe),
+        safeNote: showReal ? money(r.safeReal) + ' today’s money' : (r.safeReached ? 'reached' : ''),
+        bg: pr.crossPYear !== null && r.year === pr.crossPYear ? 'var(--accent-soft)' : 'transparent'
+      })),
+
+      footnote: 'Every figure on this screen — the ring, the verdict, both lines, the crossing markers and each row of the table — comes from one projection stepped monthly from '
+        + K.today.label + '. Value compounds at the expected return less the ' + F.pct(pr.startYield, 2)
+        + ' income yield so dividends are not counted twice; income compounds at the dividend-growth rate, is taxed at '
+        + F.pct(cfg.taxDrag * 100, 0) + (cfg.reinvestDividends ? ' and reinvested.' : ' and paid out as cash.')
+        + ' Saving writes these settings to this browser, and the dashboard’s My goal card reads them back, so the two cannot disagree.'
+    });
+  }
+}
+</script>
+</body>
+</html>

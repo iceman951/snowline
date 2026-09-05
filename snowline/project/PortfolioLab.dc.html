@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <script src="snowline-data.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --canvas:#FAFAF9; --card:#FFFFFF; --t1:#171717; --t2:#737373; --t3:#A3A3A3; --line:#E7E5E4;
+      --accent:#0F7B57; --neg:#B91C1C; --amber:#B45309; --hover:#F5F5F4; --on-accent:#FFFFFF;
+      --grey-series:#A8A29E; --shadow:0 10px 28px rgba(23,23,23,.10); --scrim:rgba(12,12,12,.42);
+      --accent-soft:color-mix(in oklab, var(--accent) 9%, var(--card));
+      --accent-tint:color-mix(in oklab, var(--accent) 16%, var(--card));
+      --tag-bg:color-mix(in oklab, var(--amber) 8%, var(--card));
+      --tag-fg:var(--amber); --track:#E4E1DF; --tick:#CFCAC6;
+    }
+    html[data-theme="dark"]{
+      --canvas:#0C0C0C; --card:#171717; --t1:#FAFAF9; --t2:#A3A3A3; --t3:#737373; --line:#292524;
+      --accent:#34D399; --neg:#F87171; --amber:#F59E0B; --hover:#201E1D; --on-accent:#0C0C0C;
+      --grey-series:#57534E; --shadow:0 10px 28px rgba(0,0,0,.55); --scrim:rgba(0,0,0,.6);
+      --tag-bg:color-mix(in oklab, var(--amber) 7%, var(--card));
+      --tag-fg:color-mix(in oklab, var(--amber) 58%, var(--t2));
+      --track:#3A3431; --tick:#3A3431;
+    }
+    html,body{margin:0;padding:0;background:var(--canvas)}
+    *{box-sizing:border-box}
+    body{font-family:'Inter',system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif;font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
+    a{color:var(--accent);text-decoration:none}
+    a:hover{color:var(--accent);text-decoration:underline}
+    button,input,select{font-family:inherit;font-variant-numeric:tabular-nums}
+    ::selection{background:var(--accent-tint)}
+    @keyframes menuIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+    @media (max-width:1320px){
+      [data-r="two"]{grid-template-columns:minmax(0,1fr)!important}
+      [data-r="panel"]{position:static!important}
+    }
+    @media (max-width:1180px){[data-r="cmpwrap"]{min-width:900px}[data-r="legwrap"]{min-width:940px}}
+    @media (max-width:1080px){[data-r="stats"]{grid-template-columns:1fr 1fr 1fr!important}}
+    @media (max-width:960px){
+      [data-r="stats"]{grid-template-columns:1fr 1fr!important}
+      [data-r="tabbar"]{display:flex!important}
+      [data-r="main"]{padding:16px 16px 104px!important}
+    }
+  </style>
+</helmet>
+<div style="min-height:100vh;background:var(--canvas);color:var(--t1);font-size:14px;line-height:1.45">
+
+  <dc-import name="TopNav" active="Tools" sub-active="Portfolio Lab" hint-size="100%,56px"></dc-import>
+
+  <main data-r="main" data-screen-label="Tools — Portfolio Lab" style="max-width:1392px;margin:0 auto;padding:24px 24px 88px;display:flex;flex-direction:column;gap:18px">
+
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap">
+      <div style="display:flex;flex-direction:column;gap:5px;min-width:0">
+        <div style="display:flex;align-items:center;gap:8px;position:relative">
+          <h1 style="margin:0;font-size:32px;font-weight:600;letter-spacing:-0.028em;line-height:1.1;color:var(--t1)">Portfolio Lab</h1>
+          <span onMouseEnter="{{ titleTipOn }}" onMouseLeave="{{ titleTipOff }}" style="width:16px;height:16px;margin-top:6px;flex:none;border:1px solid var(--line);border-radius:50%;font-size:10px;font-weight:500;color:var(--t3);display:flex;align-items:center;justify-content:center;cursor:help" style-hover="border-color:var(--t3);color:var(--t2)">?</span>
+          <sc-if value="{{ titleTip }}" hint-placeholder-val="{{ false }}">
+            <span style="position:absolute;top:44px;left:0;z-index:40;width:400px;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:10px 12px;font-size:11.5px;line-height:1.55;color:var(--t2)">{{ titleTipText }}</span>
+          </sc-if>
+          <span style="font-size:13px;color:var(--t3);padding-top:6px">{{ portfolioName }}</span>
+        </div>
+        <span style="font-size:12px;color:var(--t3)">{{ headNote }}</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <button onClick="{{ onLoadMine }}" style="display:inline-flex;align-items:center;gap:7px;height:32px;padding:0 13px;border:1px solid var(--accent);border-radius:7px;background:var(--accent-soft);color:var(--accent);font-size:12.5px;font-weight:500;cursor:pointer;white-space:nowrap" style-hover="background:var(--accent-tint)">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V6M6 12l6-6 6 6M4 20h16"></path></svg>
+          Load my portfolio
+        </button>
+        <a href="Screener.dc.html" style="display:inline-flex;align-items:center;height:32px;padding:0 13px;border:1px solid var(--line);border-radius:7px;color:var(--t1);font-size:12.5px;font-weight:500;text-decoration:none;white-space:nowrap" style-hover="background:var(--hover);text-decoration:none">Screener</a>
+        <a href="Metrics.dc.html" style="display:inline-flex;align-items:center;height:32px;padding:0 13px;border:1px solid var(--line);border-radius:7px;color:var(--t1);font-size:12.5px;font-weight:500;text-decoration:none;white-space:nowrap" style-hover="background:var(--hover);text-decoration:none">Metrics</a>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 12px">
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+        <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="2">
+          <button onClick="{{ t.onClick }}" style="display:flex;align-items:center;gap:9px;height:44px;padding:0 13px;border:1px solid {{ t.border }};border-radius:8px;background:{{ t.bg }};cursor:pointer;text-align:left" style-hover="background:var(--hover)">
+            <span style="width:22px;height:22px;flex:none;border-radius:6px;background:{{ t.badgeBg }};color:{{ t.badgeFg }};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600">{{ t.badge }}</span>
+            <span style="display:flex;flex-direction:column;gap:1px;min-width:0">
+              <span style="font-size:12.5px;font-weight:{{ t.weight }};color:{{ t.color }};white-space:nowrap">{{ t.name }}</span>
+              <span style="font-size:10.5px;color:var(--t3);white-space:nowrap">{{ t.meta }}</span>
+            </span>
+          </button>
+        </sc-for>
+        <sc-if value="{{ canAdd }}" hint-placeholder-val="{{ true }}">
+          <button onClick="{{ onAddScenario }}" style="display:flex;align-items:center;gap:6px;height:44px;padding:0 13px;border:1px dashed var(--line);border-radius:8px;background:transparent;color:var(--t2);font-size:12.5px;font-weight:500;cursor:pointer;white-space:nowrap" style-hover="background:var(--hover);color:var(--t1)">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
+            Duplicate to compare
+          </button>
+        </sc-if>
+      </div>
+      <div style="flex:1"></div>
+      <sc-if value="{{ canRemove }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ onRemoveScenario }}" style="height:30px;padding:0 12px;border:1px solid var(--line);border-radius:7px;background:transparent;color:var(--t2);font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap" style-hover="background:var(--hover);color:var(--neg)">Delete {{ activeName }}</button>
+      </sc-if>
+      <button onClick="{{ onResetAll }}" style="height:30px;padding:0 12px;border:1px solid var(--line);border-radius:7px;background:transparent;color:var(--t2);font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap" style-hover="background:var(--hover);color:var(--t1)">Start over</button>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:13px 16px">
+      <span style="display:flex;align-items:center;gap:9px">
+        <span style="font-size:12px;font-weight:500;color:var(--t2);white-space:nowrap">Scenario</span>
+        <input value="{{ nameDraft }}" onChange="{{ onName }}" style="width:170px;height:30px;padding:0 10px;border:1px solid var(--line);border-radius:7px;background:transparent;color:var(--t1);font-size:13px;font-weight:500;outline:none" style-focus="border-color:var(--accent)">
+      </span>
+      <span style="display:flex;align-items:center;gap:9px">
+        <span style="font-size:12px;font-weight:500;color:var(--t2);white-space:nowrap">Starting amount</span>
+        <span style="display:flex;align-items:stretch;width:130px;border:1px solid var(--line);border-radius:7px;overflow:hidden">
+          <span style="display:flex;align-items:center;padding:0 2px 0 10px;font-size:13px;color:var(--t3)">$</span>
+          <input value="{{ amountDraft }}" onChange="{{ onAmount }}" inputmode="decimal" style="flex:1;min-width:0;height:30px;padding:0 10px 0 3px;border:none;background:transparent;color:var(--t1);font-size:13px;font-weight:500;outline:none">
+        </span>
+      </span>
+      <span style="display:flex;align-items:center;gap:9px">
+        <span style="font-size:12px;font-weight:500;color:var(--t2);white-space:nowrap">Monthly contribution</span>
+        <span style="display:flex;align-items:stretch;width:112px;border:1px solid var(--line);border-radius:7px;overflow:hidden">
+          <span style="display:flex;align-items:center;padding:0 2px 0 10px;font-size:13px;color:var(--t3)">$</span>
+          <input value="{{ monthlyDraft }}" onChange="{{ onMonthly }}" inputmode="decimal" style="flex:1;min-width:0;height:30px;padding:0 10px 0 3px;border:none;background:transparent;color:var(--t1);font-size:13px;outline:none">
+        </span>
+      </span>
+
+      <span style="display:flex;align-items:center;gap:7px">
+        <span style="font-size:12px;font-weight:500;color:var(--t2);white-space:nowrap">Window</span>
+        <sc-for list="{{ windowPickers }}" as="w" hint-placeholder-count="2">
+          <span style="position:relative">
+            <button onClick="{{ w.onToggle }}" style="display:flex;align-items:center;gap:8px;height:30px;padding:0 10px;border:1px solid {{ w.border }};border-radius:7px;background:transparent;color:var(--t1);font-size:12.5px;font-weight:500;cursor:pointer;white-space:nowrap" style-hover="background:var(--hover)">
+              {{ w.label }}
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2.2" stroke-linecap="round"><path d="M6 9l6 6 6-6"></path></svg>
+            </button>
+            <sc-if value="{{ w.open }}" hint-placeholder-val="{{ false }}">
+              <span onClick="{{ stop }}" style="position:absolute;top:36px;left:0;z-index:60;display:block;width:150px;max-height:250px;overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:5px;animation:menuIn .12s ease-out">
+                <sc-for list="{{ w.options }}" as="o" hint-placeholder-count="6">
+                  <button onClick="{{ o.onClick }}" style="display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;height:32px;padding:0 9px;border:none;border-radius:6px;background:{{ o.bg }};color:{{ o.color }};font-size:12.5px;font-weight:{{ o.weight }};cursor:pointer;text-align:left" style-hover="background:var(--hover)">
+                    {{ o.label }}
+                    <span style="font-size:11px;color:var(--accent);opacity:{{ o.check }}">✓</span>
+                  </button>
+                </sc-for>
+              </span>
+            </sc-if>
+          </span>
+        </sc-for>
+      </span>
+
+      <button onClick="{{ togReinvest }}" style="display:flex;align-items:center;gap:8px;height:30px;padding:0 11px 0 9px;border:1px solid {{ reinvestBorder }};border-radius:7px;background:{{ reinvestBg }};color:var(--t1);font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap" style-hover="background:var(--hover)">
+        <span style="width:15px;height:15px;flex:none;border:1px solid {{ reinvestBoxBorder }};border-radius:4px;background:{{ reinvestBoxBg }};display:flex;align-items:center;justify-content:center;color:var(--on-accent);font-size:10px;font-weight:700">{{ reinvestMark }}</span>
+        Reinvest dividends
+      </button>
+    </div>
+
+    <div data-r="stats" style="display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:0;background:var(--card);border:1px solid var(--line);border-radius:8px;overflow:hidden">
+      <sc-for list="{{ stats }}" as="s" hint-placeholder-count="6">
+        <div style="padding:16px 18px;border-left:{{ s.border }}">
+          <dc-import name="Metric" label="{{ s.label }}" primary="{{ s.primary }}" primary-tone="{{ s.tone }}" secondary="{{ s.secondary }}" secondary-note="{{ s.note }}" tip="{{ s.tip }}" help="{{ true }}" hint-size="100%,74px"></dc-import>
+        </div>
+      </sc-for>
+    </div>
+
+    <div data-r="two" style="display:grid;grid-template-columns:minmax(0,1.55fr) minmax(340px,1fr);gap:18px;align-items:start">
+
+      <div style="display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:8px;overflow:hidden">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:14px 18px;border-bottom:1px solid var(--line)">
+          <span style="display:flex;flex-direction:column;gap:3px">
+            <span style="font-size:13px;font-weight:600;color:var(--t1)">{{ chartTitle }}</span>
+            <span style="font-size:11.5px;color:var(--t3)">{{ chartSpan }}</span>
+          </span>
+          <span style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+            <sc-for list="{{ chartLegend }}" as="l" hint-placeholder-count="3">
+              <span style="display:flex;align-items:center;gap:7px;white-space:nowrap">
+                <span style="width:14px;height:0;border-top:{{ l.stroke }}"></span>
+                <span style="font-size:11px;color:var(--t3)">{{ l.label }}</span>
+                <span style="font-size:12px;font-weight:500;color:{{ l.color }}">{{ l.value }}</span>
+              </span>
+            </sc-for>
+          </span>
+        </div>
+
+        <sc-if value="{{ hasRun }}" hint-placeholder-val="{{ true }}">
+          <div style="padding:18px 20px 14px 52px">
+            <div style="position:relative" onMouseLeave="{{ chartLeave }}">
+              <svg viewBox="0 0 1000 260" preserveAspectRatio="none" style="width:100%;height:260px;display:block" onMouseMove="{{ chartMove }}">
+                <defs>
+                  <linearGradient id="labFill" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="var(--accent)" stop-opacity="0.18"></stop>
+                    <stop offset="100%" stop-color="var(--accent)" stop-opacity="0"></stop>
+                  </linearGradient>
+                </defs>
+                <sc-for list="{{ grid }}" as="g" hint-placeholder-count="5">
+                  <line x1="0" y1="{{ g.y }}" x2="1000" y2="{{ g.y }}" stroke="var(--line)" stroke-width="1" stroke-dasharray="3 5" vector-effect="non-scaling-stroke"></line>
+                </sc-for>
+                <path d="{{ areaPath }}" fill="url(#labFill)"></path>
+                <sc-if value="{{ showInvested }}" hint-placeholder-val="{{ true }}">
+                  <path d="{{ investedPath }}" fill="none" stroke="var(--t3)" stroke-width="1.4" stroke-dasharray="2 4" vector-effect="non-scaling-stroke" stroke-linejoin="round"></path>
+                </sc-if>
+                <sc-if value="{{ showBench }}" hint-placeholder-val="{{ true }}">
+                  <path d="{{ benchPath }}" fill="none" stroke="var(--grey-series)" stroke-width="1.7" stroke-dasharray="5 4" vector-effect="non-scaling-stroke" stroke-linejoin="round"></path>
+                </sc-if>
+                <path d="{{ linePath }}" fill="none" stroke="var(--accent)" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linejoin="round"></path>
+                <sc-if value="{{ ddBand }}" hint-placeholder-val="{{ false }}">
+                  <rect x="{{ ddX }}" y="4" width="{{ ddW }}" height="252" fill="var(--neg)" opacity="0.06"></rect>
+                </sc-if>
+                <sc-if value="{{ hover }}" hint-placeholder-val="{{ false }}">
+                  <line x1="{{ cursorX }}" y1="0" x2="{{ cursorX }}" y2="260" stroke="var(--t3)" stroke-width="1" vector-effect="non-scaling-stroke"></line>
+                </sc-if>
+              </svg>
+              <sc-for list="{{ grid }}" as="g" hint-placeholder-count="5">
+                <span style="position:absolute;left:-52px;top:{{ g.top }};transform:translateY(-50%);width:44px;text-align:right;font-size:10px;color:var(--t3);pointer-events:none">{{ g.label }}</span>
+              </sc-for>
+              <sc-if value="{{ hover }}" hint-placeholder-val="{{ false }}">
+                <span style="position:absolute;left:{{ dotLeft }};top:{{ dotTop }};transform:translate(-50%,-50%);width:9px;height:9px;border-radius:50%;background:var(--accent);border:2px solid var(--card);pointer-events:none"></span>
+              </sc-if>
+              <sc-if value="{{ tip }}" hint-placeholder-val="{{ false }}">
+                <div style="position:absolute;top:6px;left:{{ tipLeft }};transform:translateX(-50%);z-index:9;pointer-events:none">
+                  <dc-import name="ChartTooltip" tip="{{ tip }}" hint-size="230px,180px"></dc-import>
+                </div>
+              </sc-if>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:9px">
+              <sc-for list="{{ xTicks }}" as="x" hint-placeholder-count="6">
+                <span style="font-size:10px;color:var(--t3);white-space:nowrap">{{ x.label }}</span>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding:12px 18px;border-top:1px solid var(--line)">
+            <sc-for list="{{ chartFoot }}" as="f" hint-placeholder-count="3">
+              <span style="display:flex;align-items:baseline;gap:7px;white-space:nowrap">
+                <span style="font-size:11.5px;color:var(--t3)">{{ f.label }}</span>
+                <span style="font-size:12.5px;font-weight:500;color:{{ f.color }}">{{ f.value }}</span>
+              </span>
+            </sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{ noRun }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:7px;padding:70px 24px">
+            <span style="font-size:13.5px;font-weight:500;color:var(--t1)">{{ noRunTitle }}</span>
+            <span style="font-size:12px;color:var(--t3);text-align:center;max-width:420px;line-height:1.6">{{ noRunBody }}</span>
+          </div>
+        </sc-if>
+      </div>
+
+      <div data-r="panel" style="position:sticky;top:74px;display:flex;flex-direction:column;gap:18px">
+        <div style="display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:8px;overflow:hidden">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 16px;border-bottom:1px solid var(--line)">
+            <span style="font-size:13px;font-weight:600;color:var(--t1)">Weights</span>
+            <span style="display:flex;align-items:center;gap:7px">
+              <span style="display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:999px;background:{{ sumBg }};color:{{ sumFg }};font-size:11.5px;font-weight:500;white-space:nowrap">{{ sumLabel }}</span>
+              <sc-if value="{{ sumOff }}" hint-placeholder-val="{{ false }}">
+                <button onClick="{{ onNormalise }}" style="height:24px;padding:0 10px;border:1px solid var(--line);border-radius:999px;background:transparent;color:var(--t1);font-size:11.5px;font-weight:500;cursor:pointer;white-space:nowrap" style-hover="background:var(--hover)">Scale to 100%</button>
+              </sc-if>
+            </span>
+          </div>
+
+          <sc-for list="{{ weightRows }}" as="w" hint-placeholder-count="5">
+            <div style="display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--line)">
+              <span style="width:26px;height:26px;flex:none;border-radius:6px;background:var(--hover);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:600;color:var(--t2)">{{ w.mono }}</span>
+              <span style="display:flex;flex-direction:column;gap:2px;min-width:0;flex:1">
+                <span style="display:flex;align-items:baseline;gap:7px;min-width:0">
+                  <span style="font-size:12.5px;font-weight:500;color:var(--t1)">{{ w.ticker }}</span>
+                  <span style="font-size:10.5px;color:var(--t3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ w.name }}</span>
+                </span>
+                <span style="font-size:10.5px;color:var(--t3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ w.anchor }}</span>
+              </span>
+              <span style="display:flex;align-items:stretch;width:78px;flex:none;border:1px solid var(--line);border-radius:7px;overflow:hidden">
+                <input value="{{ w.draft }}" onChange="{{ w.onChange }}" inputmode="decimal" style="flex:1;min-width:0;height:28px;padding:0 3px 0 9px;border:none;background:transparent;color:var(--t1);font-size:12.5px;font-weight:500;outline:none;text-align:right">
+                <span style="display:flex;align-items:center;padding:0 8px 0 2px;font-size:11.5px;color:var(--t3)">%</span>
+              </span>
+              <button onClick="{{ w.onRemove }}" title="Remove" style="width:26px;height:26px;flex:none;display:flex;align-items:center;justify-content:center;border:none;border-radius:6px;background:transparent;color:var(--t3);cursor:pointer" style-hover="background:var(--hover);color:var(--neg)">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+              </button>
+            </div>
+          </sc-for>
+
+          <sc-if value="{{ noWeights }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:5px;padding:26px 18px;border-bottom:1px solid var(--line)">
+              <span style="font-size:12.5px;font-weight:500;color:var(--t1)">Nothing in this portfolio yet</span>
+              <span style="font-size:11.5px;color:var(--t3);text-align:center;line-height:1.55">Search below to add a ticker, or load the 12 positions you already hold.</span>
+            </div>
+          </sc-if>
+
+          <div style="display:flex;flex-direction:column;gap:9px;padding:13px 16px">
+            <div style="display:flex;align-items:center;gap:8px">
+              <input value="{{ query }}" onChange="{{ onQuery }}" placeholder="Add a ticker or name…" style="flex:1;min-width:0;height:32px;padding:0 11px;border:1px solid var(--line);border-radius:7px;background:transparent;color:var(--t1);font-size:12.5px;outline:none" style-focus="border-color:var(--accent)">
+              <button onClick="{{ onEven }}" style="height:32px;padding:0 11px;border:1px solid var(--line);border-radius:7px;background:transparent;color:var(--t1);font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap" style-hover="background:var(--hover)">Even split</button>
+            </div>
+            <sc-for list="{{ picks }}" as="p" hint-placeholder-count="4">
+              <button onClick="{{ p.onClick }}" style="display:flex;align-items:center;gap:9px;width:100%;padding:7px 8px;border:none;border-radius:7px;background:transparent;cursor:pointer;text-align:left" style-hover="background:var(--hover)">
+                <span style="width:24px;height:24px;flex:none;border-radius:6px;background:var(--hover);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;color:var(--t2)">{{ p.mono }}</span>
+                <span style="display:flex;flex-direction:column;gap:1px;min-width:0;flex:1">
+                  <span style="display:flex;align-items:baseline;gap:6px;min-width:0">
+                    <span style="font-size:12.5px;font-weight:500;color:var(--t1)">{{ p.ticker }}</span>
+                    <sc-if value="{{ p.tag }}" hint-placeholder-val="{{ false }}">
+                      <span style="font-size:9.5px;font-weight:500;color:var(--accent);border:1px solid var(--accent);border-radius:999px;padding:0 5px">{{ p.tag }}</span>
+                    </sc-if>
+                  </span>
+                  <span style="font-size:10.5px;color:var(--t3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ p.sub }}</span>
+                </span>
+                <span style="font-size:12px;font-weight:500;color:var(--t2);white-space:nowrap">{{ p.yield }}</span>
+              </button>
+            </sc-for>
+            <sc-if value="{{ noPicks }}" hint-placeholder-val="{{ false }}">
+              <span style="font-size:11.5px;color:var(--t3);padding:4px 2px">{{ noPicksNote }}</span>
+            </sc-if>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:8px;overflow:hidden">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 16px;border-bottom:1px solid var(--line)">
+            <span style="font-size:13px;font-weight:600;color:var(--t1)">What these numbers rest on</span>
+            <span style="font-size:11.5px;color:var(--t3)">{{ honestyNote }}</span>
+          </div>
+          <sc-for list="{{ honesty }}" as="h" hint-placeholder-count="4">
+            <div style="display:flex;flex-direction:column;gap:3px;padding:12px 16px 12px 13px;border-bottom:1px solid var(--line);border-left:3px solid {{ h.tone }}">
+              <span style="font-size:12.5px;font-weight:500;color:var(--t1)">{{ h.title }}</span>
+              <span style="font-size:11.5px;line-height:1.55;color:var(--t2);text-wrap:pretty">{{ h.body }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:8px;overflow:hidden">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:13px 16px;border-bottom:1px solid var(--line)">
+        <span style="display:flex;align-items:baseline;gap:9px;flex-wrap:wrap">
+          <span style="font-size:13px;font-weight:600;color:var(--t1)">Scenarios side by side</span>
+          <span style="font-size:11.5px;color:var(--t3)">{{ cmpNote }}</span>
+        </span>
+      </div>
+      <div style="max-width:100%;overflow-x:auto;overscroll-behavior-x:contain">
+        <div data-r="cmpwrap">
+          <div style="display:grid;grid-template-columns:{{ cmpCols }};border-bottom:1px solid var(--line)">
+            <div style="padding:10px 16px"></div>
+            <sc-for list="{{ cmpHead }}" as="h" hint-placeholder-count="3">
+              <div style="display:flex;flex-direction:column;gap:2px;padding:10px 16px;background:{{ h.bg }};border-left:1px solid var(--line)">
+                <span style="font-size:12.5px;font-weight:600;color:{{ h.color }};white-space:nowrap">{{ h.name }}</span>
+                <span style="font-size:10.5px;color:var(--t3);white-space:nowrap">{{ h.meta }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <sc-for list="{{ cmpRows }}" as="r" hint-placeholder-count="9">
+            <div style="display:grid;grid-template-columns:{{ cmpCols }};border-bottom:1px solid var(--line);background:{{ r.bg }}">
+              <div style="display:flex;flex-direction:column;gap:1px;padding:10px 16px">
+                <span style="font-size:12.5px;color:var(--t1)">{{ r.label }}</span>
+                <sc-if value="{{ r.sub }}" hint-placeholder-val="{{ false }}">
+                  <span style="font-size:10.5px;color:var(--t3)">{{ r.sub }}</span>
+                </sc-if>
+              </div>
+              <sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="3">
+                <div style="display:flex;align-items:center;padding:10px 16px;border-left:1px solid var(--line);background:{{ c.bg }}">
+                  <span style="font-size:12.5px;font-weight:{{ c.weight }};color:{{ c.color }};white-space:nowrap">{{ c.value }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:8px;overflow:hidden">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:13px 16px;border-bottom:1px solid var(--line)">
+        <span style="display:flex;align-items:baseline;gap:9px;flex-wrap:wrap">
+          <span style="font-size:13px;font-weight:600;color:var(--t1)">{{ legTitle }}</span>
+          <span style="font-size:11.5px;color:var(--t3)">{{ legNote }}</span>
+        </span>
+      </div>
+      <div style="max-width:100%;overflow-x:auto;overscroll-behavior-x:contain">
+        <div data-r="legwrap">
+          <div style="display:grid;grid-template-columns:{{ legCols }};border-bottom:1px solid var(--line)">
+            <sc-for list="{{ legHead }}" as="h" hint-placeholder-count="6">
+              <div style="display:flex;align-items:center;justify-content:{{ h.justify }};padding:9px 13px">
+                <span style="font-size:12px;font-weight:500;color:var(--t2);white-space:nowrap">{{ h.label }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <sc-for list="{{ legRows }}" as="r" hint-placeholder-count="6">
+            <div style="display:grid;grid-template-columns:{{ legCols }};border-bottom:1px solid var(--line)">
+              <div style="display:flex;align-items:center;gap:9px;padding:11px 13px;min-width:0">
+                <span style="width:26px;height:26px;flex:none;border-radius:6px;background:var(--hover);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:600;color:var(--t2)">{{ r.mono }}</span>
+                <span style="display:block;min-width:0;flex:1;overflow:hidden">
+                  <dc-import name="TwoLineCell" primary="{{ r.ticker }}" secondary="{{ r.name }}" align="left" hint-size="150px,36px"></dc-import>
+                </span>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:flex-end;padding:11px 13px;min-width:0">
+                <dc-import name="TwoLineCell" primary="{{ r.weight }}" secondary="{{ r.weightSub }}" align="right" hint-size="96px,36px"></dc-import>
+              </div>
+              <div style="display:flex;align-items:center;padding:11px 13px;min-width:0;overflow:hidden">
+                <span style="display:block;min-width:0;flex:1;overflow:hidden">
+                  <dc-import name="TwoLineCell" primary="{{ r.anchor }}" secondary="{{ r.anchorSub }}" align="left" hint-size="160px,36px"></dc-import>
+                </span>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:flex-end;padding:11px 13px;min-width:0">
+                <dc-import name="TwoLineCell" primary="{{ r.ends }}" secondary="{{ r.endsSub }}" tone="{{ r.endsTone }}" align="right" hint-size="118px,36px"></dc-import>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:flex-end;padding:11px 13px;min-width:0">
+                <dc-import name="TwoLineCell" primary="{{ r.dividends }}" secondary="{{ r.dividendsSub }}" align="right" hint-size="112px,36px"></dc-import>
+              </div>
+            </div>
+          </sc-for>
+          <sc-if value="{{ hasRun }}" hint-placeholder-val="{{ true }}">
+            <div style="display:grid;grid-template-columns:{{ legCols }};border-top:1px solid var(--t3)">
+              <div style="display:flex;align-items:center;padding:12px 13px;min-width:0">
+                <dc-import name="TwoLineCell" primary="Total" secondary="{{ legTotalSub }}" align="left" hint-size="150px,36px"></dc-import>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:flex-end;padding:12px 13px;min-width:0">
+                <dc-import name="TwoLineCell" primary="{{ legTotalWeight }}" secondary="{{ legTotalWeightSub }}" align="right" hint-size="96px,36px"></dc-import>
+              </div>
+              <div style="display:flex;align-items:center;padding:12px 13px">
+                <span style="font-size:11.5px;color:var(--t3);text-wrap:pretty">{{ legTotalAnchor }}</span>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:flex-end;padding:12px 13px;min-width:0">
+                <dc-import name="TwoLineCell" primary="{{ legTotalEnds }}" secondary="{{ legTotalEndsSub }}" tone="{{ legTotalTone }}" align="right" hint-size="118px,36px"></dc-import>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:flex-end;padding:12px 13px;min-width:0">
+                <dc-import name="TwoLineCell" primary="{{ legTotalDiv }}" secondary="{{ legTotalDivSub }}" align="right" hint-size="112px,36px"></dc-import>
+              </div>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+    </div>
+
+    <span style="font-size:11px;line-height:1.55;color:var(--t3);max-width:1000px;text-wrap:pretty">{{ footnote }}</span>
+  </main>
+
+  <div data-r="tabbar" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:60;height:60px;background:var(--card);border-top:1px solid var(--line);align-items:stretch;padding:0 4px">
+    <sc-for list="{{ tabRows }}" as="t" hint-placeholder-count="4">
+      <a href="{{ t.href }}" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-decoration:none;color:{{ t.color }}">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="{{ t.d }}"></path></svg>
+        <span style="font-size:10px;font-weight:500">{{ t.label }}</span>
+      </a>
+    </sc-for>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;monthlyContribution&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:300,&quot;min&quot;:0,&quot;max&quot;:5000,&quot;step&quot;:50,&quot;unit&quot;:&quot;$&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Portfolio Lab&quot;},&quot;reinvest&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Portfolio Lab&quot;},&quot;chartScale&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Money&quot;,&quot;Growth of $1&quot;],&quot;default&quot;:&quot;Money&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Portfolio Lab&quot;},&quot;showBenchmark&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Portfolio Lab&quot;}}">
+class Component extends DCLogic {
+  state = {
+    scen: null, active: 0, drafts: {}, amountDraft: null, monthlyDraft: null,
+    nameDraft: null, query: '', menu: null, hover: null, titleTip: false
+  };
+
+  componentDidMount() {
+    if (!window.SnowlineData) {
+      const check = () => { if (window.SnowlineData) this.forceUpdate(); else setTimeout(check, 30); };
+      setTimeout(check, 20);
+    }
+    this.doc = () => { if (this.state.menu) this.setState({ menu: null }); };
+    document.addEventListener('click', this.doc);
+  }
+  componentWillUnmount() { if (this.doc) document.removeEventListener('click', this.doc); }
+
+  num(v) { const n = parseFloat(String(v === null || v === undefined ? '' : v).replace(/[^0-9.]/g, '')); return isFinite(n) ? n : 0; }
+
+  seed(D) {
+    const span = D.monthSpan();
+    return [{
+      name: 'My portfolio',
+      weights: D.labMyPortfolio(),
+      amount: Math.round(D.totals().invested),
+      monthly: this.props.monthlyContribution === undefined ? 300 : this.props.monthlyContribution,
+      reinvest: this.props.reinvest !== false,
+      from: 0, to: span.length - 1
+    }];
+  }
+
+  scenarios(D) {
+    if (this.state.scen) return this.state.scen;
+    const saved = D.labScenarios();
+    if (saved && saved.length) return saved;
+    return this.seed(D);
+  }
+
+  /* every mutation writes the whole list, so state and storage never diverge */
+  commit(list, extra) {
+    window.SnowlineData.saveLabScenarios(list);
+    this.setState(Object.assign({ scen: list }, extra || {}));
+  }
+  patch(D, changes, extra) {
+    const list = this.scenarios(D).map((s, i) => (i === this.activeIndex(D) ? Object.assign({}, s, changes) : s));
+    this.commit(list, extra);
+  }
+  activeIndex(D) { return Math.max(0, Math.min(this.scenarios(D).length - 1, this.state.active)); }
+
+  niceMax(raw, steps) {
+    if (!(raw > 0)) return steps;
+    const mag = Math.pow(10, Math.floor(Math.log10(raw / steps)));
+    const cands = [1, 2, 2.5, 5, 10, 20, 25];
+    for (let m = mag; m <= mag * 100000; m *= 10) {
+      for (let i = 0; i < cands.length; i++) {
+        const step = cands[i] * m;
+        if (step * steps >= raw) return step * steps;
+      }
+    }
+    return Math.ceil(raw / steps) * steps;
+  }
+
+  indexAt(e, count) {
+    const r = e.currentTarget.getBoundingClientRect();
+    if (!r.width) return 0;
+    const t = (e.clientX - r.left) / r.width;
+    return Math.max(0, Math.min(count - 1, Math.round(t * (count - 1))));
+  }
+
+  renderVals() {
+    const st = this.state;
+    const I = {
+      bars: 'M4 20V10M10 20V4M16 20v-7M22 20H2', table: 'M3 5h18v14H3V5Zm0 5h18M9 10v9',
+      home: 'M4 11l8-7 8 7v9H4v-9Zm5 9v-6h6v6',
+      scale: 'M12 4v16M6 8l-3 6h6l-3-6Zm12 0l-3 6h6l-3-6ZM5 8h14', dots: 'M5 12h.01M12 12h.01M19 12h.01'
+    };
+    const base = {
+      stop: (e) => e.stopPropagation(),
+      tabRows: [
+        { label: 'Dashboard', d: I.home, href: 'Snowline.dc.html', color: 'var(--t3)' },
+        { label: 'Analytics', d: I.bars, href: 'Analytics.dc.html', color: 'var(--t3)' },
+        { label: 'Portfolio', d: I.table, href: 'Holdings.dc.html', color: 'var(--t3)' },
+        { label: 'Tools', d: I.scale, href: 'Rebalancing.dc.html', color: 'var(--accent)' }
+      ],
+      cmpCols: 'minmax(190px,1fr) repeat(2,minmax(130px,0.8fr))',
+      legCols: 'minmax(180px,1.15fr) minmax(104px,0.7fr) minmax(170px,1.05fr) minmax(126px,0.85fr) minmax(120px,0.8fr)'
+    };
+    if (!window.SnowlineData) return base;
+
+    const D = window.SnowlineData, F = D.fmt, K = D.constants, T = D.totals();
+    const money = (v) => F.money(v);
+    const span = D.monthSpan();
+    const list = this.scenarios(D);
+    const ai = this.activeIndex(D);
+    const s = list[ai];
+    const wsum = Math.round(s.weights.reduce((a, w) => a + this.num(w.weight), 0) * 100) / 100;
+    const sumOff = Math.abs(wsum - 100) > 0.005;
+
+    const cfgOf = (x) => ({
+      weights: x.weights, amount: x.amount, monthly: x.monthly,
+      reinvest: x.reinvest !== false, from: x.from, to: x.to
+    });
+    const runs = list.map((x) => D.backtest(cfgOf(x)));
+    const run = runs[ai];
+    const sec = D.labSecurities();
+    const byT = {};
+    sec.forEach((r) => { byT[r.ticker] = r; });
+
+    /* ---- scenario chrome ------------------------------------------------- */
+    const LETTERS = ['A', 'B', 'C'];
+    const tabs = list.map((x, i) => {
+      const r = runs[i];
+      return {
+        badge: LETTERS[i] || String(i + 1), name: x.name || 'Scenario ' + (i + 1),
+        meta: r ? F.caret(r.stats.cagr, 1) + ' a year · ' + x.weights.length + (x.weights.length === 1 ? ' name' : ' names')
+          : x.weights.length + ' names · nothing to run',
+        bg: i === ai ? 'var(--accent-soft)' : 'transparent',
+        border: i === ai ? 'var(--accent)' : 'var(--line)',
+        color: i === ai ? 'var(--accent)' : 'var(--t1)',
+        badgeBg: i === ai ? 'var(--accent)' : 'var(--hover)',
+        badgeFg: i === ai ? 'var(--on-accent)' : 'var(--t2)',
+        weight: i === ai ? 600 : 500,
+        onClick: () => this.setState({ active: i, drafts: {}, amountDraft: null, monthlyDraft: null, nameDraft: null, hover: null })
+      };
+    });
+
+    /* ---- the run ---------------------------------------------------------- */
+    const pts = run ? run.months : [];
+    const growth = this.props.chartScale === 'Growth of $1';
+    const vals = growth
+      ? pts.map((p) => ({ me: p.twrIndex * 100, bench: p.benchmarkIndex * 100, invested: 100 }))
+      : pts.map((p) => ({ me: p.value, bench: p.benchmark, invested: p.invested }));
+    const showBench = this.props.showBenchmark !== false;
+    const showInvested = !growth;
+    const all = [];
+    vals.forEach((v) => { all.push(v.me); if (showBench) all.push(v.bench); if (showInvested) all.push(v.invested); });
+    const hi = this.niceMax(all.length ? Math.max.apply(null, all) : 1, 4);
+    const lowest = all.length ? Math.min.apply(null, all) : 0;
+    const lo = growth ? Math.max(0, Math.floor((lowest - 6) / 10) * 10) : 0;
+    const x = (i) => (pts.length < 2 ? 0 : i / (pts.length - 1) * 1000);
+    const y = (v) => 250 - (hi - lo ? (v - lo) / (hi - lo) : 0) * 240;
+    const pathOf = (pick) => vals.map((v, i) => (i ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(pick(v)).toFixed(1)).join(' ');
+    const hoverIdx = st.hover === null ? null : Math.max(0, Math.min(pts.length - 1, st.hover));
+    const hp = hoverIdx === null ? null : pts[hoverIdx];
+    const unit = (v) => (growth ? F.num(v, 1) : money(v));
+
+    /* drawdown band, from the peak month to the trough month */
+    const keyIndex = (k) => { for (let i = 0; i < pts.length; i++) { if (pts[i].key === k) return i; } return -1; };
+    const ddA = run ? keyIndex(run.stats.drawdownPeak) : -1;
+    const ddB = run ? keyIndex(run.stats.drawdownTrough) : -1;
+    const ddBand = ddA >= 0 && ddB > ddA;
+
+    const tickCount = Math.min(7, Math.max(2, pts.length));
+    const xTicks = [];
+    for (let i = 0; i < tickCount; i++) {
+      const idx = Math.round(i / (tickCount - 1) * (pts.length - 1));
+      xTicks.push({ label: pts[idx] ? (pts[idx].isStart ? 'Start' : pts[idx].short) : '' });
+    }
+
+    /* ---- weights editor --------------------------------------------------- */
+    const weightRows = s.weights.map((w, i) => {
+      const row = byT[w.ticker];
+      const a = row ? D.labAnchor(row) : null;
+      return {
+        mono: row ? row.mono : w.ticker.slice(0, 2),
+        ticker: w.ticker, name: row ? row.name : 'unknown ticker',
+        anchor: a
+          ? F.caret(a.annual * 100, 1) + ' a year · ' + a.source + (row.yieldPct ? ' · ' + F.pct(row.yieldPct, 2) + ' yield' : ' · no dividend')
+          : 'not in the universe — excluded from the run',
+        draft: st.drafts[w.ticker] === undefined ? F.num(this.num(w.weight), 2) : st.drafts[w.ticker],
+        onChange: (e) => {
+          const raw = e.target.value.replace(/[^0-9.]/g, '');
+          const drafts = Object.assign({}, st.drafts); drafts[w.ticker] = raw;
+          const next = s.weights.map((z, j) => (j === i ? { ticker: z.ticker, weight: this.num(raw) } : z));
+          this.patch(D, { weights: next }, { drafts: drafts, hover: null });
+        },
+        onRemove: () => {
+          const drafts = Object.assign({}, st.drafts); delete drafts[w.ticker];
+          this.patch(D, { weights: s.weights.filter((z) => z.ticker !== w.ticker) }, { drafts: drafts, hover: null });
+        }
+      };
+    });
+
+    const q = st.query.trim().toLowerCase();
+    const chosen = {};
+    s.weights.forEach((w) => { chosen[w.ticker] = true; });
+    const candidates = sec.filter((r) => !chosen[r.ticker])
+      .filter((r) => !q || r.ticker.toLowerCase().indexOf(q) >= 0 || r.name.toLowerCase().indexOf(q) >= 0)
+      .sort((a, b) => (a.held === b.held ? b.yieldPct - a.yieldPct : a.held ? -1 : 1))
+      .slice(0, q ? 7 : 5);
+    const addTicker = (t) => () => {
+      const room = Math.max(0, 100 - wsum);
+      const w = room > 0.5 ? Math.round(room * 100) / 100 : 5;
+      this.patch(D, { weights: s.weights.concat([{ ticker: t, weight: w }]) }, { query: '', drafts: {}, hover: null });
+    };
+
+    /* ---- comparison ------------------------------------------------------- */
+    const cols = list.map((x, i) => ({ kind: 'scen', i: i, name: (LETTERS[i] || i + 1) + ' · ' + (x.name || 'Scenario'), run: runs[i], x: x }))
+      .concat([{ kind: 'bench', name: K.benchmark, run: null, x: null }]);
+    const cmpCols = 'minmax(190px,1fr) repeat(' + cols.length + ',minmax(130px,0.8fr))';
+    const cell = (v, tone, strong) => ({
+      value: v, color: tone === 'pos' ? 'var(--accent)' : tone === 'neg' ? 'var(--neg)' : 'var(--t1)',
+      weight: strong ? 600 : 400, bg: 'transparent'
+    });
+    const bench = run ? run.benchmark : null;
+    const cmpRow = (label, sub, fn, alt) => ({
+      label: label, sub: sub, bg: alt ? 'var(--hover)' : 'transparent',
+      cells: cols.map((c) => (c.kind === 'bench'
+        ? (bench ? fn({ stats: null, bench: bench }, true) : cell('—'))
+        : (c.run ? fn(c.run, false) : cell('—'))))
+    });
+    const B = (r) => (r.bench ? r.bench : null);
+    const cmpRows = [
+      cmpRow('Window', run ? run.stats.months + ' months' : '', (r, isB) => cell(isB ? K.benchmark + ' path' : r.stats.fromShort + ' – ' + r.stats.toShort), false),
+      cmpRow('Money in', 'start + contributions', (r, isB) => cell(isB ? money(run.stats.contributed) : money(r.stats.contributed)), true),
+      cmpRow('Ends at', 'value on the last month', (r, isB) => cell(isB ? money(B(r).finalValue) : money(r.stats.finalValue), null, true), false),
+      cmpRow('CAGR', 'chain-linked, annualised', (r, isB) => cell(F.caret(isB ? B(r).cagr : r.stats.cagr, 2), (isB ? B(r).cagr : r.stats.cagr) >= 0 ? 'pos' : 'neg', true), true),
+      cmpRow('Total return', 'on money invested', (r, isB) => cell(F.caret(isB ? B(r).moneyReturn : r.stats.moneyReturn, 2), (isB ? B(r).moneyReturn : r.stats.moneyReturn) >= 0 ? 'pos' : 'neg'), false),
+      cmpRow('Max drawdown', 'on growth of $1', (r, isB) => cell(F.pct(isB ? B(r).maxDrawdown : r.stats.maxDrawdown, 2), 'neg'), true),
+      cmpRow('Volatility', 'annualised, monthly returns', (r, isB) => cell(F.pct(isB ? B(r).volatility : r.stats.volatility, 2)), false),
+      cmpRow('Sharpe', 'risk-free ' + (run ? F.pct(run.stats.riskFree, 2) : '—') + ' (BIL)', (r, isB) => cell(F.num(isB ? B(r).sharpe : r.stats.sharpe, 3)), true),
+      cmpRow('Down months', 'out of ' + (run ? run.stats.months : 0), (r, isB) => cell(String(isB ? B(r).downMonths : r.stats.downMonths)), false),
+      cmpRow('Dividends collected', 'net of ' + F.pct(K.withholdingTax * 100, 0) + ' withholding', (r, isB) => cell(isB ? '—' : money(r.stats.dividendsNet)), true),
+      cmpRow('Holdings', 'names in the mix', (r, isB) => cell(isB ? '1' : String(r.legs.length)), false)
+    ];
+
+    /* ---- per-holding table ------------------------------------------------ */
+    const legs = run ? run.legs.slice().sort((a, b) => b.value - a.value) : [];
+    const heldCount = legs.filter((l) => l.held).length;
+
+    const statCell = (label, primary, tone, secondary, note, tip, first) => ({
+      label: label, primary: primary, tone: tone, secondary: secondary, note: note, tip: tip,
+      border: first ? 'none' : '1px solid var(--line)'
+    });
+
+    return Object.assign(base, {
+      portfolioName: K.portfolioName,
+      headNote: run
+        ? 'Backtest over ' + run.stats.from + ' – ' + run.stats.to + ' · ' + run.stats.months
+          + ' months, the whole history this app has · ' + money(run.stats.contributed) + ' in, '
+          + money(run.stats.finalValue) + ' out · ' + list.length + (list.length === 1 ? ' scenario' : ' scenarios')
+        : 'Pick tickers, set weights and a starting amount to run a backtest.',
+      titleTip: st.titleTip,
+      titleTipOn: () => this.setState({ titleTip: true }),
+      titleTipOff: () => this.setState({ titleTip: false }),
+      titleTipText: 'Nothing here is a forecast and nothing is a measurement of the real market. Each ticker’s path is generated by the same engine that draws the portfolio history, pinned to one published annual figure — a held name uses its own IRR, everything else uses yield plus 5-year dividend growth. The month-to-month wobble around that anchor is synthetic, so drawdown, volatility and Sharpe describe the shape of a plausible path, not what actually happened.',
+
+      tabs: tabs,
+      activeName: (LETTERS[ai] || ai + 1) + ' · ' + (s.name || 'Scenario'),
+      canAdd: list.length < 3,
+      canRemove: list.length > 1,
+      onAddScenario: () => {
+        const copy = Object.assign({}, s, {
+          name: (s.name || 'Scenario') + ' variant',
+          weights: s.weights.map((w) => ({ ticker: w.ticker, weight: this.num(w.weight) }))
+        });
+        this.commit(list.concat([copy]), { active: list.length, drafts: {}, amountDraft: null, monthlyDraft: null, nameDraft: null });
+      },
+      onRemoveScenario: () => {
+        const next = list.filter((z, i) => i !== ai);
+        this.commit(next, { active: Math.max(0, ai - 1), drafts: {}, amountDraft: null, monthlyDraft: null, nameDraft: null });
+      },
+      onResetAll: () => {
+        D.clearLabScenarios();
+        this.setState({ scen: null, active: 0, drafts: {}, amountDraft: null, monthlyDraft: null, nameDraft: null, query: '', hover: null });
+      },
+      onLoadMine: () => this.patch(D, {
+        name: 'My portfolio', weights: D.labMyPortfolio(), amount: Math.round(T.invested)
+      }, { drafts: {}, amountDraft: null, nameDraft: null, hover: null }),
+
+      nameDraft: st.nameDraft === null ? (s.name || '') : st.nameDraft,
+      onName: (e) => this.patch(D, { name: e.target.value }, { nameDraft: e.target.value }),
+      amountDraft: st.amountDraft === null ? F.num(s.amount, 0) : st.amountDraft,
+      onAmount: (e) => {
+        const raw = e.target.value.replace(/[^0-9.]/g, '');
+        this.patch(D, { amount: this.num(raw) }, { amountDraft: raw, hover: null });
+      },
+      monthlyDraft: st.monthlyDraft === null ? F.num(s.monthly, 0) : st.monthlyDraft,
+      onMonthly: (e) => {
+        const raw = e.target.value.replace(/[^0-9.]/g, '');
+        this.patch(D, { monthly: this.num(raw) }, { monthlyDraft: raw, hover: null });
+      },
+      windowPickers: [
+        { id: 'from', label: span[s.from] ? span[s.from].short : '', value: s.from },
+        { id: 'to', label: span[s.to] ? span[s.to].short : '', value: s.to }
+      ].map((w) => ({
+        label: (w.id === 'from' ? 'from ' : 'to ') + w.label,
+        border: st.menu === w.id ? 'var(--accent)' : 'var(--line)',
+        open: st.menu === w.id,
+        onToggle: (e) => { e.stopPropagation(); this.setState({ menu: st.menu === w.id ? null : w.id }); },
+        options: span.map((mo, i) => ({
+          label: mo.short, check: i === w.value ? 1 : 0,
+          bg: i === w.value ? 'var(--accent-soft)' : 'transparent',
+          color: i === w.value ? 'var(--accent)' : 'var(--t1)',
+          weight: i === w.value ? 600 : 400,
+          onClick: (e) => {
+            e.stopPropagation();
+            const from = w.id === 'from' ? Math.min(i, s.to - 1) : s.from;
+            const to = w.id === 'to' ? Math.max(i, s.from + 1) : s.to;
+            this.patch(D, { from: Math.max(0, from), to: Math.min(span.length - 1, to) }, { menu: null, hover: null });
+          }
+        }))
+      })),
+      togReinvest: () => this.patch(D, { reinvest: s.reinvest === false }, { hover: null }),
+      reinvestMark: s.reinvest !== false ? '✓' : '',
+      reinvestBg: s.reinvest !== false ? 'var(--accent-soft)' : 'transparent',
+      reinvestBorder: s.reinvest !== false ? 'var(--accent)' : 'var(--line)',
+      reinvestBoxBg: s.reinvest !== false ? 'var(--accent)' : 'transparent',
+      reinvestBoxBorder: s.reinvest !== false ? 'var(--accent)' : 'var(--t3)',
+
+      stats: run ? [
+        statCell('CAGR', F.caret(run.stats.cagr, 2), run.stats.cagr >= 0 ? 'pos' : 'neg',
+          K.benchmark + ' ' + F.caret(run.benchmark.cagr, 2), F.num(run.stats.years, 2) + ' years',
+          'Chain-linked monthly return over the window, annualised — contribution-neutral, so a bigger monthly deposit does not flatter it.', true),
+        statCell('Total return', F.caret(run.stats.moneyReturn, 2), run.stats.moneyReturn >= 0 ? 'pos' : 'neg',
+          money(run.stats.profit) + ' on ' + money(run.stats.contributed), 'money-weighted',
+          'Profit against every dollar put in, start plus contributions. Unlike CAGR this does depend on when the money arrived.'),
+        statCell('Max drawdown', F.pct(run.stats.maxDrawdown, 2), 'neg',
+          run.stats.drawdownPeak && run.stats.drawdownTrough
+            ? run.stats.drawdownPeak + ' → ' + run.stats.drawdownTrough : 'no losing stretch',
+          'growth of $1',
+          'Deepest peak-to-trough fall of the growth-of-$1 index, not of the money line — a portfolio still taking deposits never shows its real drawdown on a value chart.'),
+        statCell('Volatility', F.pct(run.stats.volatility, 2), 'plain',
+          K.benchmark + ' ' + F.pct(run.benchmark.volatility, 2), run.stats.downMonths + ' down months',
+          'Standard deviation of the monthly returns, annualised. It comes from the synthetic dispersion around each anchor, so read it as scale, not as a measured figure.'),
+        statCell('Sharpe', F.num(run.stats.sharpe, 3), 'plain',
+          K.benchmark + ' ' + F.num(run.benchmark.sharpe, 3), 'risk-free ' + F.pct(run.stats.riskFree, 2),
+          'Excess return per unit of volatility, over the BIL yield the portfolio actually holds. Calibrated identically to Analytics ▸ Metrics, and window-wide only.'),
+        statCell('Dividends collected', money(run.stats.dividendsNet), 'plain',
+          money(run.stats.dividendsGross) + ' gross', F.pct(run.stats.incomeYield, 2) + ' a year on end value',
+          'Every payment the mix would have made across the window, at each name’s current yield and payment frequency, net of ' + F.pct(K.withholdingTax * 100, 0) + ' withholding.')
+      ] : [
+        statCell('CAGR', '—', 'plain', '', 'no run', 'Add at least one ticker with a weight above zero and a starting amount or monthly contribution.', true),
+        statCell('Total return', '—', 'plain', '', '', ''),
+        statCell('Max drawdown', '—', 'plain', '', '', ''),
+        statCell('Volatility', '—', 'plain', '', '', ''),
+        statCell('Sharpe', '—', 'plain', '', '', ''),
+        statCell('Dividends collected', '—', 'plain', '', '', '')
+      ],
+
+      hasRun: !!run, noRun: !run,
+      noRunTitle: s.weights.length === 0 ? 'Nothing to run yet' : 'Set an amount to run',
+      noRunBody: s.weights.length === 0
+        ? 'Add tickers on the right — or load the 12 positions you hold and vary them from there.'
+        : 'A backtest needs a starting amount, a monthly contribution, or both.',
+
+      chartTitle: growth ? 'Growth of $1' : 'Equity curve',
+      chartSpan: run
+        ? run.stats.from + ' – ' + run.stats.to + ' · ' + run.stats.months + ' months · '
+          + (s.reinvest !== false ? 'dividends reinvested' : 'dividends held in cash')
+        : '',
+      chartLegend: run ? [
+        { label: s.name || 'Scenario', value: growth ? F.num(run.stats.twr + 100, 1) : money(run.stats.finalValue), color: 'var(--accent)', stroke: '2px solid var(--accent)' }
+      ].concat(showBench ? [
+        { label: K.benchmark, value: growth ? F.num(run.benchmark.twr + 100, 1) : money(run.benchmark.finalValue), color: 'var(--t2)', stroke: '2px dashed var(--grey-series)' }
+      ] : []).concat(showInvested ? [
+        { label: 'Money in', value: money(run.stats.contributed), color: 'var(--t2)', stroke: '1px dotted var(--t3)' }
+      ] : []) : [],
+      grid: [0, 1, 2, 3, 4].map((i) => {
+        const v = lo + (hi - lo) * (1 - i / 4);
+        return { y: (10 + i * 60).toFixed(0), top: (10 + i * 60) + 'px', label: growth ? F.num(v, 0) : F.k(v) };
+      }),
+      linePath: pathOf((v) => v.me),
+      areaPath: pts.length ? pathOf((v) => v.me) + ' L1000 250 L0 250 Z' : '',
+      benchPath: pathOf((v) => v.bench),
+      investedPath: pathOf((v) => v.invested),
+      showBench: showBench && pts.length > 1,
+      showInvested: showInvested && pts.length > 1,
+      ddBand: ddBand,
+      ddX: ddBand ? x(ddA).toFixed(1) : '0',
+      ddW: ddBand ? (x(ddB) - x(ddA)).toFixed(1) : '0',
+      chartMove: (e) => { if (pts.length) this.setState({ hover: this.indexAt(e, pts.length) }); },
+      chartLeave: () => this.setState({ hover: null }),
+      hover: hp !== null,
+      cursorX: hp !== null ? x(hoverIdx).toFixed(1) : '0',
+      dotLeft: hp !== null ? (hoverIdx / Math.max(1, pts.length - 1) * 100).toFixed(2) + '%' : '0%',
+      dotTop: hp !== null ? y(vals[hoverIdx].me).toFixed(1) + 'px' : '0px',
+      tipLeft: hp !== null ? Math.min(88, Math.max(12, hoverIdx / Math.max(1, pts.length - 1) * 100)).toFixed(2) + '%' : '0%',
+      tip: hp === null ? null : {
+        title: hp.isStart ? 'Start of the window' : hp.key,
+        headline: unit(vals[hoverIdx].me),
+        sub: hp.isStart ? 'before the first month' : 'month ' + hoverIdx + ' of ' + run.stats.months,
+        rows: [
+          { label: K.benchmark + ', same schedule', value: unit(vals[hoverIdx].bench), color: 'var(--grey-series)' },
+          { label: 'Money in', value: money(hp.invested), color: 'var(--t3)' },
+          { label: 'Dividends this month', value: hp.isStart ? '—' : money(hp.dividends), color: 'var(--accent)' },
+          { label: 'Dividends to date', value: money(hp.dividendsToDate), color: 'var(--accent)' }
+        ],
+        footer: hp.isStart ? '' : 'Month return ' + F.caret(hp.monthReturn, 2) + ' · ' + K.benchmark + ' ' + F.caret(hp.benchmarkReturn, 2),
+        footerTone: hp.isStart ? 'neutral' : hp.monthReturn >= 0 ? 'pos' : 'neg'
+      },
+      xTicks: xTicks,
+      chartFoot: run ? [
+        { label: 'Against ' + K.benchmark, value: F.caret(run.stats.cagr - run.benchmark.cagr, 2) + ' a year', color: run.stats.cagr >= run.benchmark.cagr ? 'var(--accent)' : 'var(--neg)' },
+        { label: 'Worst stretch', value: run.stats.drawdownPeak ? F.pct(run.stats.maxDrawdown, 2) + ' · ' + run.stats.drawdownPeak + ' → ' + run.stats.drawdownTrough : 'none', color: 'var(--t1)' },
+        { label: 'Beta', value: F.num(run.stats.beta, 3) + ' vs ' + K.benchmark, color: 'var(--t1)' }
+      ] : [],
+
+      sumLabel: sumOff
+        ? 'Weights sum to ' + F.pct(wsum, 2) + ' · ' + F.num(Math.abs(wsum - 100), 2) + 'pp ' + (wsum > 100 ? 'over' : 'under')
+        : 'Weights sum to 100%',
+      sumBg: sumOff ? 'var(--tag-bg)' : 'var(--accent-soft)',
+      sumFg: sumOff ? 'var(--tag-fg)' : 'var(--accent)',
+      sumOff: sumOff,
+      onNormalise: () => {
+        if (!wsum) return;
+        let acc = 0;
+        const next = s.weights.map((w, i) => {
+          if (i === s.weights.length - 1) return { ticker: w.ticker, weight: Math.round((100 - acc) * 100) / 100 };
+          const v = Math.round(this.num(w.weight) / wsum * 10000) / 100;
+          acc = Math.round((acc + v) * 100) / 100;
+          return { ticker: w.ticker, weight: v };
+        });
+        this.patch(D, { weights: next }, { drafts: {} });
+      },
+      onEven: () => {
+        if (!s.weights.length) return;
+        const n = s.weights.length, each = Math.round(100 / n * 100) / 100;
+        const next = s.weights.map((w, i) => ({
+          ticker: w.ticker,
+          weight: i === n - 1 ? Math.round((100 - each * (n - 1)) * 100) / 100 : each
+        }));
+        this.patch(D, { weights: next }, { drafts: {} });
+      },
+      weightRows: weightRows,
+      noWeights: s.weights.length === 0,
+      query: st.query,
+      onQuery: (e) => this.setState({ query: e.target.value }),
+      picks: candidates.map((r) => ({
+        mono: r.mono, ticker: r.ticker, tag: r.held ? 'held' : '',
+        sub: r.name + ' · ' + r.sector,
+        yield: r.yieldPct ? F.pct(r.yieldPct, 2) : 'no dividend',
+        onClick: addTicker(r.ticker)
+      })),
+      noPicks: candidates.length === 0,
+      noPicksNote: q ? 'No name in the ' + sec.length + '-security universe matches “' + st.query.trim() + '”.' : 'Every security in the universe is already in this mix.',
+
+      honestyNote: run ? run.stats.months + ' months of history' : '',
+      honesty: [
+        {
+          tone: 'var(--amber)', title: 'The window is the app’s own history',
+          body: 'The portfolio starts in ' + span[0].key + ' and the last closed month is ' + span[span.length - 1].key
+            + '. There is no data before that, so a backtest cannot reach further back — every window here is a slice of those '
+            + span.length + ' months, which is a thin sample for anything annualised.'
+        },
+        {
+          tone: 'var(--line)', title: 'Each name is pinned to one published number',
+          body: 'A name you hold compounds at its own IRR (' + heldCount + ' of ' + legs.length
+            + ' in this mix). Everything else compounds at yield plus 5-year dividend growth — a Gordon proxy, not a price history. Two names with the same anchor follow different paths only because the generator is seeded per ticker.'
+        },
+        {
+          tone: 'var(--line)', title: 'Drawdown, volatility and Sharpe are shape',
+          body: 'The wobble around each anchor is synthetic. It is scaled by asset class — funds move less than single stocks, the money-market line not at all — and it is what produces those three figures. Read them as an order of magnitude; the CAGR and the dividend total are the parts tied to real published inputs.'
+        },
+        {
+          tone: 'var(--line)', title: 'No rebalancing, no fees, no tax on gains',
+          body: 'Weights are set once and then drift as the paths diverge. Dividends are taxed at ' + F.pct(K.withholdingTax * 100, 0)
+            + ' withholding' + (s.reinvest !== false ? ' and reinvested into the name that paid them' : ' and held in cash') + '. Trading costs and capital-gains tax are ignored, exactly as on the rebalancing screen.'
+        }
+      ],
+
+      cmpNote: list.length > 1
+        ? list.length + ' scenarios and ' + K.benchmark + ' · same window, same deposit schedule'
+        : 'Duplicate this scenario to compare a variation against it',
+      cmpCols: cmpCols,
+      cmpHead: cols.map((c, i) => ({
+        name: c.name,
+        meta: c.kind === 'bench'
+          ? 'same schedule, index path'
+          : (c.x.weights.length + (c.x.weights.length === 1 ? ' name · ' : ' names · ') + money(c.x.amount) + (c.x.monthly ? ' + ' + money(c.x.monthly) + '/mo' : '')),
+        bg: c.kind === 'scen' && c.i === ai ? 'var(--accent-soft)' : 'transparent',
+        color: c.kind === 'scen' && c.i === ai ? 'var(--accent)' : 'var(--t1)'
+      })),
+      cmpRows: cmpRows,
+
+      legTitle: 'Inside ' + (s.name || 'this scenario'),
+      legNote: run
+        ? legs.length + (legs.length === 1 ? ' name · ' : ' names · ') + heldCount + ' held today · weights drift, nothing is rebalanced'
+        : '',
+      legHead: [
+        { label: 'Holding', justify: 'flex-start' },
+        { label: 'Weight', justify: 'flex-end' },
+        { label: 'Return anchor', justify: 'flex-start' },
+        { label: 'Ends at', justify: 'flex-end' },
+        { label: 'Dividends', justify: 'flex-end' }
+      ],
+      legRows: legs.map((l) => ({
+        mono: l.mono, ticker: l.ticker, name: l.name,
+        weight: F.pct(l.share, 2),
+        weightSub: sumOff ? 'entered ' + F.pct(l.weight, 2) : l.sector,
+        anchor: F.caret(l.anchorAnnual, 1) + ' a year',
+        anchorSub: l.anchorSource,
+        ends: money(l.value),
+        endsSub: F.caret(l.growth, 2) + ' on ' + money(l.contributed),
+        endsTone: l.growth >= 0 ? 'pos' : 'neg',
+        dividends: money(l.dividends),
+        dividendsSub: l.yieldPct ? F.pct(l.yieldPct, 2) + ' · ' + l.frequency.toLowerCase() : 'none'
+      })),
+      legTotalSub: run ? legs.length + ' names · ' + run.stats.months + ' months' : '',
+      legTotalWeight: '100.00%',
+      legTotalWeightSub: sumOff ? 'normalised from ' + F.pct(wsum, 2) : 'as entered',
+      legTotalAnchor: run
+        ? 'weighted anchor ' + F.caret(legs.reduce((a, l) => a + l.anchorAnnual * l.share / 100, 0), 2) + ' a year vs realised CAGR ' + F.caret(run.stats.cagr, 2)
+        : '',
+      legTotalEnds: run ? money(run.stats.finalValue) : '—',
+      legTotalEndsSub: run ? F.caret(run.stats.moneyReturn, 2) + ' on ' + money(run.stats.contributed) : '',
+      legTotalTone: run && run.stats.moneyReturn >= 0 ? 'pos' : 'neg',
+      legTotalDiv: run ? money(run.stats.dividendsNet) : '—',
+      legTotalDivSub: run ? money(run.stats.dividendsGross) + ' gross' : '',
+
+      footnote: run
+        ? 'This is a what-if, not a record. The window is fixed to the app’s own monthly history — ' + span[0].key + ' to '
+          + span[span.length - 1].key + ', ' + span.length + ' months — because nothing earlier exists to test against. Within it, each name’s monthly path comes from the same generator that draws the portfolio value chart, pinned to one published annual figure per name: the position’s IRR where you hold it, yield plus 5-year dividend growth where you do not. '
+          + 'Dividends are paid at each name’s current yield on its running value, at its real frequency, net of ' + F.pct(K.withholdingTax * 100, 0) + ' withholding — ' + money(run.stats.dividendsNet) + ' across this window. '
+          + 'CAGR is chain-linked and contribution-neutral; total return is money-weighted and is not. Max drawdown, volatility, Sharpe and beta are computed over the whole selected window only, with the same calibration Analytics ▸ Metrics uses, and they derive from synthetic month-to-month dispersion — the risk figures are the shape of a plausible path, not a measurement. Weights are normalised to run whatever they sum to on screen'
+          + (sumOff ? ' — yours sum to ' + F.pct(wsum, 2) + ', so the mix shown is scaled' : '')
+          + '. No rebalancing, no trading costs, no tax on gains, and nothing here is advice.'
+        : 'Weights are normalised to run whatever they sum to on screen. The window is fixed to the app’s own monthly history, ' + span[0].key + ' to ' + span[span.length - 1].key + '.'
+    });
+  }
+}
+</script>
+</body>
+</html>

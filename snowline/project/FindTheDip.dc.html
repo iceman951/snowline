@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <script src="snowline-data.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --canvas:#FAFAF9; --card:#FFFFFF; --t1:#171717; --t2:#737373; --t3:#A3A3A3; --line:#E7E5E4;
+      --accent:#0F7B57; --neg:#B91C1C; --amber:#B45309; --hover:#F5F5F4; --on-accent:#FFFFFF;
+      --grey-series:#A8A29E; --shadow:0 10px 28px rgba(23,23,23,.10);
+      --accent-soft:color-mix(in oklab, var(--accent) 9%, var(--card));
+      --accent-tint:color-mix(in oklab, var(--accent) 16%, var(--card));
+      --neg-soft:color-mix(in oklab, var(--neg) 8%, var(--card));
+      --tag-bg:color-mix(in oklab, var(--amber) 8%, var(--card));
+      --tag-fg:var(--amber); --track:#E4E1DF;
+    }
+    html[data-theme="dark"]{
+      --canvas:#0C0C0C; --card:#171717; --t1:#FAFAF9; --t2:#A3A3A3; --t3:#737373; --line:#292524;
+      --accent:#34D399; --neg:#F87171; --amber:#F59E0B; --hover:#201E1D; --on-accent:#0C0C0C;
+      --grey-series:#57534E; --shadow:0 10px 28px rgba(0,0,0,.55);
+      --neg-soft:color-mix(in oklab, var(--neg) 10%, var(--card));
+      --tag-bg:color-mix(in oklab, var(--amber) 7%, var(--card));
+      --tag-fg:color-mix(in oklab, var(--amber) 58%, var(--t2));
+      --track:#3A3431;
+    }
+    html,body{margin:0;padding:0;background:var(--canvas)}
+    *{box-sizing:border-box}
+    body{font-family:'Inter',system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif;font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
+    a{color:var(--accent);text-decoration:none}
+    a:hover{color:var(--accent);text-decoration:underline}
+    button,input{font-family:inherit;font-variant-numeric:tabular-nums}
+    ::selection{background:var(--accent-tint)}
+    @keyframes menuIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+    @media (max-width:1080px){[data-r="stats"]{grid-template-columns:1fr 1fr!important}}
+    @media (max-width:960px){
+      [data-r="tabbar"]{display:flex!important}
+      [data-r="main"]{padding:16px 16px 104px!important}
+    }
+  </style>
+</helmet>
+<div style="min-height:100vh;background:var(--canvas);color:var(--t1);font-size:14px;line-height:1.45">
+
+  <dc-import name="TopNav" active="Tools" sub-active="Find the Dip" hint-size="100%,56px"></dc-import>
+
+  <main data-r="main" data-screen-label="Tools — Find the Dip" style="max-width:1392px;margin:0 auto;padding:24px 24px 88px;display:flex;flex-direction:column;gap:18px">
+
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap">
+      <div style="display:flex;flex-direction:column;gap:5px;min-width:0">
+        <div style="display:flex;align-items:center;gap:8px;position:relative">
+          <h1 style="margin:0;font-size:32px;font-weight:600;letter-spacing:-0.028em;line-height:1.1;color:var(--t1)">Find the Dip</h1>
+          <span onMouseEnter="{{ tipOn }}" onMouseLeave="{{ tipOff }}" style="width:16px;height:16px;margin-top:6px;flex:none;border:1px solid var(--line);border-radius:50%;font-size:10px;font-weight:500;color:var(--t3);display:flex;align-items:center;justify-content:center;cursor:help" style-hover="border-color:var(--t3);color:var(--t2)">?</span>
+          <sc-if value="{{ titleTip }}" hint-placeholder-val="{{ false }}">
+            <span style="position:absolute;top:44px;left:0;z-index:40;width:400px;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:10px 12px;font-size:11.5px;line-height:1.55;color:var(--t2)">{{ titleTipText }}</span>
+          </sc-if>
+          <span style="font-size:13px;color:var(--t3);padding-top:6px">{{ portfolioName }}</span>
+        </div>
+        <span style="font-size:12px;color:var(--t3)">{{ headNote }}</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <a href="Screener.dc.html" style="display:inline-flex;align-items:center;height:32px;padding:0 13px;border:1px solid var(--line);border-radius:7px;color:var(--t1);font-size:12.5px;font-weight:500;text-decoration:none;white-space:nowrap" style-hover="background:var(--hover);text-decoration:none">Screener</a>
+        <a href="Holdings.dc.html" style="display:inline-flex;align-items:center;height:32px;padding:0 13px;border:1px solid var(--line);border-radius:7px;color:var(--t1);font-size:12.5px;font-weight:500;text-decoration:none;white-space:nowrap" style-hover="background:var(--hover);text-decoration:none">My holdings</a>
+      </div>
+    </div>
+
+    <div data-r="stats" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;background:var(--card);border:1px solid var(--line);border-radius:8px;overflow:hidden">
+      <sc-for list="{{ stats }}" as="s" hint-placeholder-count="4">
+        <div style="padding:16px 18px;border-left:{{ s.border }}">
+          <dc-import name="Metric" label="{{ s.label }}" primary="{{ s.primary }}" primary-tone="{{ s.tone }}" secondary="{{ s.secondary }}" secondary-note="{{ s.note }}" tip="{{ s.tip }}" help="{{ true }}" hint-size="100%,74px"></dc-import>
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:11px 14px">
+      <span style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:12px;font-weight:500;color:var(--t2);white-space:nowrap">Off the high by</span>
+        <span style="display:flex;align-items:center;gap:0;border:1px solid var(--line);border-radius:7px;overflow:hidden">
+          <sc-for list="{{ depthTabs }}" as="d" hint-placeholder-count="4">
+            <button onClick="{{ d.onClick }}" style="height:30px;padding:0 11px;border:none;border-left:{{ d.divider }};background:{{ d.bg }};color:{{ d.color }};font-size:12px;font-weight:{{ d.weight }};cursor:pointer;white-space:nowrap" style-hover="background:var(--hover)">{{ d.label }}</button>
+          </sc-for>
+        </span>
+      </span>
+
+      <span style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:12px;font-weight:500;color:var(--t2);white-space:nowrap">Show</span>
+        <span style="display:flex;align-items:center;gap:0;border:1px solid var(--line);border-radius:7px;overflow:hidden">
+          <sc-for list="{{ scopeTabs }}" as="d" hint-placeholder-count="3">
+            <button onClick="{{ d.onClick }}" style="height:30px;padding:0 11px;border:none;border-left:{{ d.divider }};background:{{ d.bg }};color:{{ d.color }};font-size:12px;font-weight:{{ d.weight }};cursor:pointer;white-space:nowrap" style-hover="background:var(--hover)">{{ d.label }}</button>
+          </sc-for>
+        </span>
+      </span>
+
+      <span style="position:relative">
+        <button onClick="{{ togSector }}" style="display:flex;align-items:center;gap:8px;height:30px;padding:0 11px;border:1px solid {{ sectorBorder }};border-radius:7px;background:transparent;color:var(--t1);font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap" style-hover="background:var(--hover)">
+          {{ sectorLabel }}
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2.2" stroke-linecap="round"><path d="M6 9l6 6 6-6"></path></svg>
+        </button>
+        <sc-if value="{{ sectorOpen }}" hint-placeholder-val="{{ false }}">
+          <span onClick="{{ stop }}" style="position:absolute;top:36px;left:0;z-index:60;display:block;width:230px;max-height:300px;overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:5px;animation:menuIn .12s ease-out">
+            <sc-for list="{{ sectorOptions }}" as="o" hint-placeholder-count="8">
+              <button onClick="{{ o.onClick }}" style="display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;height:32px;padding:0 9px;border:none;border-radius:6px;background:{{ o.bg }};color:{{ o.color }};font-size:12.5px;font-weight:{{ o.weight }};cursor:pointer;text-align:left" style-hover="background:var(--hover)">
+                <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ o.label }}</span>
+                <span style="font-size:11px;color:var(--t3)">{{ o.count }}</span>
+              </button>
+            </sc-for>
+          </span>
+        </sc-if>
+      </span>
+
+      <button onClick="{{ togBelow200 }}" style="display:flex;align-items:center;gap:8px;height:30px;padding:0 11px 0 9px;border:1px solid {{ belowBorder }};border-radius:7px;background:{{ belowBg }};color:var(--t1);font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap" style-hover="background:var(--hover)">
+        <span style="width:15px;height:15px;flex:none;border:1px solid {{ belowBoxBorder }};border-radius:4px;background:{{ belowBoxBg }};display:flex;align-items:center;justify-content:center;color:var(--on-accent);font-size:10px;font-weight:700">{{ belowMark }}</span>
+        Below the 200-day only
+      </button>
+
+      <input value="{{ query }}" onChange="{{ onQuery }}" placeholder="Ticker or name…" style="width:170px;height:30px;padding:0 11px;border:1px solid var(--line);border-radius:7px;background:transparent;color:var(--t1);font-size:12.5px;outline:none" style-focus="border-color:var(--accent)">
+
+      <div style="flex:1"></div>
+      <span style="font-size:12px;color:var(--t3);white-space:nowrap">{{ resultLabel }}</span>
+      <sc-if value="{{ filtered }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ onReset }}" style="height:30px;padding:0 11px;border:1px solid var(--line);border-radius:7px;background:transparent;color:var(--t2);font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap" style-hover="background:var(--hover);color:var(--t1)">Clear filters</button>
+      </sc-if>
+    </div>
+
+    <div style="display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:8px;overflow:hidden">
+      <div style="max-width:100%;overflow-x:auto;overscroll-behavior-x:contain">
+        <div style="min-width:1240px">
+          <div style="display:grid;grid-template-columns:{{ cols }};border-bottom:1px solid var(--line);background:var(--card)">
+            <sc-for list="{{ head }}" as="h" hint-placeholder-count="8">
+              <div onClick="{{ h.onClick }}" style="display:flex;align-items:center;justify-content:{{ h.justify }};gap:5px;padding:9px 13px;cursor:{{ h.cursor }};position:{{ h.pos }};left:0;z-index:{{ h.z }};background:var(--card)" style-hover="background:{{ h.hoverBg }}">
+                <span style="font-size:12px;font-weight:{{ h.weight }};color:{{ h.color }};white-space:nowrap">{{ h.label }}</span>
+                <sc-if value="{{ h.arrow }}" hint-placeholder-val="{{ false }}">
+                  <span style="font-size:9px;color:var(--accent)">{{ h.arrow }}</span>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+
+          <sc-for list="{{ rows }}" as="r" hint-placeholder-count="12">
+            <div onMouseEnter="{{ r.onEnter }}" onMouseLeave="{{ r.onLeave }}" style="display:grid;grid-template-columns:{{ cols }};border-bottom:1px solid var(--line);background:{{ r.bg }};border-left:{{ r.mark }}">
+              <div style="display:flex;align-items:center;gap:9px;padding:11px 13px;min-width:0;position:sticky;left:0;z-index:1;background:{{ r.bg }}">
+                <button onClick="{{ r.onStar }}" title="{{ r.starTitle }}" style="width:24px;height:24px;flex:none;display:flex;align-items:center;justify-content:center;border:none;border-radius:6px;background:transparent;cursor:pointer" style-hover="background:var(--hover)">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="{{ r.starFill }}" stroke="{{ r.starColor }}" stroke-width="1.7" stroke-linejoin="round"><path d="M12 3.6l2.6 5.5 6 .9-4.3 4.2 1 6-5.3-2.8-5.3 2.8 1-6-4.3-4.2 6-.9 2.6-5.5Z"></path></svg>
+                </button>
+                <span style="width:26px;height:26px;flex:none;border-radius:6px;background:var(--hover);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:600;color:var(--t2)">{{ r.mono }}</span>
+                <a href="{{ r.href }}" title="{{ r.hrefTitle }}" style="display:flex;flex-direction:column;gap:1px;min-width:0;flex:1;text-decoration:none" style-hover="text-decoration:none">
+                  <span style="display:flex;align-items:center;gap:6px;min-width:0">
+                    <span style="font-size:12.5px;font-weight:500;color:var(--t1);white-space:nowrap">{{ r.ticker }}</span>
+                    <sc-if value="{{ r.tag }}" hint-placeholder-val="{{ false }}">
+                      <span style="display:inline-flex;align-items:center;height:16px;padding:0 6px;border-radius:4px;background:{{ r.tagBg }};color:{{ r.tagFg }};font-size:9.5px;font-weight:600;white-space:nowrap">{{ r.tag }}</span>
+                    </sc-if>
+                  </span>
+                  <span style="font-size:10.5px;color:var(--t3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</span>
+                </a>
+              </div>
+
+              <div style="display:flex;align-items:center;justify-content:flex-end;padding:11px 13px;min-width:0">
+                <dc-import name="TwoLineCell" primary="{{ r.price }}" secondary="{{ r.priceSub }}" tone="{{ r.priceTone }}" align="right" hint-size="100px,36px"></dc-import>
+              </div>
+
+              <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;padding:11px 13px;min-width:0">
+                <dc-import name="TwoLineCell" primary="{{ r.fromHigh }}" secondary="{{ r.highSub }}" tone="{{ r.highTone }}" align="right" hint-size="128px,36px"></dc-import>
+                <sc-if value="{{ showRange }}" hint-placeholder-val="{{ true }}">
+                  <span style="position:relative;display:block;width:100%;height:3px;border-radius:2px;background:var(--track)">
+                    <span style="position:absolute;top:0;bottom:0;left:0;width:{{ r.rangePos }};border-radius:2px;background:{{ r.rangeColor }}"></span>
+                    <span style="position:absolute;top:-2px;left:{{ r.rangePos }};transform:translateX(-50%);width:2px;height:7px;border-radius:1px;background:var(--t2)"></span>
+                  </span>
+                </sc-if>
+              </div>
+
+              <div style="display:flex;align-items:center;justify-content:flex-end;padding:11px 13px;min-width:0">
+                <dc-import name="TwoLineCell" primary="{{ r.from50 }}" secondary="{{ r.ma50 }}" tone="{{ r.tone50 }}" align="right" hint-size="112px,36px"></dc-import>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:flex-end;padding:11px 13px;min-width:0">
+                <dc-import name="TwoLineCell" primary="{{ r.from200 }}" secondary="{{ r.ma200 }}" tone="{{ r.tone200 }}" align="right" hint-size="112px,36px"></dc-import>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:flex-end;padding:11px 13px;min-width:0">
+                <dc-import name="TwoLineCell" primary="{{ r.yield }}" secondary="{{ r.yieldSub }}" align="right" hint-size="104px,36px"></dc-import>
+              </div>
+              <div style="display:flex;align-items:center;padding:11px 13px;min-width:0;overflow:hidden">
+                <span style="display:block;min-width:0;flex:1;overflow:hidden">
+                  <dc-import name="TwoLineCell" primary="{{ r.sector }}" secondary="{{ r.sectorSub }}" align="left" hint-size="150px,36px"></dc-import>
+                </span>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:flex-end;padding:11px 13px;min-width:0">
+                <dc-import name="TwoLineCell" primary="{{ r.held }}" secondary="{{ r.heldSub }}" tone="{{ r.heldTone }}" align="right" hint-size="118px,36px"></dc-import>
+              </div>
+            </div>
+          </sc-for>
+
+          <sc-if value="{{ noResults }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:52px 24px">
+              <span style="font-size:13.5px;font-weight:500;color:var(--t1)">Nothing is down that far</span>
+              <span style="font-size:12px;color:var(--t3);text-align:center;max-width:460px;line-height:1.6">{{ noResultsNote }}</span>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ hasMore }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;align-items:center;justify-content:center;padding:12px">
+              <button onClick="{{ onMore }}" style="height:32px;padding:0 14px;border:1px solid var(--line);border-radius:7px;background:transparent;color:var(--t1);font-size:12.5px;font-weight:500;cursor:pointer" style-hover="background:var(--hover)">{{ moreLabel }}</button>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+    </div>
+
+    <span style="font-size:11px;line-height:1.55;color:var(--t3);max-width:1000px;text-wrap:pretty">{{ footnote }}</span>
+  </main>
+
+  <sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:80;padding:9px 15px;border-radius:8px;background:var(--t1);color:var(--canvas);font-size:12.5px;font-weight:500;box-shadow:var(--shadow)">{{ toast }}</div>
+  </sc-if>
+
+  <div data-r="tabbar" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:60;height:60px;background:var(--card);border-top:1px solid var(--line);align-items:stretch;padding:0 4px">
+    <sc-for list="{{ tabRows }}" as="t" hint-placeholder-count="4">
+      <a href="{{ t.href }}" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-decoration:none;color:{{ t.color }}">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="{{ t.d }}"></path></svg>
+        <span style="font-size:10px;font-weight:500">{{ t.label }}</span>
+      </a>
+    </sc-for>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;minOffHigh&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Any&quot;,&quot;5%+&quot;,&quot;10%+&quot;,&quot;20%+&quot;],&quot;default&quot;:&quot;Any&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Find the Dip&quot;},&quot;scope&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;All&quot;,&quot;Mine&quot;,&quot;Held&quot;,&quot;Watchlist&quot;],&quot;default&quot;:&quot;All&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Find the Dip&quot;},&quot;below200Only&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Find the Dip&quot;},&quot;showRangeBar&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Find the Dip&quot;}}">
+class Component extends DCLogic {
+  state = {
+    depth: null, scope: null, sector: null, below200: null, query: '',
+    sort: 'off-high', dir: 1, limit: 25, menu: false, hover: null, titleTip: false, toast: '', watch: null
+  };
+
+  componentDidMount() {
+    if (!window.SnowlineData) {
+      const check = () => { if (window.SnowlineData) this.forceUpdate(); else setTimeout(check, 30); };
+      setTimeout(check, 20);
+    }
+    this.doc = () => { if (this.state.menu) this.setState({ menu: false }); };
+    document.addEventListener('click', this.doc);
+  }
+  componentWillUnmount() {
+    if (this.doc) document.removeEventListener('click', this.doc);
+    if (this.t) clearTimeout(this.t);
+  }
+
+  toast(msg) {
+    this.setState({ toast: msg });
+    if (this.t) clearTimeout(this.t);
+    this.t = setTimeout(() => this.setState({ toast: '' }), 2200);
+  }
+
+  watch() {
+    return this.state.watch === null ? (window.SnowlineData ? window.SnowlineData.watchlist() : []) : this.state.watch;
+  }
+
+  renderVals() {
+    const st = this.state;
+    const I = {
+      bars: 'M4 20V10M10 20V4M16 20v-7M22 20H2', table: 'M3 5h18v14H3V5Zm0 5h18M9 10v9',
+      home: 'M4 11l8-7 8 7v9H4v-9Zm5 9v-6h6v6',
+      scale: 'M12 4v16M6 8l-3 6h6l-3-6Zm12 0l-3 6h6l-3-6ZM5 8h14', dots: 'M5 12h.01M12 12h.01M19 12h.01'
+    };
+    const base = {
+      stop: (e) => e.stopPropagation(),
+      tabRows: [
+        { label: 'Dashboard', d: I.home, href: 'Snowline.dc.html', color: 'var(--t3)' },
+        { label: 'Analytics', d: I.bars, href: 'Analytics.dc.html', color: 'var(--t3)' },
+        { label: 'Portfolio', d: I.table, href: 'Holdings.dc.html', color: 'var(--t3)' },
+        { label: 'Tools', d: I.scale, href: 'FindTheDip.dc.html', color: 'var(--accent)' }
+      ],
+      cols: 'minmax(240px,1.5fr) minmax(104px,0.72fr) minmax(150px,1fr) minmax(120px,0.8fr) minmax(120px,0.8fr) minmax(108px,0.72fr) minmax(160px,1fr) minmax(126px,0.82fr)'
+    };
+    if (!window.SnowlineData) return base;
+
+    const D = window.SnowlineData, F = D.fmt, K = D.constants;
+    const all = D.dipRows();
+    const watch = this.watch();
+    const inWatch = {};
+    watch.forEach((t) => { inWatch[t] = true; });
+
+    const depth = st.depth === null ? (this.props.minOffHigh || 'Any') : st.depth;
+    const scope = st.scope === null ? (this.props.scope || 'All') : st.scope;
+    const below200 = st.below200 === null ? this.props.below200Only === true : st.below200;
+    const sector = st.sector;
+    const q = st.query.trim().toLowerCase();
+    const DEPTHS = { Any: 0, '5%+': 5, '10%+': 10, '20%+': 20 };
+    const minOff = DEPTHS[depth] || 0;
+
+    /* The universe this screen speaks about: what you hold, plus what you
+       starred. "All" widens to the whole market list. */
+    const scoped = all.filter((r) => {
+      if (scope === 'Held') return r.held;
+      if (scope === 'Watchlist') return !!inWatch[r.ticker];
+      if (scope === 'Mine') return r.held || !!inWatch[r.ticker];
+      return true;
+    });
+    const matches = scoped.filter((r) => {
+      if (-r.tech.fromHigh < minOff - 0.0001) return false;
+      if (below200 && r.tech.from200 >= 0) return false;
+      if (sector && r.sector !== sector) return false;
+      if (!q) return true;
+      return (r.ticker + ' ' + r.name + ' ' + r.sector).toLowerCase().indexOf(q) >= 0;
+    });
+
+    const SORTS = {
+      'Holding': (r) => r.ticker,
+      'Price': (r) => r.price,
+      'off-high': (r) => r.tech.fromHigh,
+      '50-day': (r) => r.tech.from50,
+      '200-day': (r) => r.tech.from200,
+      'Yield': (r) => r.yieldPct,
+      'Sector': (r) => r.sector,
+      'Held': (r) => (r.held ? r.position.value : -1)
+    };
+    const pick = SORTS[st.sort] || SORTS['off-high'];
+    const sorted = matches.slice().sort((a, b) => {
+      const x = pick(a), y = pick(b);
+      const c = typeof x === 'string' ? x.localeCompare(y) : x - y;
+      return c * st.dir;
+    });
+    const shown = sorted.slice(0, st.limit);
+
+    const dipped = scoped.filter((r) => r.tech.fromHigh <= -0.005);
+    const below = scoped.filter((r) => r.tech.from200 < 0);
+    const belowBoth = scoped.filter((r) => r.tech.from200 < 0 && r.tech.from50 < 0);
+    const heldDown = scoped.filter((r) => r.held && r.tech.fromHigh <= -10);
+    const offs = scoped.map((r) => -r.tech.fromHigh).sort((a, b) => a - b);
+    const median = offs.length ? offs[Math.floor(offs.length / 2)] : 0;
+    const deepest = scoped.slice().sort((a, b) => a.tech.fromHigh - b.tech.fromHigh)[0];
+    const heldCount = all.filter((r) => r.held).length;
+    const scopeWord = scope === 'Held' ? 'the ' + heldCount + ' names you hold'
+      : scope === 'Watchlist' ? 'your ' + watch.length + '-name watchlist'
+        : scope === 'Mine' ? 'your holdings and watchlist' : 'the ' + all.length + '-name universe';
+
+    const head = [
+      { label: 'Holding', key: 'Holding', justify: 'flex-start' },
+      { label: 'Price', key: 'Price', justify: 'flex-end' },
+      { label: 'From 52-week high', key: 'off-high', justify: 'flex-end' },
+      { label: 'From 50-day', key: '50-day', justify: 'flex-end' },
+      { label: 'From 200-day', key: '200-day', justify: 'flex-end' },
+      { label: 'Yield', key: 'Yield', justify: 'flex-end' },
+      { label: 'Sector', key: 'Sector', justify: 'flex-start' },
+      { label: 'Held', key: 'Held', justify: 'flex-end' }
+    ].map((h) => ({
+      label: h.label, justify: h.justify, cursor: 'pointer', hoverBg: 'var(--hover)',
+      pos: h.key === 'Holding' ? 'sticky' : 'static', z: h.key === 'Holding' ? 2 : 1,
+      weight: st.sort === h.key ? 600 : 500,
+      color: st.sort === h.key ? 'var(--t1)' : 'var(--t2)',
+      arrow: st.sort === h.key ? (st.dir === -1 ? '▼' : '▲') : '',
+      onClick: () => this.setState({
+        sort: h.key,
+        dir: st.sort === h.key ? -st.dir : (h.key === 'off-high' || h.key === 'Holding' || h.key === 'Sector' || h.key === '50-day' || h.key === '200-day' ? 1 : -1),
+        limit: 25
+      })
+    }));
+
+    const seg = (opts, cur, set) => opts.map((o, i) => ({
+      label: o, divider: i ? '1px solid var(--line)' : 'none',
+      bg: cur === o ? 'var(--accent-soft)' : 'transparent',
+      color: cur === o ? 'var(--accent)' : 'var(--t1)',
+      weight: cur === o ? 600 : 500,
+      onClick: () => set(o)
+    }));
+
+    const sectors = {};
+    scoped.forEach((r) => { sectors[r.sector] = (sectors[r.sector] || 0) + 1; });
+
+    return Object.assign(base, {
+      portfolioName: K.portfolioName,
+      headNote: 'Prices to ' + K.today.label + ' · ' + dipped.length + ' of ' + scoped.length + ' names in ' + scopeWord
+        + ' are off their 52-week high, ' + below.length + ' below the 200-day'
+        + (deepest ? ' · deepest is ' + deepest.ticker + ' at ' + F.pct(deepest.tech.fromHigh, 2) : ''),
+      titleTip: st.titleTip,
+      tipOn: () => this.setState({ titleTip: true }),
+      tipOff: () => this.setState({ titleTip: false }),
+      titleTipText: 'A dip is not a reason to buy. Everything here is a distance — price against its own 52-week extremes and its own 50- and 200-session averages — computed from one generated price path per ticker that ends exactly at the price the rest of the app shows. Nothing on this screen forecasts a recovery, and a name can be 30% off its high because the business changed.',
+
+      stats: [
+        {
+          label: 'Off their high', primary: String(dipped.length) + ' of ' + scoped.length,
+          tone: 'plain', secondary: 'median ' + F.pct(median, 2) + ' below', note: scopeWord,
+          tip: 'Names trading under their own 52-week high, within the scope selected above. The median is the middle distance, not an average — a few deep names cannot drag it.',
+          border: 'none'
+        },
+        {
+          label: 'Below the 200-day', primary: String(below.length),
+          tone: below.length ? 'neg' : 'plain',
+          secondary: belowBoth.length + ' below both averages', note: 'of ' + scoped.length + ' names',
+          tip: 'Price under the 200-session average — the slower of the two. Below both usually means the shorter average has crossed under the longer one.',
+          border: '1px solid var(--line)'
+        },
+        {
+          label: 'Held names down 10%+', primary: String(heldDown.length),
+          tone: heldDown.length ? 'neg' : 'plain',
+          secondary: heldDown.length ? heldDown.map((r) => r.ticker).slice(0, 4).join(', ') : 'none that far off',
+          note: 'from their 52-week high',
+          tip: 'Positions you already own that sit 10% or more below their 52-week high — the ones where adding would lower your average cost, if the reason for holding still stands.',
+          border: '1px solid var(--line)'
+        },
+        {
+          label: 'Watchlist', primary: String(watch.length),
+          tone: 'plain',
+          secondary: watch.length ? watch.slice(0, 5).join(', ') : 'nothing starred yet',
+          note: 'shared with the screener',
+          tip: 'Starred names, kept in step with Tools ▸ Top dividend stocks — star here and it is starred there.',
+          border: '1px solid var(--line)'
+        }
+      ],
+
+      depthTabs: seg(['Any', '5%+', '10%+', '20%+'], depth, (o) => this.setState({ depth: o, limit: 25 })),
+      scopeTabs: seg(['All', 'Mine', 'Held', 'Watchlist'], scope, (o) => this.setState({ scope: o, limit: 25 })),
+      togSector: (e) => { e.stopPropagation(); this.setState({ menu: !st.menu }); },
+      sectorOpen: st.menu,
+      sectorLabel: sector || 'All sectors',
+      sectorBorder: st.menu || sector ? 'var(--accent)' : 'var(--line)',
+      sectorOptions: [{ label: 'All sectors', value: null, count: scoped.length }]
+        .concat(Object.keys(sectors).sort().map((s) => ({ label: s, value: s, count: sectors[s] })))
+        .map((o) => ({
+          label: o.label, count: o.count,
+          bg: sector === o.value ? 'var(--accent-soft)' : 'transparent',
+          color: sector === o.value ? 'var(--accent)' : 'var(--t1)',
+          weight: sector === o.value ? 600 : 400,
+          onClick: (e) => { e.stopPropagation(); this.setState({ sector: o.value, menu: false, limit: 25 }); }
+        })),
+      togBelow200: () => this.setState({ below200: !below200, limit: 25 }),
+      belowMark: below200 ? '✓' : '',
+      belowBg: below200 ? 'var(--accent-soft)' : 'transparent',
+      belowBorder: below200 ? 'var(--accent)' : 'var(--line)',
+      belowBoxBg: below200 ? 'var(--accent)' : 'transparent',
+      belowBoxBorder: below200 ? 'var(--accent)' : 'var(--t3)',
+      query: st.query,
+      onQuery: (e) => this.setState({ query: e.target.value, limit: 25 }),
+      filtered: depth !== 'Any' || scope !== 'All' || !!sector || below200 || !!q,
+      onReset: () => this.setState({ depth: 'Any', scope: 'All', sector: null, below200: false, query: '', limit: 25 }),
+      resultLabel: matches.length === scoped.length
+        ? scoped.length + ' names'
+        : matches.length + ' of ' + scoped.length + ' names',
+
+      showRange: this.props.showRangeBar !== false,
+      head: head,
+      rows: shown.map((r) => {
+        const t = r.tech, starred = !!inWatch[r.ticker];
+        return {
+          mono: r.mono, ticker: r.ticker, name: r.name,
+          /* both destinations pick the ticker up from the hash */
+          href: (r.held ? 'Holdings.dc.html#' : 'Screener.dc.html#') + r.ticker,
+          hrefTitle: r.held ? 'Open the ' + r.ticker + ' position' : 'See ' + r.ticker + ' on the screener',
+          /* same marking the screener uses: a filled HELD badge and a thin
+             accent rule down the frozen column */
+          tag: r.held ? 'HELD' : starred ? 'WATCHING' : '',
+          tagBg: r.held ? 'var(--accent-soft)' : 'var(--tag-bg)',
+          tagFg: r.held ? 'var(--accent)' : 'var(--tag-fg)',
+          mark: r.held ? '2px solid var(--accent)' : '2px solid transparent',
+          price: F.money(r.price),
+          /* a day change exists only for what you hold — everything else gets
+             its place in the 52-week range instead of a fabricated 0.00% */
+          priceSub: r.held
+            ? F.caret(r.position.dayChangePct, 2) + ' today'
+            : F.num(t.rangePos, 0) + '% of 52w range',
+          priceTone: r.held ? (r.position.dayChangePct >= 0 ? 'pos' : 'neg') : 'plain',
+
+          fromHigh: F.caret(t.fromHigh, 2),
+          highSub: F.money(t.high) + ' high · ' + t.highDate,
+          highTone: t.fromHigh <= -10 ? 'neg' : 'plain',
+          rangePos: Math.max(0, Math.min(100, t.rangePos)).toFixed(1) + '%',
+          rangeColor: t.fromHigh <= -10 ? 'var(--neg)' : 'var(--grey-series)',
+
+          from50: F.caret(t.from50, 2),
+          ma50: F.money(t.ma50) + ' avg',
+          tone50: t.from50 >= 0 ? 'pos' : 'neg',
+          from200: F.caret(t.from200, 2),
+          ma200: F.money(t.ma200) + ' avg',
+          tone200: t.from200 >= 0 ? 'pos' : 'neg',
+
+          yield: r.yieldPct ? F.pct(r.yieldPct, 2) : '—',
+          yieldSub: r.yieldPct ? F.money(r.dps) + ' · ' + r.frequency.toLowerCase() : 'no dividend',
+          sector: r.sector,
+          sectorSub: r.assetClass + (t.trendUp ? ' · 50d above 200d' : ' · 50d below 200d'),
+          held: r.held ? F.money(r.position.value) : starred ? 'Watchlist' : '—',
+          heldSub: r.held ? F.shares(r.position.shares) + ' shares' : starred ? 'not held' : 'not held',
+          heldTone: 'plain',
+
+          bg: st.hover === r.ticker ? 'var(--hover)' : 'var(--card)',
+          onEnter: () => this.setState({ hover: r.ticker }),
+          onLeave: () => this.setState({ hover: null }),
+          starred: starred,
+          starFill: starred ? 'var(--amber)' : 'none',
+          starColor: starred ? 'var(--amber)' : 'var(--t3)',
+          starTitle: starred ? 'Remove from watchlist' : 'Add to watchlist',
+          onStar: (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const next = D.toggleWatch(r.ticker);
+            this.setState({ watch: next });
+            this.toast(starred ? r.ticker + ' removed from the watchlist' : r.ticker + ' added to the watchlist');
+          }
+        };
+      }),
+      noResults: matches.length === 0,
+      noResultsNote: scope === 'Watchlist' && !watch.length
+        ? 'The watchlist is empty — star a name here or on the screener.'
+        : 'Nothing in ' + scopeWord + (sector ? ', ' + sector + ',' : '') + ' is '
+          + (minOff ? 'at least ' + F.pct(minOff, 0) + ' below its 52-week high' : 'below its 52-week high')
+          + (below200 ? ' and under its 200-day average' : '') + '. Widen the filters to see more.',
+      hasMore: sorted.length > shown.length,
+      moreLabel: 'Show ' + Math.min(25, sorted.length - shown.length) + ' more of ' + sorted.length,
+      onMore: () => this.setState({ limit: st.limit + 25 }),
+      toast: st.toast,
+
+      footnote: 'How these are computed: each ticker has one generated price path of ' + D.technicals(all[0]).sessions
+        + ' sessions — about a trading year — and the 52-week high and low are that path’s extremes, while the 50-day and 200-day '
+        + 'figures are the plain mean of its last 50 and 200 sessions. The path is scaled by a single constant so its final session equals '
+        + 'the price shown everywhere else in the app, which leaves every ratio inside it intact: that is why a name near its high is never '
+        + 'also reported far below its 200-day. Its drift is pinned to one published annual figure per name — the position’s IRR where you hold it, '
+        + 'yield plus 5-year dividend growth where you do not — and the session-to-session dispersion is synthetic, scaled by asset class, with the '
+        + 'T-bill ETF held nearly flat. So treat the distances as the shape of a plausible year, not a market record: '
+        + 'there is no intraday data, no split-adjusted vendor history, and no forecast of a bounce. Prices are as of ' + K.today.label
+        + ' and dividends are gross of the ' + F.pct(K.withholdingTax * 100, 0) + ' withholding applied elsewhere. '
+        + 'A day change is shown only for positions you hold, where the app has one; every other name shows where its price sits inside its 52-week range instead.'
+    });
+  }
+}
+</script>
+</body>
+</html>
