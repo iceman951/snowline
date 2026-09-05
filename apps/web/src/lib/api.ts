@@ -145,7 +145,26 @@ export interface DividendCalendarPayload {
   payerCount: number;
 }
 
+export interface GoalScenario {
+  name: string;
+  self: boolean;
+  expectedReturn: number;
+  crossPYear: number | null;
+  yearsToGoal: number | null;
+  endValue: number;
+  byYear: number;
+}
+
+export interface GoalScreenPayload {
+  constants: Constants;
+  totals: Totals;
+  projection: Projection;
+  scenarios: GoalScenario[];
+  requiredContribution: number | null;
+}
+
 export const api = {
+  goalScreen: (f: Fetch) => get<GoalScreenPayload>(f, '/api/screens/goal'),
   dividendCalendar: (f: Fetch, offset = 0, windowOffset = 0) =>
     get<DividendCalendarPayload>(
       f,

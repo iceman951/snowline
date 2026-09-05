@@ -672,4 +672,28 @@ export class Engine {
       rewardCapital: y0 ? target / y0 : 0
     };
   }
+
+  /**
+   * The smallest monthly contribution that would reach the goal: double until
+   * one works, then bisect. Returns null when no contribution can close it —
+   * which happens when the horizon is simply too short.
+   */
+  requiredContribution(cfg: GoalConfig): number | null {
+    let lo = cfg.monthlyContribution;
+    let hi = Math.max(200, cfg.monthlyContribution) * 2;
+
+    for (let i = 0; i < 24; i++) {
+      if (this.projection({ ...cfg, monthlyContribution: hi }).achievable) break;
+      hi *= 2;
+      if (hi > 5e7) return null;
+    }
+    if (!this.projection({ ...cfg, monthlyContribution: hi }).achievable) return null;
+
+    for (let i = 0; i < 44; i++) {
+      const mid = (lo + hi) / 2;
+      if (this.projection({ ...cfg, monthlyContribution: mid }).achievable) hi = mid;
+      else lo = mid;
+    }
+    return hi;
+  }
 }

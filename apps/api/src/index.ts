@@ -216,6 +216,48 @@ export const app = new Elysia()
     };
   })
 
+  /* ---- composite: the My goal screen ------------------------------------- */
+
+  /**
+   * The projection plus the scenario grid. Scenarios each run the engine
+   * again, and the required-contribution solver runs it ~68 times, so this
+   * stays on the server rather than shipping the engine to the browser.
+   */
+  .get('/api/screens/goal', () => {
+    const e = engine();
+    const projection = e.projection(loadGoalConfig());
+    const cfg = projection.cfg;
+
+    const scenario = (name: string, patch: Partial<typeof cfg>, self = false) => {
+      const p = e.projection({ ...cfg, ...patch });
+      return {
+        name,
+        self,
+        expectedReturn: p.cfg.expectedReturn,
+        crossPYear: p.crossPYear,
+        yearsToGoal: p.yearsToGoal,
+        endValue: p.endValue,
+        byYear: p.byYear
+      };
+    };
+
+    return {
+      constants: e.constants,
+      totals: e.totals(),
+      projection,
+      scenarios: [
+        scenario('Safe scenario', { expectedReturn: cfg.safeReturn }),
+        scenario('Expected return − 5pp', { expectedReturn: cfg.expectedReturn - 0.05 }),
+        scenario('Expected return', {}, true),
+        scenario('Expected return + 5pp', { expectedReturn: cfg.expectedReturn + 0.05 }),
+        scenario('No further contributions', { monthlyContribution: 0 }),
+        scenario('Dividends taken as cash', { reinvestDividends: false })
+      ],
+      // Only meaningful when the goal is currently out of reach.
+      requiredContribution: projection.achievable ? null : e.requiredContribution(cfg)
+    };
+  })
+
   /* ---- composite: the Dividend calendar ---------------------------------- */
 
   /**
