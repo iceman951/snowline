@@ -1,0 +1,197 @@
+/*
+ * Design tokens, lifted verbatim from the prototype's :root block.
+ * The bundle is the acceptance criteria — these values are not to be
+ * "improved"; a change here is a change to the design.
+ */
+
+:root {
+  --canvas: #fafaf9;
+  --card: #ffffff;
+  --t1: #171717;
+  --t2: #737373;
+  --t3: #a3a3a3;
+  --line: #e7e5e4;
+  --accent: #0f7b57;
+  --neg: #b91c1c;
+  --amber: #b45309;
+  --hover: #f5f5f4;
+  --on-accent: #ffffff;
+  --grey-series: #a8a29e;
+  --shadow: 0 10px 28px rgba(23, 23, 23, 0.1);
+  --pad: 20px;
+  --accent-2: color-mix(in oklab, var(--accent) 74%, var(--card));
+  --accent-3: color-mix(in oklab, var(--accent) 48%, var(--card));
+  --accent-4: color-mix(in oklab, var(--accent) 26%, var(--card));
+  --accent-soft: color-mix(in oklab, var(--accent) 9%, var(--card));
+  --accent-tint: color-mix(in oklab, var(--accent) 16%, var(--card));
+  --neg-soft: color-mix(in oklab, var(--neg) 9%, var(--card));
+  --amber-soft: color-mix(in oklab, var(--amber) 9%, var(--card));
+  --tag-bg: color-mix(in oklab, var(--amber) 8%, var(--card));
+  --tag-fg: var(--amber);
+}
+
+html[data-theme='dark'] {
+  --canvas: #0c0c0c;
+  --card: #171717;
+  --t1: #fafaf9;
+  --t2: #a3a3a3;
+  --t3: #737373;
+  --line: #292524;
+  --accent: #34d399;
+  --neg: #f87171;
+  --amber: #f59e0b;
+  --hover: #201e1d;
+  --on-accent: #0c0c0c;
+  --grey-series: #57534e;
+  --shadow: 0 10px 28px rgba(0, 0, 0, 0.55);
+  --tag-bg: color-mix(in oklab, var(--amber) 7%, var(--card));
+  --tag-fg: color-mix(in oklab, var(--amber) 58%, var(--t2));
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--canvas);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+  color: var(--t1);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+button,
+input,
+textarea {
+  font-family: inherit;
+  font-variant-numeric: tabular-nums;
+}
+
+::selection {
+  background: var(--accent-tint);
+}
+
+@keyframes menuIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---- shared primitives the screens compose --------------------------- */
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 15px 20px;
+  border-bottom: 1px solid var(--line);
+}
+
+.card-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--t1);
+}
+
+.card-note {
+  font-size: 12px;
+  color: var(--t3);
+}
+
+.mono-badge {
+  flex: none;
+  border-radius: 6px;
+  background: var(--hover);
+  border: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--t2);
+}
+
+.icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--t2);
+  cursor: pointer;
+}
+
+.icon-btn:hover {
+  background: var(--hover);
+  color: var(--t1);
+}
+
+/* ---- responsive rules, matching the prototype's breakpoints ---------- */
+
+@media (max-width: 1180px) {
+  [data-r='kpi'],
+  [data-r='why'] {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 960px) {
+  [data-r='kpi'],
+  [data-r='ins'],
+  [data-r='pair'],
+  [data-r='alloc'],
+  [data-r='why'] {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  [data-r='quotes'] {
+    overflow-x: auto !important;
+  }
+  [data-r='navd'] {
+    display: none !important;
+  }
+  [data-r='tabbar'] {
+    display: flex !important;
+  }
+  [data-r='main'] {
+    padding: 16px 16px 104px !important;
+  }
+  [data-r='navwrap'] {
+    padding: 0 16px !important;
+  }
+}
+
+@media (max-width: 620px) {
+  [data-r='kpi'] {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}

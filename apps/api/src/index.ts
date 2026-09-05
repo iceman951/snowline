@@ -1,6 +1,6 @@
 import { Elysia, t } from 'elysia';
 import { cors } from '@elysiajs/cors';
-import { Engine } from '@snowline/core';
+import { Engine, MONTHS } from '@snowline/core';
 import {
   clearGoalConfig,
   loadDataset,
@@ -113,15 +113,29 @@ export const app = new Elysia()
 
   .get('/api/dashboard', () => {
     const e = engine();
+
+    // Per-calendar-month payer breakdown, so the received chart can attribute
+    // a month's total to tickers without a second round trip.
+    const schedules: Record<string, ReturnType<Engine['scheduleFor']>> = {};
+    for (const m of MONTHS) schedules[m] = e.scheduleFor(m);
+
     return {
       constants: e.constants,
       totals: e.totals(),
       categories: e.categories(),
       movers: e.movers(),
+      holdings: e.open().map((p) => ({
+        ticker: p.ticker,
+        name: p.name,
+        mono: p.mono,
+        sector: p.sector,
+        value: p.value
+      })),
       dividendTimeline: e.dividendTimeline(),
       dividendHistory: e.dividendHistory,
       forwardPayments: e.forwardPayments(),
       paymentCount: e.paymentCountNext12(),
+      schedules,
       projection: e.projection(loadGoalConfig())
     };
   });
