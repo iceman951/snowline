@@ -2,9 +2,12 @@
 
 import type {
   Category,
+  CategoryEdit,
+  CategoryModel,
   Constants,
   DividendHistory,
   ForwardMonth,
+  Holding,
   Movers,
   Projection,
   ScheduleRow,
@@ -39,6 +42,23 @@ export interface DashboardPayload {
 
 type Fetch = typeof globalThis.fetch;
 
+export interface CategoryEditorPayload {
+  constants: Constants;
+  totals: Totals;
+  categories: Category[];
+  holdings: Holding[];
+  targetTotal: number;
+  model: CategoryModel;
+}
+
+async function post<T>(fetchFn: Fetch, path: string, body: unknown): Promise<T> {
+  const res = await fetchFn(`${BASE}${path}`, {
+    method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body)
+  });
+  if (!res.ok) throw new Error(`API ${path} responded ${res.status}`);
+  return await res.json() as T;
+}
+
 async function get<T>(fetchFn: Fetch, path: string): Promise<T> {
   const res = await fetchFn(`${BASE}${path}`);
   if (!res.ok) {
@@ -47,7 +67,17 @@ async function get<T>(fetchFn: Fetch, path: string): Promise<T> {
   return (await res.json()) as T;
 }
 
+export interface HoldingsScreenPayload {
+  constants: Constants;
+  totals: Totals;
+  /** Includes sold positions; the table's "show sold" toggle filters client-side. */
+  holdings: Holding[];
+}
+
 export const api = {
+  holdingsScreen: (f: Fetch) => get<HoldingsScreenPayload>(f, '/api/screens/holdings'),
+  categoryEditor: (f: Fetch) => get<CategoryEditorPayload>(f, '/api/categories/editor'),
+  editCategories: (f: Fetch, edit: CategoryEdit) => post<CategoryModel>(f, '/api/categories/edit', edit),
   dashboard: (f: Fetch) => get<DashboardPayload>(f, '/api/dashboard'),
   categories: (f: Fetch) => get<Category[]>(f, '/api/categories'),
   movers: (f: Fetch) => get<Movers>(f, '/api/movers'),
