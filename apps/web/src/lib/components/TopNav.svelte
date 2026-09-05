@@ -10,23 +10,11 @@
     PORTFOLIO_ROWS,
     TAB_ROWS,
     TOOLS_ROWS,
+    type InsightItem,
     type NavRow,
+    type SearchItem,
     type Section
   } from '$lib/nav';
-
-  export interface SearchItem {
-    ticker: string;
-    name: string;
-    mono: string;
-    sector: string;
-    value: string;
-    href: string;
-  }
-
-  export interface InsightItem {
-    title: string;
-    short: string;
-  }
 
   let {
     active = 'Dashboard' as Section,

@@ -70,3 +70,19 @@ export const TAB_ROWS = [
 ] as const;
 
 export type Section = 'Dashboard' | 'Analytics' | 'Portfolio' | 'Tools';
+
+/** A holding as the nav's search box needs it. */
+export interface SearchItem {
+  ticker: string;
+  name: string;
+  mono: string;
+  sector: string;
+  value: string;
+  href: string;
+}
+
+/** One line in the nav's insights popover. */
+export interface InsightItem {
+  title: string;
+  short: string;
+}

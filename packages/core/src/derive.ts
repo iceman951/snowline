@@ -338,14 +338,16 @@ export class Engine {
     const cfg = { ...defaults } as GoalConfig;
 
     if (patch && typeof patch === 'object') {
+      const src = patch as Record<string, unknown>;
+      const dst = cfg as unknown as Record<string, unknown>;
       (Object.keys(defaults) as Array<keyof typeof defaults>).forEach((k) => {
-        let v = (patch as Record<string, unknown>)[k];
+        let v = src[k];
         if (v === undefined || v === null || v === '') return;
         if (typeof defaults[k] === 'number') {
           v = Number(v);
           if (!isFinite(v as number)) return;
         }
-        (cfg as Record<string, unknown>)[k] = v;
+        dst[k] = v;
       });
     }
 
