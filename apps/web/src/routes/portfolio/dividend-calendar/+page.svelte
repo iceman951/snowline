@@ -272,7 +272,8 @@
         </div>
       </div>
 
-      <div style="padding:16px 18px 12px;display:flex;align-items:flex-end;gap:4px;height:186px">
+      <div style="max-width:100%;overflow-x:auto;overscroll-behavior-x:contain">
+      <div style="padding:16px 18px 12px;display:flex;align-items:flex-end;gap:4px;height:186px;min-width:560px">
         {#each year as m, i (m.label)}
           {@const isCur = m.year === payload.month.year && m.monthIndex === payload.month.monthIndex}
           <button
@@ -290,6 +291,7 @@
             <span style="font-size:10px;color:{isCur ? 'var(--accent)' : 'var(--t2)'};white-space:nowrap">{m.short}</span>
           </button>
         {/each}
+      </div>
       </div>
       <span style="padding:0 18px 14px;font-size:11px;color:var(--t3)">Click a month to open it below.</span>
     </div>

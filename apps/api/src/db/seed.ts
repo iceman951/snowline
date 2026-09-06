@@ -24,6 +24,7 @@ export function runSeed(): void {
   const db = getDb();
 
   db.transaction(() => {
+    db.run('INSERT INTO research_catalog (id, catalog_json) VALUES (1, ?) ON CONFLICT(id) DO UPDATE SET catalog_json = excluded.catalog_json', [JSON.stringify(seed.researchCatalog)]);
     // Corporate actions reference positions, so they clear first.
     db.run('DELETE FROM corporate_actions');
     db.run('DELETE FROM positions');

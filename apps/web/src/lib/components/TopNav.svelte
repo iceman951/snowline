@@ -363,6 +363,7 @@
       <div style="width:1px;height:22px;background:var(--line);margin:0 3px"></div>
 
       <span
+        class="portfolio-pill"
         style="display:flex;align-items:center;gap:7px;height:32px;padding:0 10px;border:1px solid var(--line);border-radius:6px;color:var(--t1);font-size:13px;font-weight:500;white-space:nowrap"
       >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="1.6"
@@ -472,3 +473,8 @@
     </a>
   {/each}
 </div>
+
+<style>
+  @media (max-width: 960px) { [data-r="navm"] { display:flex!important; } }
+  @media (max-width: 620px) { .portfolio-pill, button[title="Insights"] { display:none!important; } }
+</style>

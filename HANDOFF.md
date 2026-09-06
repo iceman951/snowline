@@ -2,11 +2,13 @@
 
 Read this first. It is the contract for anyone (human or agent) picking up the work.
 
-Last updated: 2026-09-06. Status: **7 screens complete and verified.**
+Last updated: 2026-09-06. Status: **all 19 screens complete and verified.**
 
-Built: Dashboard, Holdings, Analytics — Common, Transactions, Corporate actions,
-Dividend calendar, My goal. Codex is building Categories in parallel (see
-`CODEX_HANDOFF.md`).
+Built: Dashboard, Holdings, Categories, Transactions, Corporate actions, Dividend
+calendar, Cash, My goal, Analytics (Common, Diversification, Dividends, Growth,
+Metrics, Report) and Tools (Rebalancing, Screener, Find the Dip, Payout calendar,
+Portfolio Lab). Every function in `snowline-data.js`'s public API is ported and
+parity-tested. What remains is listed in §4 and §6.
 
 ---
 
@@ -67,6 +69,20 @@ Ported and **parity-tested** (19 tests, 257 assertions, all passing):
 
 Also `fmt` (shared formatters — money, signed, pct, caret, k, compact) in `format.ts`.
 
+The rest of the bundle's public API lives in three further modules, all
+parity-tested the same way:
+
+| Module | What it derives |
+|---|---|
+| `history.ts` (`engine.history`) | `history()`, `historyRange()`, `monthSpan()`, `monthlyReturns()`, `benchmarkValuePath()`, `returnPath()`, and the *solved* `cashFlow()` walk |
+| `derive.ts` (cash) | `cashStats()`, `cashByCurrency()`, `cashPositions()`, `cashFloat()`, `holdingsPerformance()` |
+| `research.ts` (`createResearchEngine`) | fund look-through (`fundComposition`, `lookThrough`, `breakdown`, `incomeBreakdown`, `dividendRating`), risk (`riskFreeRate`, `seriesStats`, `betaOf`, `riskCalibration`, `riskStats`, `riskVerdict`), the market universe (`marketUniverse`, `universeSectors`, `universeStats`, `marketCalendarMonth/Year`), the backtest engine (`labSecurities`, `labSecurity`, `labAnchor`, `labReturns`, `maxDrawdown`, `labMyPortfolio`, `backtest`) and price technicals (`sessionDate`, `technicals`, `dipRows`) |
+| `rebalance.ts` | `rebalance()` and its `waterFill()` allocator for the Rebalancing tool |
+| `category-edits.ts` | `editCategories()` — create / rename / target / assign / delete / move / normalise / reset |
+
+The seeded PRNG (`seeded`) and price-band helpers are in `ledger.ts` and are shared
+by every module that needs the prototype's deterministic "random" detail data.
+
 **Reconciles exactly** to the bundle's own header figures:
 value `$30,374.48`, invested `$28,431.28`, capital gain `+$1,943.20`,
 total profit `+$3,989.53`, lifetime dividends `$1,467.21`, realised P&L `$579.12`,
@@ -75,26 +91,40 @@ forward income `$1,590.07` at `5.23%` gross / `$1,351.56` at `4.45%` net.
 ### `apps/api` — Elysia on Bun with `bun:sqlite`
 
 Schema stores only hand-entered facts (`positions`, `constants`, `dividend_history`,
-`category_targets`) plus the two things a screen may change
-(`category_overrides`, `goal_config`). A fresh `Engine` is built per request.
+`category_targets`, `corporate_actions`, `research_catalog`) plus the three things a
+screen may change (`category_overrides`, `goal_config`, `research_preferences` — the
+watchlist and saved Portfolio Lab scenarios). A fresh `Engine` is built per request.
 
 Endpoints:
 
 ```
 GET    /health
-GET    /api/portfolio              constants + totals
-GET    /api/holdings?includeSold=  per-holding derived figures
+GET    /api/portfolio                 constants + totals
+GET    /api/holdings?includeSold=     per-holding derived figures
 GET    /api/holdings/:ticker
+GET    /api/holdings/:ticker/detail   drawer: dividends, transactions, price series
 GET    /api/categories?ordered=
-PUT    /api/categories/model       save the user's bucket model
+GET    /api/categories/editor         everything the Categories screen needs
+POST   /api/categories/edit           one CategoryEdit; 422 on invalid, 400 on bad body
+PUT    /api/categories/model          save the user's bucket model
 GET    /api/movers
 GET    /api/dividends/timeline
 GET    /api/dividends/forward
 GET    /api/dividends/schedule/:month
+GET    /api/ledger
+GET    /api/ledger/reconciliation
+GET    /api/corporate-actions
 GET    /api/goal/projection
 PUT    /api/goal/config
 DELETE /api/goal/config
-GET    /api/dashboard              composite: everything the Dashboard needs
+GET    /api/dashboard                 composite: everything the Dashboard needs
+GET    /api/screens/goal
+GET    /api/screens/dividend-calendar
+GET    /api/screens/corporate-actions
+GET    /api/screens/transactions
+GET    /api/screens/holdings
+GET    /api/research/snapshot         dataset + catalog + preferences + goal config
+POST   /api/research/preferences      watchlist / lab scenarios
 ```
 
 ### `apps/web` — SvelteKit 2 / Svelte 5 (runes)
@@ -109,8 +139,25 @@ GET    /api/dashboard              composite: everything the Dashboard needs
   "why is it moving?", day movers, future payments chart, dividends received chart
   (period / granularity / bars-vs-line), dividend growth chart, and the goal card.
 - Data is loaded server-side in `+page.server.ts`; components never fetch.
+- Shared bundle components beyond the originals: `DonutBreakdown`, `NumberLineGauge`,
+  `RangeTabs`, and `ResearchPage` (the shell the eleven research screens mount into).
+- **The research screens use a presenter split.** Each of Cash, Rebalancing,
+  Diversification, Analytics Dividends, Growth, Metrics, Report, Screener, Find the Dip,
+  Payout calendar and Portfolio Lab is a pair: `src/lib/presenters/<Name>.js` holds the
+  view-model maths ported from the `.dc.html`, and `src/lib/screens/<Name>.svelte` renders
+  it. Presenters are plain JS and take the screen engine, so they stay testable and free
+  of Svelte specifics.
+- `src/lib/screen-engine.ts` builds one isolated engine per page snapshot (core `Engine` +
+  research engine + `rebalance` + `fmt`) and is the *only* thing presenters read from.
+  It also owns watchlist and lab-scenario writes, posting them to
+  `/api/research/preferences` so they survive a reload and are shared between screens.
+- `src/lib/research-actions.ts` holds the SvelteKit form actions for those writes.
 
-**Verified rendering** at desktop and mobile breakpoints against the design.
+**Verified rendering** at desktop and mobile breakpoints against the design, and by the
+Playwright suite in §3 — **every** screen (`tests/research.spec.ts` for the eleven
+research screens, `tests/screens.spec.ts` for the eight older ones) is asserted to
+return 200, render its `h1`, hydrate without page errors, survive a theme toggle, and
+not scroll horizontally at 390px, plus per-screen interaction tests.
 
 ---
 
@@ -126,8 +173,14 @@ bun run dev:web       # http://localhost:5173
 Tests:
 
 ```bash
-bun test packages/core
+bun test packages/core   # 83 parity + scenario tests, ~98k assertions
+bun test apps/api        # 15 endpoint tests
+bun run check            # svelte-check: must stay at 0 errors, 0 warnings
+bun run test:e2e         # Playwright, 27 tests; starts both dev servers itself
 ```
+
+The e2e run needs a Chromium. It uses `SNOWLINE_BROWSER_PATH` if set, otherwise falls
+back to a local Brave install, otherwise Playwright's own browser.
 
 Regenerate the seed + parity reference from the bundle (only when the bundle changes):
 
@@ -143,24 +196,8 @@ That script loads `snowline-data.js` in a fake browser and dumps
 
 ## 4. What is NOT built yet
 
-### Screens (each maps to a `.dc.html` in `snowline/project/`)
-
-| Route | Bundle file | Notes |
-|---|---|---|
-| `/analytics/diversification` | `Diversification.dc.html` | needs `breakdown()`, `lookThrough()`, `fundComposition` |
-| `/analytics/dividends` | `AnalyticsDividends.dc.html` | needs `incomeBreakdown()`, `dividendRating()` |
-| `/analytics/growth` | `Growth.dc.html` | needs `history()`, `monthlyReturns()`, `holdingsPerformance()` |
-| `/analytics/metrics` | `Metrics.dc.html` | needs `riskStats()`, `riskVerdict()`, `betaOf()`, `seriesStats()` |
-| `/analytics/report` | `Report.dc.html` | |
-| `/portfolio/cash` | `Cash.dc.html` | needs `cashFlow()`, `cashStats()`, `cashByCurrency()` |
-| `/tools/rebalancing` | `Rebalancing.dc.html` | reads the category model, already ported |
-| `/tools/screener` | `Screener.dc.html` | needs `marketUniverse()`, `universeStats()` |
-| `/tools/find-the-dip` | `FindTheDip.dc.html` | needs `technicals()`, `dipRows()` |
-| `/tools/payout-calendar` | `PayoutCalendar.dc.html` | needs `marketCalendarMonth()/Year()` |
-| `/tools/portfolio-lab` | `PortfolioLab.dc.html` | needs `backtest()`, `labSecurities()`, `maxDrawdown()` |
-
-Nav links to these already exist in `src/lib/nav.ts` and currently 404.
-**A placeholder route has not been added** — decide whether to add one or build screens first.
+Every route in `src/lib/nav.ts` now resolves; nothing 404s. Every function in
+`snowline-data.js`'s public API is ported and covered by the parity test.
 
 ### Deliberately not built
 
@@ -172,34 +209,21 @@ with nowhere to write. Each screen says so on the page:
 - Corporate actions: record a new event
 - Holdings drawer: the per-holding note
 
-### Engine functions still to port from `snowline-data.js`
+Building them for real means deciding where the write lands. A transaction is a
+*stored fact*, so the ledger would stop being derived from `positions` and start
+being derived from the trades — that is a data-model change, not a screen change,
+and it needs the cost-basis decision in §6 first.
 
-Everything not in the table in §2. Grouped by the source file's own section comments:
+### Also still open
 
-- **cash** — `cashFlow`, `cashStats`, `cashByCurrency`, `cashPositions`, `cashFloat` (~line 656).
-  Note: cash flow is *solved*, not stored — read the policy comment above `cashFlow()`.
-- **monthly history** — `history`, `historyRange`, `monthlyReturns`, `benchmarkValuePath`,
-  `holdingsPerformance`, `monthSpan`, `returnPath` (~line 913). Pinned at both ends; read the comment.
-- **market universe** — `marketUniverse`, `universeSectors`, `universeStats`,
-  `marketCalendarMonth`, `marketCalendarYear` (~line 1501)
-- **fund look-through** — `fundComposition`, `lookThrough`, `breakdown`, `incomeBreakdown`,
-  `dividendRating` (~line 1741)
-- **risk statistics** — `riskFreeRate`, `seriesStats`, `betaOf`, `riskCalibration`,
-  `riskStats`, `riskVerdict` (~line 1856)
-- **backtest engine** — `labSecurities`, `labSecurity`, `labAnchor`, `dampen`, `labReturns`,
-  `maxDrawdown`, `labMyPortfolio`, `backtest`, `labScenarios` (Portfolio Lab)
-- **price technicals** — `sessionDate`, `technicals`, `dipRows` (Find the Dip)
-- **watchlist** — `watchlist`, `saveWatchlist`, `toggleWatch`
-- **deterministic detail data** — `seeded`, `priceSeries` (seeded PRNG per ticker)
-
-Several of these use a **seeded PRNG** (`seeded(s)`) so the prototype's "random" detail data
-is deterministic. Port the PRNG exactly or the numbers will not match.
-
-Also not yet stored in SQLite: `fundComposition`, the market universe, and the watchlist.
-Extend `schema.sql` + `seed.ts` when the screens that need them are built.
-(`corporateActions` is stored — see the `corporate_actions` table.)
-
----
+- **Hardcoded copy carried over from the prototype**: the quotes bar and the
+  "why is it moving?" narrative. Both are marked with comments. There is no quote
+  source in the data model (§6).
+- **Coverage shape.** Core parity is thorough; the API has integration tests; every
+  screen is covered end-to-end, but the presenters have no unit tests of their own.
+  If a presenter grows more maths, test it directly rather than through Playwright.
+- **No production build has been certified** — only `dev` servers, `svelte-check`
+  and the test suites above.
 
 ## 5. Conventions to follow
 
@@ -251,9 +275,16 @@ snowline/                       the design bundle — READ ONLY, acceptance crit
 
 packages/core/
   src/types.ts                  domain + derived types
-  src/derive.ts                 the Engine
+  src/derive.ts                 the Engine (totals, categories, holdings, goal, cash)
+  src/ledger.ts                 trades, lots, corporate actions, seeded price series
+  src/history.ts                monthly history, benchmark path, solved cash flow
+  src/research.ts               look-through, risk, market universe, backtest, technicals
+  src/research-types.ts         the research catalog + preferences types
+  src/rebalance.ts              the rebalancing allocator
+  src/category-edits.ts         category mutations
   src/format.ts                 shared formatters
   test/parity.test.ts           pins the port to the prototype
+  test/scenarios.test.ts        scenario regressions run against the bundle as oracle
   test/reference.json           generated — do not hand-edit
 
 apps/api/
@@ -262,30 +293,54 @@ apps/api/
   src/db/index.ts               load/save
   src/db/seed.ts                seeder
   src/db/seed-data.json         generated — do not hand-edit
+  test/integration.test.ts      endpoint tests
 
 apps/web/
   src/app.css                   design tokens
   src/lib/api.ts                typed API client
   src/lib/charts.ts             SVG geometry helpers
   src/lib/nav.ts                route map + icons
-  src/lib/components/           TopNav, Metric, TwoLineCell, ChartTooltip
+  src/lib/screen-engine.ts      one engine per page snapshot; the presenters' only input
+  src/lib/research-actions.ts   form actions for watchlist / lab scenario writes
+  src/lib/components/           shared components (TopNav, Metric, DonutBreakdown, …)
   src/lib/components/dashboard/ the Dashboard's cards
-  src/routes/+page.svelte       Dashboard
+  src/lib/presenters/*.js       view-model maths for the eleven research screens
+  src/lib/screens/*.svelte      their markup
+  src/routes/                   one route per screen
+  tests/research.spec.ts        Playwright coverage of the research screens
 
 scripts/extract-reference.ts    regenerates seed + parity reference from the bundle
+playwright.config.ts            e2e config; boots both dev servers
 ```
-
----
 
 ## 8. Suggested next step
 
-`/portfolio/cash` or `/tools/rebalancing`.
+The port is complete, so the next work is a product decision, not a screen:
 
-Rebalancing needs no new engine work — it reads the category model, which is ported and
-tested. Cash needs `cashFlow()`, which is the most interesting remaining port: there is no
-stored cash ledger, so deposits and withdrawals are *solved* under a stated top-up/sweep
-policy such that the walk never goes negative and ends exactly on today's balance. Read the
-comment above `cashFlow()` before porting it.
+1. **Settle the cost-basis and dividend-recognition questions in §6.** They gate the
+   transaction modals, and changing them later invalidates realised P&L, the lot
+   display and the calendar's month buckets.
+2. **Find a real quote source.** The quotes bar and "why is it moving?" are the last
+   two places where a figure on screen is not derived from the data model.
+3. **Certify a production build** and decide on deployment. Nothing has been built
+   with `vite build` yet.
 
-After those, the Analytics tabs share one dependency — `history()` — so porting the monthly
-history unlocks Growth, Metrics and Report together.
+If instead the goal is more confidence in what exists: unit-test the presenters (§4).
+
+### Fixed in the last pass
+
+Adding browser coverage for the eight older screens found four real mobile-layout
+faults, all now fixed and pinned by the 390px assertion:
+
+- Categories: the `sr-only` header text was `position:absolute` inside the table's
+  horizontal scroller, so its static position — 800px into a 900px table — dragged the
+  whole document sideways. It is now clipped in flow.
+- Dashboard: the dividend-growth legend was a single non-wrapping row; it now wraps.
+- Dividend calendar: the twelve-month bar strip cannot shrink below its month labels,
+  so it got the bundle's scroll-wrapper treatment.
+- My goal: the scenarios table now scrolls like the year-by-year table above it, and
+  `.card-head` wraps when its title and controls cannot share a line.
+
+The goal screen's monthly-contribution input also gained an `aria-label` — the other
+inputs on that screen are still labelled only by an adjacent `<span>`, which is worth
+a sweep.

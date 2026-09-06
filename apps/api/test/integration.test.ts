@@ -142,3 +142,28 @@ describe('invalid requests do not overwrite saved settings', () => {
     expect(loadGoalConfig()).toBeNull();
   });
 });
+
+describe('research catalog and settings', () => {
+  it('loads catalog facts from SQLite and preserves independent preference edits', async () => {
+    const before = await json('/api/research/snapshot');
+    expect(before.catalog.universe.length).toBeGreaterThan(40);
+    expect(before.dataset.positions).toEqual(loadDataset().positions);
+    const scenarios = [{ name: 'Income mix', weights: [{ ticker: 'SCHD', weight: 100 }], amount: 10000, monthly: 300, reinvest: true, from: 0, to: 12 }];
+    await json('/api/research/preferences', 'POST', { scenarios });
+    await json('/api/research/preferences', 'POST', { watchlist: ['SCHD', 'O'] });
+    const saved = (await json('/api/research/snapshot')).preferences;
+    expect(saved).toEqual({ scenarios, watchlist: ['SCHD', 'O'] });
+    // Reseeding the catalog must preserve user choices.
+    runSeed();
+    expect((await json('/api/research/snapshot')).preferences).toEqual(saved);
+    await json('/api/research/preferences', 'POST', { scenarios: null });
+    expect((await json('/api/research/snapshot')).preferences.watchlist).toEqual(['SCHD', 'O']);
+  });
+
+  it('rejects invalid preferences without modifying stored settings', async () => {
+    const before = (await json('/api/research/snapshot')).preferences;
+    expect((await request('/api/research/preferences', 'POST', { watchlist: [42] })).status).toBe(422);
+    expect((await request('/api/research/preferences', 'POST', { scenarios: [{ name: 'Incomplete' }] })).status).toBe(422);
+    expect((await json('/api/research/snapshot')).preferences).toEqual(before);
+  });
+});

@@ -8,7 +8,7 @@
  */
 
 import { describe, expect, it } from 'bun:test';
-import { editCategories, Engine, type CategoryEdit, type CategoryModel } from '../src/index.js';
+import { rebalance, createResearchEngine, editCategories, Engine, type CategoryEdit, type CategoryModel } from '../src/index.js';
 import seed from '../../../apps/api/src/db/seed-data.json' with { type: 'json' };
 import reference from './reference.json' with { type: 'json' };
 
@@ -563,4 +563,68 @@ describe('cash', () => {
       near(c.yieldPct, rc.yieldPct);
     });
   });
+});
+
+// All new research outputs are checked against the independently executed
+// design engine, including nested chart paths and both reinvestment modes.
+describe('research engine parity', () => {
+  const research = createResearchEngine(engine, seed.researchCatalog);
+  const expected = reference.research;
+  function matches(actual: any, wanted: any) {
+    if (typeof wanted === 'number') {
+      expect(typeof actual).toBe('number');
+      near(actual, wanted, 1e-7);
+    } else if (Array.isArray(wanted)) {
+      expect(actual.length).toBe(wanted.length);
+      wanted.forEach((v, i) => matches(actual[i], v));
+    } else if (wanted && typeof wanted === 'object') {
+      for (const key of Object.keys(wanted)) matches(actual[key], wanted[key]);
+    } else expect(actual).toEqual(wanted);
+  }
+  it('decomposes funds without losing portfolio value in every dimension', () => {
+    for (const [dim, rows] of Object.entries(expected.breakdown)) {
+      matches(research.breakdown(dim, false), rows[0]);
+      matches(research.breakdown(dim, true), rows[1]);
+    }
+    matches(research.lookThrough(false), expected.lookThrough[0]);
+    matches(research.lookThrough(true), expected.lookThrough[1]);
+  });
+  it('derives income, reliability, and calibrated risk', () => {
+    matches(research.incomeBreakdown(), expected.incomeBreakdown);
+    matches(engine.positions.map(p => research.dividendRating(p)), expected.dividendRatings);
+    matches(research.riskStats(), expected.riskStats);
+    matches(research.riskCalibration(), expected.riskCalibration);
+    matches(research.riskFreeRate(), expected.riskFreeRate);
+  });
+  it('uses consistent market yields, ratings and payment dates', () => {
+    matches(research.marketUniverse(), expected.marketUniverse);
+    matches(research.universeSectors(), expected.universeSectors);
+    matches(research.universeStats(), expected.universeStats);
+    matches(research.marketCalendarYear(2026, 7), expected.marketCalendarYear);
+  });
+  it('reproduces portfolio backtests with reinvestment on and off', () => {
+    matches(research.labSecurities(), expected.labSecurities);
+    matches(research.labMyPortfolio(), expected.labMyPortfolio);
+    [true, false].forEach((reinvest, i) => matches(research.backtest({
+      amount: 10000, monthly: 300, reinvest, weights: research.labMyPortfolio()
+    }), expected.backtests[i]));
+    expect(research.backtest({ amount: 0, monthly: 0, weights: [] })).toBeNull();
+  });
+  it('pins every technical price path and its moving averages', () => {
+    matches(research.dipRows(), expected.dipRows);
+  });
+});
+
+
+describe('rebalancing parity', () => {
+  for (const scenario of reference.rebalancing) {
+    it(JSON.stringify(scenario.config), () => {
+      const plan = rebalance(engine, scenario.config);
+      const expected = scenario.plan;
+      for (const key of ['buyTotal', 'execBuys', 'execSells', 'surplusUsed', 'residual', 'afterTotal', 'driftBefore', 'driftAfter', 'closedPct'] as const) near(plan[key], expected[key], 1e-7);
+      near(plan.cashName ? plan.after[plan.cashName] : 0, expected.cashAfter, 1e-7);
+      expect(plan.legs.map(l => ({ ticker: l.p.ticker, shares: l.shares, exec: l.exec, blocked: l.blocked }))).toEqual(expected.legs);
+      expected.categories.forEach(c => { near(plan.after[c.name], c.value, 1e-7); near(plan.afterWeight(c.name), c.weight, 1e-7); });
+    });
+  }
 });

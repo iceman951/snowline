@@ -134,7 +134,7 @@
       {/if}
     </div>
 
-    <div style="display:flex;align-items:center;gap:18px;padding-left:34px">
+    <div style="display:flex;align-items:center;flex-wrap:wrap;gap:18px;padding-left:34px">
       {#each YEARS as y, j (y)}
         <span style="display:flex;align-items:center;gap:7px">
           <span style="width:9px;height:9px;border-radius:1px;background:{TINTS[j]};display:inline-block"

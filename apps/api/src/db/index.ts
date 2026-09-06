@@ -214,3 +214,20 @@ export function saveGoalConfig(cfg: Partial<GoalConfig>): void {
 export function clearGoalConfig(): void {
   getDb().run('DELETE FROM goal_config WHERE id = 1');
 }
+
+export function loadResearchCatalog(): import('@snowline/core').ResearchCatalog {
+  const row = getDb().query<{ catalog_json: string }, []>('SELECT catalog_json FROM research_catalog WHERE id = 1').get();
+  if (!row) throw new Error('research catalog missing — run `bun run seed`');
+  return JSON.parse(row.catalog_json);
+}
+
+export function loadResearchPreferences(): import('@snowline/core').ResearchPreferences {
+  const row = getDb().query<{ preferences_json: string }, []>('SELECT preferences_json FROM research_preferences WHERE id = 1').get();
+  return row ? JSON.parse(row.preferences_json) : { watchlist: ['O', 'MSFT', 'TXN', 'SPG', 'LIN'], scenarios: null };
+}
+
+export function saveResearchPreferences(patch: Partial<import('@snowline/core').ResearchPreferences>): import('@snowline/core').ResearchPreferences {
+  const value = { ...loadResearchPreferences(), ...patch };
+  getDb().run('INSERT INTO research_preferences (id, preferences_json) VALUES (1, ?) ON CONFLICT(id) DO UPDATE SET preferences_json = excluded.preferences_json', [JSON.stringify(value)]);
+  return value;
+}

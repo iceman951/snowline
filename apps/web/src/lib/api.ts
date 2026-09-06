@@ -163,7 +163,16 @@ export interface GoalScreenPayload {
   requiredContribution: number | null;
 }
 
+export interface ResearchSnapshot {
+  dataset: import('@snowline/core').Dataset;
+  catalog: import('@snowline/core').ResearchCatalog;
+  preferences: import('@snowline/core').ResearchPreferences;
+  goalConfig: Partial<import('@snowline/core').GoalConfig> | null;
+}
+
 export const api = {
+  researchSnapshot: (f: Fetch) => get<ResearchSnapshot>(f, '/api/research/snapshot'),
+  saveResearchPreferences: (f: Fetch, patch: Partial<import('@snowline/core').ResearchPreferences>) => post<import('@snowline/core').ResearchPreferences>(f, '/api/research/preferences', patch),
   goalScreen: (f: Fetch) => get<GoalScreenPayload>(f, '/api/screens/goal'),
   dividendCalendar: (f: Fetch, offset = 0, windowOffset = 0) =>
     get<DividendCalendarPayload>(

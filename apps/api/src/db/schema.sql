@@ -123,3 +123,15 @@ CREATE TABLE IF NOT EXISTS goal_config (
   id          INTEGER PRIMARY KEY CHECK (id = 1),
   config_json TEXT NOT NULL
 );
+
+-- Illustrative market facts from the handoff, kept separate from positions.
+CREATE TABLE IF NOT EXISTS research_catalog (
+  id INTEGER PRIMARY KEY CHECK (id = 1),
+  catalog_json TEXT NOT NULL
+);
+
+-- One portfolio's watchlist and saved backtest configurations.
+CREATE TABLE IF NOT EXISTS research_preferences (
+  id INTEGER PRIMARY KEY CHECK (id = 1),
+  preferences_json TEXT NOT NULL
+);

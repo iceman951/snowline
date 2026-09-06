@@ -30,7 +30,7 @@ const fakeWindow: any = {
 };
 (globalThis as any).window = fakeWindow;
 
-new Function('window', src)(fakeWindow);
+new Function('window', src.replace('root.SnowlineData = {', 'root.ResearchCatalog = { universe: UNIVERSE, heldMeta: HELD_META, fundComposition: fundComposition, geography: GEO }; root.SnowlineData = {'))(fakeWindow);
 
 const D = fakeWindow.SnowlineData;
 if (!D) throw new Error('SnowlineData did not attach — has the bundle changed shape?');
@@ -43,12 +43,34 @@ await Bun.write(
       constants: D.constants,
       dividendHistory: D.dividendHistory,
       categoryTargets: D.categoryTargets,
-      corporateActions: D.corporateActions
+      corporateActions: D.corporateActions,
+      researchCatalog: fakeWindow.ResearchCatalog
     },
     null,
     2
   )
 );
+
+const rebalanceSource = (await Bun.file(join(root, 'snowline/project/Rebalancing.dc.html')).text()).match(/<script type="text\/x-dc"[^>]*>([\s\S]*?)<\/script>/)![1];
+const plannerSource = rebalanceSource.replace('const flags = [];', `return {
+  buyTotal, execBuys, execSells, surplusUsed, residual, afterTotal, driftBefore, driftAfter, closedPct, cashAfter,
+  legs: legs.map(l => ({ ticker: l.p.ticker, shares: l.shares, exec: l.exec, blocked: l.blocked })),
+  categories: cats.map(c => ({ name: c.name, value: after[c.name], weight: afterWeight(c.name) }))
+}; const flags = [];`);
+const Planner = new Function('DCLogic', 'window', plannerSource + '; return Component;')(class { props = {}; }, fakeWindow);
+const rebalancing = [
+  { isCash: false, newCash: 0, minTrade: 50, whole: false, useSurplus: false },
+  { isCash: false, newCash: 0, minTrade: 50, whole: true, useSurplus: false },
+  { isCash: false, newCash: 0, minTrade: 50, whole: false, useSurplus: true },
+  { isCash: true, newCash: 1000, minTrade: 50, whole: false, useSurplus: false },
+  { isCash: true, newCash: 2500, minTrade: 50, whole: true, useSurplus: false },
+  { isCash: true, newCash: 0, minTrade: 0, whole: false, useSurplus: false },
+  { isCash: true, newCash: 50000, minTrade: 500, whole: false, useSurplus: false }
+].map(config => {
+  const planner = new Planner();
+  Object.assign(planner.state, { mode: config.isCash ? 'cash' : 'now', cash: String(config.newCash), min: String(config.minTrade), whole: config.whole, surplus: config.useSurplus });
+  return { config, plan: planner.renderVals() };
+});
 
 const T = D.totals();
 const pr = D.projection();
@@ -77,6 +99,19 @@ await Bun.write(
   join(root, 'packages/core/test/reference.json'),
   JSON.stringify(
     {
+      rebalancing,
+      research: {
+        breakdown: Object.fromEntries(['holdings', 'sector', 'assetClass', 'currency', 'region', 'country'].map(dim => [dim, [D.breakdown(dim, false), D.breakdown(dim, true)]])),
+        lookThrough: [D.lookThrough(false), D.lookThrough(true)],
+        incomeBreakdown: D.incomeBreakdown(),
+        dividendRatings: D.positions.map(p => D.dividendRating(p)),
+        riskStats: D.riskStats(), riskCalibration: D.riskCalibration(), riskFreeRate: D.riskFreeRate(),
+        marketUniverse: D.marketUniverse(), universeSectors: D.universeSectors(), universeStats: D.universeStats(),
+        marketCalendarYear: D.marketCalendarYear(2026, 7),
+        labSecurities: D.labSecurities(), labMyPortfolio: D.labMyPortfolio(),
+        backtests: [true, false].map(reinvest => D.backtest({ amount: 10000, monthly: 300, reinvest, weights: D.labMyPortfolio() })),
+        dipRows: D.dipRows()
+      },
       totals: T,
       categoryEdits,
       categories: D.categories().map((c: any) => ({

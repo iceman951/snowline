@@ -321,7 +321,7 @@
         <span style="font-size:12px;font-weight:500;color:var(--t2)">Monthly contribution</span>
         <div style="display:flex;align-items:center;gap:6px">
           <span style="font-size:13px;color:var(--t3)">$</span>
-          <input type="number" bind:value={draft.monthlyContribution} min="0"
+          <input type="number" aria-label="Monthly contribution" bind:value={draft.monthlyContribution} min="0"
             style="flex:1;height:32px;padding:0 10px;border:1px solid var(--line);border-radius:6px;background:var(--canvas);color:var(--t1);font-size:13px;outline:none" />
         </div>
         <span style="font-size:11px;color:var(--t3);line-height:1.5">
@@ -418,7 +418,7 @@
       <div class="card">
         <div class="card-head">
           <span class="card-title">{income ? 'Projected income' : 'Projected value'} · {pr.startYear} – {pr.byYear}</span>
-          <div style="display:flex;align-items:center;gap:14px">
+          <div style="display:flex;align-items:center;flex-wrap:wrap;gap:14px">
             <div style="display:flex;align-items:center;gap:12px">
               {#each [{ label: 'Portfolio', border: '2px solid var(--accent)' }, { label: pr.altLabel, border: '2px dashed var(--grey-series)' }, { label: 'Goal', border: '1px dashed var(--t3)' }] as l (l.label)}
                 <span style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--t3)">
@@ -513,7 +513,8 @@
       <span class="card-title">Scenarios</span>
       <span class="card-note">the same projection under different assumptions</span>
     </div>
-    <div style="padding:4px 20px 16px">
+    <div style="padding:4px 20px 16px;max-width:100%;overflow-x:auto;overscroll-behavior-x:contain">
+      <div style="min-width:640px">
       <div style="display:grid;grid-template-columns:minmax(0,1.4fr) 140px 180px 180px;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);font-size:12px;font-weight:500;color:var(--t2)">
         <span>Scenario</span><span style="text-align:right">Return</span>
         <span style="text-align:right">Goal reached</span>
@@ -529,6 +530,7 @@
           <span style="text-align:right;color:var(--t1)">{fmt.compact(s.endValue)}</span>
         </div>
       {/each}
+      </div>
     </div>
   </div>
 

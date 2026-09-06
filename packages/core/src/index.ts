@@ -15,3 +15,6 @@ export {
   tradeFee
 } from './ledger.js';
 export { HISTORY_START, HistoryEngine, returnPath } from './history.js';
+export { createResearchEngine } from './research.js';
+export * from './research-types.js';
+export { rebalance, waterFill, type RebalanceConfig } from './rebalance.js';

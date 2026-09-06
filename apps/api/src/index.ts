@@ -2,6 +2,9 @@ import { Elysia, t } from 'elysia';
 import { cors } from '@elysiajs/cors';
 import { editCategories, Engine, MONTHS } from '@snowline/core';
 import {
+  loadResearchCatalog,
+  loadResearchPreferences,
+  saveResearchPreferences,
   clearGoalConfig,
   loadDataset,
   loadGoalConfig,
@@ -35,6 +38,23 @@ export const app = new Elysia()
   })
 
   .get('/health', () => ({ ok: true }))
+
+  .get('/api/research/snapshot', () => ({
+    dataset: loadDataset(), catalog: loadResearchCatalog(),
+    preferences: loadResearchPreferences(), goalConfig: loadGoalConfig()
+  }))
+
+  .post('/api/research/preferences', ({ body }) => saveResearchPreferences(body), {
+    body: t.Object({
+      watchlist: t.Optional(t.Array(t.String({ minLength: 1, maxLength: 20 }), { maxItems: 200 })),
+      scenarios: t.Optional(t.Union([t.Null(), t.Array(t.Object({
+        name: t.String({ maxLength: 100 }),
+        weights: t.Array(t.Object({ ticker: t.String({ maxLength: 20 }), weight: t.Number({ minimum: 0, maximum: 10000 }) }), { maxItems: 200 }),
+        amount: t.Number({ minimum: 0, maximum: 1e12 }), monthly: t.Number({ minimum: 0, maximum: 1e9 }),
+        reinvest: t.Boolean(), from: t.Optional(t.Number()), to: t.Optional(t.Number())
+      }), { maxItems: 20 })]))
+    })
+  })
 
   /* ---- portfolio ------------------------------------------------------- */
 
