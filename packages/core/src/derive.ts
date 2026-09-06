@@ -25,6 +25,8 @@ import type {
   Totals
 } from './types.js';
 import { EXCHANGES, LedgerEngine, parseDate } from './ledger.js';
+import { HistoryEngine } from './history.js';
+import { fmt } from './format.js';
 import type { CalendarEvent, CalendarMonth } from './types.js';
 
 export const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] as const;
@@ -42,6 +44,8 @@ export class Engine {
   readonly categoryTargets: Record<string, number>;
   /** Trade lots, income rows, corporate actions and price series. */
   readonly ledger: LedgerEngine;
+  /** Solved monthly history and the cash walk. */
+  readonly history: HistoryEngine;
   private readonly savedCategoryModel: CategoryModel | null;
 
   constructor(data: Dataset) {
@@ -56,6 +60,130 @@ export class Engine {
       data.constants.withholdingTax,
       data.constants.today
     );
+    this.history = new HistoryEngine(data.positions, data.constants, data.dividendHistory, {
+      totals: () => this.totals(),
+      ledger: () => this.ledger.ledger(),
+      cashFloat: () => this.cashFloat(),
+      annualGross: (p) => this.annualGross(p),
+      money: (n) => fmt.money(n),
+      shares: (n) => fmt.shares(n)
+    });
+  }
+
+  /* ---- cash --------------------------------------------------------------
+     Cash is a position like any other; what makes it its own screen is the
+     weight it carries and what holding it costs against the goal's expected
+     return. */
+
+  cashPositions(): Position[] {
+    return this.open().filter((p) => p.assetClass === 'Cash');
+  }
+
+  cashFloat(): number {
+    return sum(this.cashPositions().map((p) => p.value));
+  }
+
+  /** Cash weight, what it yields, and the drag it puts on the whole portfolio. */
+  cashStats() {
+    const T = this.totals();
+    const cash = this.cashFloat();
+    const ps = this.cashPositions();
+    const y = cash ? sum(ps.map((p) => p.value * p.yieldPct)) / cash : 0;
+    const expected = this.goalConfig().expectedReturn * 100;
+
+    // The target weight of whichever categories the cash lines sit in — the
+    // Categories screen owns that number, not this one.
+    const names: string[] = [];
+    ps.forEach((p) => {
+      const n = this.categoryOf(p.ticker);
+      if (n && !names.includes(n)) names.push(n);
+    });
+    const m = this.categoryModel();
+    const target = sum(names.map((n) => m.targets[n] ?? 0));
+    const weight = T.value ? (cash / T.value) * 100 : 0;
+    const gap = Math.max(0, expected - y);
+
+    return {
+      cash,
+      weight,
+      target,
+      drift: weight - target,
+      categoryNames: names,
+      yieldPct: y,
+      income: (cash * y) / 100,
+      monthlyIncome: (cash * y) / 100 / 12,
+      expectedReturn: expected,
+      gap,
+      dragPct: (weight / 100) * gap,
+      dragAnnual: (cash * gap) / 100,
+      positions: ps.map((p) => ({
+        ticker: p.ticker,
+        name: p.name,
+        mono: p.mono,
+        currency: p.currency,
+        value: p.value,
+        yieldPct: p.yieldPct,
+        frequency: p.frequency,
+        income: this.annualGross(p),
+        monthly: this.annualGross(p) / 12,
+        caveat: p.caveat,
+        share: cash ? (p.value / cash) * 100 : 0
+      }))
+    };
+  }
+
+  /** Cash balances grouped by currency (only the base currency is held). */
+  cashByCurrency() {
+    const ps = this.cashPositions();
+    const total = this.cashFloat();
+    const map = new Map<string, {
+      currency: string; balance: number; inBase: number; income: number; lines: string[];
+    }>();
+
+    ps.forEach((p) => {
+      const c = map.get(p.currency) ?? {
+        currency: p.currency, balance: 0, inBase: 0, income: 0, lines: []
+      };
+      c.balance += p.value;
+      c.inBase += p.value * (p.fxToUsd || 1);
+      c.income += this.annualGross(p);
+      c.lines.push(p.ticker);
+      map.set(p.currency, c);
+    });
+
+    return [...map.values()]
+      .map((c) => ({
+        ...c,
+        pct: total ? (c.balance / total) * 100 : 0,
+        yieldPct: c.balance ? (c.income / c.balance) * 100 : 0,
+        isBase: c.currency === this.constants.baseCurrency
+      }))
+      .sort((a, b) => b.balance - a.balance);
+  }
+
+  /** Per-holding performance, for the horizontal bar chart. */
+  holdingsPerformance() {
+    return this.open()
+      .map((p) => {
+        const h = this.holding(p);
+        const profit = p.value - p.costTotal + p.dividendsReceived + p.realizedPnL;
+        const fees = Math.round(p.costTotal * 0.0009 * 100) / 100;
+        return {
+          ticker: p.ticker,
+          name: p.name,
+          mono: p.mono,
+          totalProfit: profit,
+          totalProfitPct: p.costTotal ? (profit / p.costTotal) * 100 : 0,
+          capitalGain: p.value - p.costTotal,
+          capitalGainPct: h.capitalGainPct,
+          dividends: p.dividendsReceived,
+          taxes: p.dividendsReceived / (1 - this.constants.withholdingTax) - p.dividendsReceived,
+          fees,
+          value: p.value,
+          invested: p.costTotal
+        };
+      })
+      .sort((a, b) => b.totalProfitPct - a.totalProfitPct);
   }
 
   /** Most recent payments for a holding, newest first. */

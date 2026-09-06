@@ -220,6 +220,83 @@ export interface ForwardMonth {
   rows: Array<ScheduleRow & { status: PaymentStatus }>;
 }
 
+export interface MonthKey {
+  year: number;
+  monthIndex: number;
+  label: string;
+  key: string;
+  short: string;
+}
+
+/** One month of the solved portfolio history. */
+export interface HistoryMonth extends MonthKey {
+  value: number;
+  invested: number;
+  deposits: number;
+  withdrawals: number;
+  begin: number;
+  end: number;
+  change: number;
+  monthReturn: number;
+  benchmarkReturn: number;
+  twrIndex: number;
+  benchmarkIndex: number;
+  dividends: number;
+  taxes: number;
+  fees: number;
+  realized: number;
+  realizedToDate: number;
+  capitalGain: number;
+  totalProfit: number;
+}
+
+export interface CashRow {
+  id: string;
+  type: 'Deposit' | 'Withdrawal' | 'Buy' | 'Sell' | 'Dividend';
+  date: string;
+  /** Negative for money leaving the account. */
+  signed: number;
+  amount: number;
+  inflow: boolean;
+  label: string;
+  detail: string;
+  ticker: string | null;
+  mono: string | null;
+  balance: number;
+}
+
+export interface CashMonth extends MonthKey {
+  deposits: number;
+  withdrawals: number;
+  invested: number;
+  proceeds: number;
+  income: number;
+  inflow: number;
+  outflow: number;
+  net: number;
+  end: number;
+}
+
+export interface CashFlow {
+  currency: string;
+  /** The money-market line the walk is held at. */
+  float: number;
+  balance: number;
+  rows: CashRow[];
+  deposits: number;
+  withdrawals: number;
+  netDeposits: number;
+  invested: number;
+  proceeds: number;
+  income: number;
+  depositCount: number;
+  withdrawalCount: number;
+  count: number;
+  months: CashMonth[];
+  first: string | null;
+  last: string | null;
+}
+
 /** One projected payment on a calendar day. */
 export interface CalendarEvent {
   ticker: string;

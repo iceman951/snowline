@@ -421,3 +421,146 @@ describe('dividend calendar', () => {
     }
   });
 });
+
+describe('monthly history', () => {
+  const H = engine.history;
+
+  it('reproduces the month span', () => {
+    expect(H.monthSpan()).toEqual(reference.monthSpan as any);
+  });
+
+  it('reproduces every solved month', () => {
+    const h = H.history();
+    expect(h).toHaveLength(reference.history.length);
+    h.forEach((m, i) => {
+      const r = reference.history[i] as any;
+      expect(m.key).toBe(r.key);
+      for (const k of ['value', 'invested', 'deposits', 'begin', 'end', 'change', 'monthReturn',
+        'benchmarkReturn', 'twrIndex', 'benchmarkIndex', 'dividends', 'taxes', 'fees',
+        'realized', 'realizedToDate', 'capitalGain', 'totalProfit'] as const) {
+        near(m[k], r[k], 1e-6);
+      }
+    });
+  });
+
+  it('is pinned at both ends — the invariant the whole solve rests on', () => {
+    const h = H.history();
+    const last = h[h.length - 1];
+    const T = engine.totals();
+    // Value lands exactly on today's market value.
+    near(last.value, T.value, 1e-9);
+    // Cumulative deposits land on the real cost basis.
+    near(last.invested, T.invested, 1e-6);
+    // The chain-linked return lands on the stored TWR.
+    near((last.twrIndex - 1) * 100, engine.constants.twr, 1e-6);
+    near((last.benchmarkIndex - 1) * 100, engine.constants.benchmarkTwr, 1e-6);
+  });
+
+  it('reproduces the benchmark value path', () => {
+    const b = H.benchmarkValuePath();
+    b.forEach((m, i) => near(m.value, (reference.benchmarkValuePath as any)[i].value, 1e-6));
+  });
+
+  it('reproduces monthly returns for every period', () => {
+    for (const period of ['all', '12m', '2026'] as const) {
+      const got = H.monthlyReturns(period);
+      const ref = (reference.monthlyReturns as any)[period];
+      expect(got).toHaveLength(ref.length);
+      got.forEach((m, i) => {
+        expect(m.key).toBe(ref[i].key);
+        near(m.pct, ref[i].pct, 1e-6);
+        near(m.value, ref[i].value, 1e-6);
+      });
+    }
+  });
+
+  it('reproduces each range window', () => {
+    for (const [range, keys] of Object.entries(reference.historyRange)) {
+      expect(H.historyRange(range).map((m) => m.key)).toEqual(keys as string[]);
+    }
+  });
+
+  it('reproduces per-holding performance', () => {
+    const got = engine.holdingsPerformance();
+    expect(got).toHaveLength(reference.holdingsPerformance.length);
+    got.forEach((h, i) => {
+      const r = reference.holdingsPerformance[i] as any;
+      expect(h.ticker).toBe(r.ticker);
+      near(h.totalProfit, r.totalProfit);
+      near(h.totalProfitPct, r.totalProfitPct);
+      near(h.capitalGain, r.capitalGain);
+      near(h.dividends, r.dividends);
+      near(h.taxes, r.taxes);
+      near(h.fees, r.fees);
+    });
+  });
+});
+
+describe('cash', () => {
+  const C = engine.history.cashFlow();
+  const R = reference.cashFlow as any;
+
+  it('reproduces every row of the solved walk', () => {
+    expect(C.rows).toHaveLength(R.rows.length);
+    C.rows.forEach((row, i) => {
+      const r = R.rows[i];
+      expect(row.id).toBe(r.id);
+      expect(row.type).toBe(r.type);
+      expect(row.date).toBe(r.date);
+      expect(row.label).toBe(r.label);
+      expect(row.detail).toBe(r.detail);
+      near(row.signed, r.signed, 1e-9);
+      near(row.balance, r.balance, 1e-9);
+    });
+  });
+
+  it('matches the reference totals', () => {
+    for (const k of ['float', 'balance', 'deposits', 'withdrawals', 'netDeposits',
+      'invested', 'proceeds', 'income'] as const) {
+      near(C[k], R[k], 1e-9);
+    }
+    expect(C.count).toBe(R.count);
+    expect(C.depositCount).toBe(R.depositCount);
+    expect(C.withdrawalCount).toBe(R.withdrawalCount);
+  });
+
+  it('never goes negative and ends exactly on the money-market line', () => {
+    // The walk is ordered newest first, so check it in chronological order.
+    const chrono = C.rows.slice().reverse();
+    chrono.forEach((r) => expect(r.balance).toBeGreaterThanOrEqual(0));
+    near(chrono[chrono.length - 1].balance, C.float, 1e-9);
+    near(C.balance, engine.cashFloat(), 1e-9);
+  });
+
+  it('reproduces the monthly in/out series', () => {
+    expect(C.months).toHaveLength(R.months.length);
+    C.months.forEach((m, i) => {
+      const r = R.months[i];
+      expect(m.key).toBe(r.key);
+      for (const k of ['deposits', 'withdrawals', 'invested', 'proceeds', 'income',
+        'inflow', 'outflow', 'net', 'end'] as const) {
+        near(m[k], r[k], 1e-9);
+      }
+    });
+  });
+
+  it('reproduces cash stats and the currency split', () => {
+    const s = engine.cashStats();
+    const r = reference.cashStats as any;
+    for (const k of ['cash', 'weight', 'target', 'drift', 'yieldPct', 'income',
+      'monthlyIncome', 'expectedReturn', 'gap', 'dragPct', 'dragAnnual'] as const) {
+      near(s[k], r[k], 1e-9);
+    }
+    expect(s.categoryNames).toEqual(r.categoryNames);
+
+    const byCcy = engine.cashByCurrency();
+    expect(byCcy).toHaveLength((reference.cashByCurrency as any[]).length);
+    byCcy.forEach((c, i) => {
+      const rc = (reference.cashByCurrency as any[])[i];
+      expect(c.currency).toBe(rc.currency);
+      near(c.balance, rc.balance);
+      near(c.pct, rc.pct);
+      near(c.yieldPct, rc.yieldPct);
+    });
+  });
+});

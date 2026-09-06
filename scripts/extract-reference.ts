@@ -128,6 +128,21 @@ await Bun.write(
       priceSeries: Object.fromEntries(
         D.positions.map((p: any) => [p.ticker, D.priceSeries(p.ticker, 60)])
       ),
+      monthSpan: D.monthSpan(),
+      history: D.history(),
+      benchmarkValuePath: D.benchmarkValuePath(),
+      monthlyReturns: {
+        all: D.monthlyReturns('all'),
+        '12m': D.monthlyReturns('12m'),
+        '2026': D.monthlyReturns('2026')
+      },
+      historyRange: Object.fromEntries(
+        ['1m', '3m', '6m', 'YTD', '1y', 'all'].map((r) => [r, D.historyRange(r).map((m: any) => m.key)])
+      ),
+      holdingsPerformance: D.holdingsPerformance(),
+      cashFlow: D.cashFlow(),
+      cashStats: D.cashStats(),
+      cashByCurrency: D.cashByCurrency(),
       // The forward year plus a past month and a year boundary, so the status
       // rules and the leading-blank arithmetic are both covered.
       calendarYear: D.calendarYear(D.constants.today.year, D.constants.today.monthIndex),

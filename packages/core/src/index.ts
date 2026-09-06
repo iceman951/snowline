@@ -1,6 +1,7 @@
 export * from './types.js';
 export * from './derive.js';
 export * from './format.js';
+export * from './category-edits.js';
 export {
   BUY_DATES,
   EXCHANGES,
@@ -13,3 +14,4 @@ export {
   serial,
   tradeFee
 } from './ledger.js';
+export { HISTORY_START, HistoryEngine, returnPath } from './history.js';
