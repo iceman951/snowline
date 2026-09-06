@@ -90,7 +90,8 @@ export class LedgerEngine {
     private readonly positions: Position[],
     private readonly corporateActions: CorporateAction[],
     private readonly withholdingTax: number,
-    private readonly today: { year: number; monthIndex: number; label: string }
+    private readonly today: { year: number; monthIndex: number; label: string },
+    private readonly transactions: LedgerRow[] = []
   ) {}
 
   private byTicker(t: string): Position | undefined {
@@ -400,7 +401,8 @@ export class LedgerEngine {
       return s !== 0 ? s : a.ticker.localeCompare(b.ticker);
     });
 
-    this.cache = rows.map((r, i) => ({ id: `tx${rows.length - i}`, ...r }));
+    this.cache = [...rows.map((r, i) => ({ id: `tx${rows.length - i}`, ...r })), ...this.transactions]
+      .sort((a, b) => serial(b.date) - serial(a.date) || a.ticker.localeCompare(b.ticker));
     return this.cache;
   }
 
@@ -410,7 +412,7 @@ export class LedgerEngine {
     return {
       buy: pick((x) => x.operation === 'Buy'),
       sell: pick((x) => x.operation === 'Sell'),
-      income: pick((x) => x.kind === 'income'),
+      income: sum(r.filter(x => x.kind === 'income').map(x => x.signed)),
       fee: sum(r.map((x) => x.fee)),
       tax: sum(r.map((x) => x.tax)),
       count: r.length
@@ -425,7 +427,8 @@ export class LedgerEngine {
    */
   ledgerReconciliation() {
     return this.positions.map((p) => {
-      const mine = this.ledger().filter((r) => r.ticker === p.ticker);
+      // Reconcile the opening snapshot only; user entries are replayed separately.
+      const mine = this.ledger().filter((r) => r.ticker === p.ticker && r.updateCash === undefined);
       const buys = mine.filter((r) => r.operation === 'Buy');
       const inc = mine.filter((r) => r.kind === 'income');
       const adjShares = sum(buys.map((r) => r.shares * this.splitFactorAfter(p.ticker, r.date)));
@@ -443,6 +446,25 @@ export class LedgerEngine {
         basisAdjust: cut
       };
     });
+  }
+
+  /** Allocate today's shares to the newest buys: sales consume oldest lots (FIFO).
+   * Quantities use the current, split-adjusted share basis rather than mixing
+   * pre-split purchase units with the current holding balance.
+   */
+  remainingShares(positions: Pick<Position, 'ticker' | 'status' | 'shares'>[]): Record<string, number> {
+    const available = new Map(positions.map(p => [p.ticker, p.status === 'open' ? p.shares : 0]));
+    const remaining: Record<string, number> = {};
+    // Reverse first so entries added later on the same day receive shares first.
+    const rows = this.ledger().slice().reverse().sort((a, b) => serial(b.date) - serial(a.date));
+    for (const row of rows) {
+      if (row.operation !== 'Buy') continue;
+      const balance = Math.max(0, available.get(row.ticker) ?? 0);
+      const quantity = row.shares * this.splitFactorAfter(row.ticker, row.date);
+      remaining[row.id] = Math.min(balance, quantity);
+      available.set(row.ticker, Math.max(0, balance - remaining[row.id]));
+    }
+    return remaining;
   }
 
   /** Trade rows for one ticker, oldest first. */

@@ -1,8 +1,10 @@
 import { Elysia, t } from 'elysia';
 import { cors } from '@elysiajs/cors';
-import { editCategories, Engine, MONTHS } from '@snowline/core';
+import { createTransaction, editCategories, Engine, MONTHS } from '@snowline/core';
 import {
   loadResearchCatalog,
+  getDb,
+  saveTransaction,
   loadResearchPreferences,
   saveResearchPreferences,
   clearGoalConfig,
@@ -136,6 +138,28 @@ export const app = new Elysia()
   .get('/api/dividends/schedule/:month', ({ params }) => engine().scheduleFor(params.month))
 
   /* ---- ledger and corporate actions ------------------------------------- */
+
+  .post('/api/transactions', ({ body, set }) => {
+    try {
+      return getDb().transaction(() => {
+        const e = engine();
+        const row = createTransaction(body, e.positions, `manual-${crypto.randomUUID()}`);
+        saveTransaction(row);
+        return row;
+      })();
+    } catch (error) {
+      set.status = 400;
+      return { error: error instanceof Error ? error.message : 'Could not save transaction.' };
+    }
+  }, {
+    body: t.Object({
+      kind: t.Union([t.Literal('trade'), t.Literal('income'), t.Literal('expense')]),
+      operation: t.Union([t.Literal('Buy'), t.Literal('Sell'), t.Literal('Dividends'), t.Literal('Fee'), t.Literal('Tax')]),
+      ticker: t.String({ maxLength: 20 }), customName: t.Optional(t.String({ maxLength: 120 })),
+      date: t.String(), currency: t.String(), note: t.String({ maxLength: 2000 }), updateCash: t.Boolean(),
+      shares: t.Number(), price: t.Number(), amount: t.Number(), fee: t.Number(), tax: t.Number()
+    })
+  })
 
   .get('/api/ledger', ({ query }) => {
     const e = engine();
@@ -335,6 +359,9 @@ export const app = new Elysia()
       constants: e.constants,
       totals: e.totals(),
       rows,
+      assets: e.positions.map(p => ({ ticker: p.ticker, name: p.name, shares: p.status === 'open' ? p.shares : 0, currency: p.currency })),
+      remainingShares: e.ledger.remainingShares(e.positions),
+      cashBalance: e.cashFloat(),
       ledgerTotals: e.ledger.ledgerTotals(rows),
       reconciliation: e.ledger.ledgerReconciliation(),
       instrumentCount: e.positions.length,

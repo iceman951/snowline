@@ -116,8 +116,8 @@ export interface Lot {
 
 export interface LedgerRow {
   id: string;
-  kind: 'trade' | 'income';
-  operation: 'Buy' | 'Sell' | 'Dividends';
+  kind: 'trade' | 'income' | 'expense';
+  operation: 'Buy' | 'Sell' | 'Dividends' | 'Fee' | 'Tax';
   ticker: string;
   name: string;
   mono: string;
@@ -131,6 +131,10 @@ export interface LedgerRow {
   /** Cash effect: negative for a buy. */
   signed: number;
   note: string;
+  /** Present only on user-entered transactions. */
+  updateCash?: boolean;
+  /** Cost basis released by a user-entered sale. */
+  costBasis?: number;
 }
 
 /** Everything a derivation needs. One snapshot, read once per request. */
@@ -141,6 +145,7 @@ export interface Dataset {
   categoryTargets: Record<string, number>;
   categoryModel?: CategoryModel | null;
   corporateActions?: CorporateAction[];
+  transactions?: LedgerRow[];
 }
 
 /* ---- derived shapes ----------------------------------------------------- */
@@ -252,7 +257,7 @@ export interface HistoryMonth extends MonthKey {
 
 export interface CashRow {
   id: string;
-  type: 'Deposit' | 'Withdrawal' | 'Buy' | 'Sell' | 'Dividend';
+  type: 'Deposit' | 'Withdrawal' | 'Buy' | 'Sell' | 'Dividend' | 'Fee' | 'Tax';
   date: string;
   /** Negative for money leaving the account. */
   signed: number;

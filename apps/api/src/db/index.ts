@@ -15,6 +15,7 @@ import type {
   Dataset,
   DividendHistory,
   GoalConfig,
+  LedgerRow,
   Position
 } from '@snowline/core';
 
@@ -163,8 +164,18 @@ export function loadDataset(): Dataset {
     dividendHistory,
     categoryTargets,
     corporateActions,
+    transactions: loadTransactions(),
     categoryModel: loadCategoryModel()
   };
+}
+
+export function loadTransactions(): LedgerRow[] {
+  return getDb().query<{ row_json: string }, []>('SELECT row_json FROM transactions ORDER BY rowid')
+    .all().map(row => JSON.parse(row.row_json) as LedgerRow);
+}
+
+export function saveTransaction(row: LedgerRow): void {
+  getDb().run('INSERT INTO transactions (id, row_json) VALUES (?, ?)', [row.id, JSON.stringify(row)]);
 }
 
 export function loadCategoryModel(): CategoryModel | null {

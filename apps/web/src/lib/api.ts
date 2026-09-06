@@ -77,6 +77,9 @@ export interface HoldingsScreenPayload {
 }
 
 export interface TransactionsScreenPayload {
+  remainingShares: Record<string, number>;
+  assets: Array<{ ticker: string; name: string; shares: number; currency: string }>;
+  cashBalance: number;
   constants: Constants;
   totals: Totals;
   rows: LedgerRow[];
@@ -171,6 +174,16 @@ export interface ResearchSnapshot {
 }
 
 export const api = {
+  createTransaction: async (f: Fetch, input: import('@snowline/core').TransactionInput) => {
+    const res = await f(`${BASE}/api/transactions`, {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(input)
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(res.status < 500 ? body.error ?? 'Check the transaction details.' : 'Could not save transaction. Please try again.');
+    }
+    return await res.json() as LedgerRow;
+  },
   researchSnapshot: (f: Fetch) => get<ResearchSnapshot>(f, '/api/research/snapshot'),
   saveResearchPreferences: (f: Fetch, patch: Partial<import('@snowline/core').ResearchPreferences>) => post<import('@snowline/core').ResearchPreferences>(f, '/api/research/preferences', patch),
   goalScreen: (f: Fetch) => get<GoalScreenPayload>(f, '/api/screens/goal'),

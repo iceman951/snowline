@@ -7,6 +7,12 @@
 PRAGMA journal_mode = WAL;
 PRAGMA foreign_keys = ON;
 
+-- Append-only user entries; the opening positions and generated lots stay intact.
+CREATE TABLE IF NOT EXISTS transactions (
+  id TEXT PRIMARY KEY,
+  row_json TEXT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS positions (
   ticker            TEXT PRIMARY KEY,
   name              TEXT    NOT NULL,

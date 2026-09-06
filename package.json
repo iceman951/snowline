@@ -12,7 +12,8 @@
     "dev:web": "bun run --cwd apps/web dev",
     "seed": "bun run --cwd apps/api seed",
     "check": "bun run --cwd apps/web check",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:transactions": "playwright test --config playwright.transactions.config.ts"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",

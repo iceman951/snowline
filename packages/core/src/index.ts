@@ -2,6 +2,7 @@ export * from './types.js';
 export * from './derive.js';
 export * from './format.js';
 export * from './category-edits.js';
+export * from './transactions.js';
 export {
   BUY_DATES,
   EXCHANGES,

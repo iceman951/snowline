@@ -26,6 +26,7 @@ import type {
 } from './types.js';
 import { EXCHANGES, LedgerEngine, parseDate } from './ledger.js';
 import { HistoryEngine } from './history.js';
+import { applyTransactions } from './transactions.js';
 import { fmt } from './format.js';
 import type { CalendarEvent, CalendarMonth } from './types.js';
 
@@ -49,18 +50,20 @@ export class Engine {
   private readonly savedCategoryModel: CategoryModel | null;
 
   constructor(data: Dataset) {
-    this.positions = data.positions;
+    const applied = applyTransactions(data);
+    this.positions = applied.positions;
     this.constants = data.constants;
-    this.dividendHistory = data.dividendHistory;
+    this.dividendHistory = applied.dividendHistory;
     this.categoryTargets = data.categoryTargets;
     this.savedCategoryModel = data.categoryModel ?? null;
     this.ledger = new LedgerEngine(
       data.positions,
       data.corporateActions ?? [],
       data.constants.withholdingTax,
-      data.constants.today
+      data.constants.today,
+      data.transactions ?? []
     );
-    this.history = new HistoryEngine(data.positions, data.constants, data.dividendHistory, {
+    this.history = new HistoryEngine(this.positions, data.constants, this.dividendHistory, {
       totals: () => this.totals(),
       ledger: () => this.ledger.ledger(),
       cashFloat: () => this.cashFloat(),

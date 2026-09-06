@@ -296,8 +296,9 @@ export class HistoryEngine {
     };
 
     src.forEach((r) => {
+      if (r.updateCash === false) return;
       let effect =
-        r.kind === 'income' ? r.amount : r.operation === 'Buy' ? -(r.amount + r.fee) : r.amount - r.fee;
+        r.updateCash === true ? r.signed : r.kind === 'income' ? r.amount : r.operation === 'Buy' ? -(r.amount + r.fee) : r.amount - r.fee;
       effect = Math.round(effect * 100) / 100;
 
       if (effect < 0 && bal + effect < float) {
@@ -305,7 +306,9 @@ export class HistoryEngine {
         add('Deposit', r.date, need, 'Deposit', `Funding the ${r.ticker} purchase`);
       }
 
-      if (r.kind === 'income') {
+      if (r.kind === 'expense') {
+        add(r.operation === 'Tax' ? 'Tax' : 'Fee', r.date, effect, r.name, r.note || r.operation, r.ticker, r.mono);
+      } else if (r.kind === 'income') {
         add('Dividend', r.date, effect, `${r.ticker} dividend`, r.note || 'Cash distribution', r.ticker, r.mono);
       } else if (r.operation === 'Buy') {
         add('Buy', r.date, effect, `Bought ${r.ticker}`,

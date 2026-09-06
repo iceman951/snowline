@@ -3,6 +3,7 @@ import { defineConfig } from '@playwright/test';
 
 export default defineConfig({
   testDir: './apps/web/tests',
+  testIgnore: 'transactions.spec.ts', // Uses its own disposable API/config.
   timeout: 20000,
   fullyParallel: false,
   workers: 1,
