@@ -8,6 +8,7 @@ import { Database } from 'bun:sqlite';
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { cachedQuotes } from '../market.js';
 import type {
   CategoryModel,
   Constants,
@@ -159,6 +160,7 @@ export function loadDataset(): Dataset {
     }));
 
   return {
+    marketQuotes: cachedQuotes(),
     positions,
     constants,
     dividendHistory,
@@ -229,7 +231,13 @@ export function clearGoalConfig(): void {
 export function loadResearchCatalog(): import('@snowline/core').ResearchCatalog {
   const row = getDb().query<{ catalog_json: string }, []>('SELECT catalog_json FROM research_catalog WHERE id = 1').get();
   if (!row) throw new Error('research catalog missing — run `bun run seed`');
-  return JSON.parse(row.catalog_json);
+  const catalog = JSON.parse(row.catalog_json);
+  const quotes = cachedQuotes();
+  for (const row of catalog.universe) {
+    const quote = quotes[row[0]];
+    if (quote?.currency === 'USD') row[5] = quote.price;
+  }
+  return catalog;
 }
 
 export function loadResearchPreferences(): import('@snowline/core').ResearchPreferences {

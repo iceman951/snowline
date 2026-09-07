@@ -1,6 +1,7 @@
 import { Elysia, t } from 'elysia';
 import { cors } from '@elysiajs/cors';
 import { createTransaction, editCategories, Engine, MONTHS } from '@snowline/core';
+import { marketCache, marketEnabled } from './market.js';
 import {
   loadResearchCatalog,
   getDb,
@@ -16,9 +17,21 @@ import {
 
 /** A fresh engine per request — the dataset is read from SQLite each time. */
 const engine = () => new Engine(loadDataset());
+const marketSymbols = (research = false) => [...new Set([
+  ...engine().positions.filter(p => p.assetClass !== 'Cash').map(p => p.ticker),
+  ...(research ? loadResearchCatalog().universe.map(row => String(row[0])) : [])
+])];
+const marketStatus = () => marketEnabled() ? marketCache().status(marketSymbols(true))
+  : { source: 'seed', refreshing: false, entries: [], error: null };
 
 export const app = new Elysia()
   .use(cors({ origin: true }))
+  .onBeforeHandle(async ({ request }) => {
+    const path = new URL(request.url).pathname;
+    if (marketEnabled() && request.method === 'GET' && path.startsWith('/api/') && !path.startsWith('/api/market/')) {
+      await marketCache().ensure(marketSymbols(path === '/api/research/snapshot'));
+    }
+  })
   .onError(({ code, error, set }) => {
     if (code === 'NOT_FOUND') {
       set.status = 404;
@@ -40,6 +53,18 @@ export const app = new Elysia()
   })
 
   .get('/health', () => ({ ok: true }))
+  .get('/api/market/status', () => marketStatus())
+  .post('/api/market/refresh', async ({ set }) => {
+    if (marketEnabled()) {
+      const { retryAfter } = await marketCache().ensure(marketSymbols(true), true);
+      if (retryAfter) {
+        set.status = 429;
+        set.headers['Retry-After'] = String(retryAfter);
+        return { ...marketStatus(), error: `กรุณารอ ${retryAfter} วินาทีก่อนอัปเดตอีกครั้ง`, retryAfter };
+      }
+    }
+    return marketStatus();
+  })
 
   .get('/api/research/snapshot', () => ({
     dataset: loadDataset(), catalog: loadResearchCatalog(),

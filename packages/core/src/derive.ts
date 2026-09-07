@@ -52,6 +52,17 @@ export class Engine {
   constructor(data: Dataset) {
     const applied = applyTransactions(data);
     this.positions = applied.positions;
+    // Overlay market values after trades; opening lots and cost basis remain immutable.
+    this.positions = this.positions.map(p => {
+      const q = data.marketQuotes?.[p.ticker];
+      if (!q || p.status !== 'open' || p.assetClass === 'Cash' || q.currency !== p.currency ||
+          !Number.isFinite(q.price) || q.price <= 0 || !Number.isFinite(q.previousClose) || q.previousClose <= 0) return p;
+      const value = p.shares * q.price;
+      return { ...p, price: q.price, value,
+        yieldPct: value > 0 ? p.value * p.yieldPct / value : 0,
+        dayChangePct: (q.price / q.previousClose - 1) * 100,
+        dayChangeAbs: p.shares * (q.price - q.previousClose) };
+    });
     this.constants = data.constants;
     this.dividendHistory = applied.dividendHistory;
     this.categoryTargets = data.categoryTargets;

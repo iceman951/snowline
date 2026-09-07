@@ -139,6 +139,7 @@ export interface LedgerRow {
 
 /** Everything a derivation needs. One snapshot, read once per request. */
 export interface Dataset {
+  marketQuotes?: Record<string, { price: number; previousClose: number; currency: string; asOf: string }>;
   positions: Position[];
   constants: Constants;
   dividendHistory: DividendHistory;

@@ -7,6 +7,18 @@
 PRAGMA journal_mode = WAL;
 PRAGMA foreign_keys = ON;
 
+CREATE TABLE IF NOT EXISTS market_quotes (
+  ticker TEXT PRIMARY KEY,
+  quote_json TEXT,
+  fetched_at INTEGER,
+  attempted_at INTEGER NOT NULL,
+  failed INTEGER NOT NULL DEFAULT 0
+);
+CREATE TABLE IF NOT EXISTS market_refresh (
+  id INTEGER PRIMARY KEY CHECK (id = 1),
+  attempted_at INTEGER NOT NULL
+);
+
 -- Append-only user entries; the opening positions and generated lots stay intact.
 CREATE TABLE IF NOT EXISTS transactions (
   id TEXT PRIMARY KEY,
